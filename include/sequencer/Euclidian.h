@@ -415,7 +415,8 @@ class EuclidianSequencer : public BaseSequencer {
         if (fills_enabled && bar == BARS_PER_PHRASE - 1) {
             //if (Serial) Serial.println("on_bar doing fill!");
             // do fill
-            for (int_fast8_t i = 0 ; i < 3 ; i++) {
+            int_fast8_t effective_mutation_count = this->get_effective_mutation_count();
+            for (int_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
                 int_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
                 if (!patterns[ran]->is_locked()) {
                     //this->patterns[ran]->arguments.rotation += 2;
@@ -423,7 +424,7 @@ class EuclidianSequencer : public BaseSequencer {
                     this->patterns[ran]->make_euclid();
                 }
             }
-            for (int_fast8_t i = 0 ; i < 3 ; i++) {
+            for (int_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
                 int_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
                 if (!patterns[ran]->is_locked()) {
                     this->patterns[ran]->set_rotation(this->patterns[ran]->get_rotation() * 2);
@@ -441,7 +442,8 @@ class EuclidianSequencer : public BaseSequencer {
                 reset_patterns();
             unsigned long seed = get_euclidian_seed();
             randomSeed(seed);
-            for (uint_fast8_t i = 0 ; i < this->get_effective_mutation_count() ; i++) {
+            int_fast8_t effective_mutation_count = this->get_effective_mutation_count();
+            for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
                 // choose a pattern to mutate, out of all those for whom mutate is enabled
                 uint_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
                 randomSeed(seed + ran);

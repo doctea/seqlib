@@ -162,16 +162,16 @@
         create_low_memory_parameter_controls(label, parameters, this->get_colour());
 
         #ifdef SIMPLE_SELECTOR
-        OutputSelectorControl<EuclidianPattern> *selector = new OutputSelectorControl<EuclidianPattern>(
-            "Output",
-            this,
-            &EuclidianPattern::set_output,
-            &EuclidianPattern::get_output,
-            output_processor->nodes,
-            this->output
-        );
-        selector->go_back_on_select = true;
-        menu->add(selector);
+            OutputSelectorControl<EuclidianPattern> *selector = new OutputSelectorControl<EuclidianPattern>(
+                "Output",
+                this,
+                &EuclidianPattern::set_output,
+                &EuclidianPattern::get_output,
+                this->available_outputs,
+                this->output
+            );
+            selector->go_back_on_select = true;
+            menu->add(selector);
         #endif
     }
 
