@@ -93,7 +93,7 @@ class OutputSelectorControl : public SelectorControl<int_least16_t> {
     int last_index = -1;
     char last_label[MAX_LABEL];
     virtual const char *get_label_for_index(int_least16_t index) {
-        if (index<0 || index >= this->available_objects->size())
+        if (index<0 || index >= (int)this->available_objects->size())
             return "None";
 
         if (last_index!=index) {

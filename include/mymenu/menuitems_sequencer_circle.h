@@ -72,22 +72,22 @@ class CircleDisplay : public MenuItem {
 
             tft->setCursor(pos.x, pos.y);
 
-            static const int_fast8_t circle_center_x = tft->width()/4;
-            static const int_fast8_t circle_center_y = tft->width()/3;
+            static const uint_fast8_t circle_center_x = tft->width()/4;
+            static const uint_fast8_t circle_center_y = tft->width()/3;
 
             // draw circle
-            for (int_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++) {
-                int_fast8_t first_x, first_y;
-                int_fast8_t last_x, last_y;
-                int_fast8_t count = 0;
+            for (uint_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++) {
+                uint_fast8_t first_x, first_y;
+                uint_fast8_t last_x, last_y;
+                uint_fast8_t count = 0;
                 BasePattern *pattern = target_sequencer->get_pattern(seq);
                 //int16_t colour = color565(255 * seq, 255 - (255 * seq), seq) + (seq*8);
                 uint16_t colour = pattern->get_colour();
                 if (!pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR))
                     colour = tft->halfbright_565(colour);
                 for (int i = 0 ; i < 16 ; i++) {
-                    int_fast8_t coord_x = circle_center_x + coordinates_x[i];
-                    int_fast8_t coord_y = circle_center_y + coordinates_y[i];
+                    uint_fast8_t coord_x = circle_center_x + coordinates_x[i];
+                    uint_fast8_t coord_y = circle_center_y + coordinates_y[i];
                     if (pattern->query_note_on_for_step(i)) {
                         if (count>0) {
                             tft->drawLine(
@@ -109,9 +109,9 @@ class CircleDisplay : public MenuItem {
             }
 
             // draw step markers around circle
-            const int_fast8_t radius = 2;
-            for (int_fast8_t i = 0 ; i < 16 ; i++) {
-                int16_t colour = BPM_CURRENT_STEP_OF_BAR == i ? RED : BLUE;
+            const uint_fast8_t radius = 2;
+            for (uint_fast8_t i = 0 ; i < 16 ; i++) {
+                uint16_t colour = BPM_CURRENT_STEP_OF_BAR == i ? RED : BLUE;
                 tft->fillCircle(
                     circle_center_x + coordinates_x[i], 
                     circle_center_y + coordinates_y[i], 
@@ -125,11 +125,11 @@ class CircleDisplay : public MenuItem {
             colours(false, C_WHITE);
             //tft->println(" St Pu Ro   St Pu Ro");
             tft->setCursor((tft->width()/2)-8, pos.y);
-            static const int_fast16_t middle_x = ((tft->width()/2)-8);
-            static const int_fast8_t column_width = (8*8)+1;
-            for (int_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++) {
-                int_fast8_t column = seq / 10;
-                int_fast8_t row = 1+(seq % 10);
+            static const uint_fast16_t middle_x = ((tft->width()/2)-8);
+            static const uint_fast8_t column_width = (8*8)+1;
+            for (uint_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++) {
+                uint_fast8_t column = seq / 10;
+                uint_fast8_t row = 1+(seq % 10);
                 tft->setCursor(middle_x + (column*column_width), initial_y + (row*8)); //tft->getCursorY());
                 //tft->setCursor((tft->width()/2) + (seq/10), tft->getCursorY());
                 BasePattern *pattern = target_sequencer->get_pattern(seq);

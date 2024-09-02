@@ -15,7 +15,7 @@ class BaseSequencer {
     public:
 
     bool running = true;
-    int_fast8_t number_patterns = 20;
+    uint_fast8_t number_patterns = 20;
     virtual SimplePattern *get_pattern(int pattern) = 0;
 
     /*virtual void process_tick(int tick) {

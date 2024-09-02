@@ -31,7 +31,7 @@ class EnvelopeOutput : public MIDIDrumOutput {
 
     EnvelopeBase *envelope;
 
-    EnvelopeOutput(const char *label, byte note_number, byte cc_number, byte channel, MIDIOutputWrapper *output_wrapper) : 
+    EnvelopeOutput(const char *label, byte note_number, byte cc_number, byte channel, IMIDINoteAndCCTarget *output_wrapper) : 
         MIDIDrumOutput(label, note_number, channel, output_wrapper)
         ,midi_cc(cc_number)
         {

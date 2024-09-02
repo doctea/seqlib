@@ -29,9 +29,9 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
     public:
 
     LinkedList<BaseOutput*> *nodes = new LinkedList<BaseOutput*>();
-    MIDIOutputWrapper *output_wrapper = nullptr;
+    IMIDINoteAndCCTarget *output_target = nullptr;
 
-    MIDIOutputProcessor(MIDIOutputWrapper *output_wrapper) : BaseOutputProcessor(), output_wrapper(output_wrapper) {
+    MIDIOutputProcessor(IMIDINoteAndCCTarget *output_target) : BaseOutputProcessor(), output_target(output_target) {
         /*this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_BASS_DRUM));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_SNARE));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_OPEN_HI_HAT));
@@ -49,11 +49,11 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         this->addDrumNode("OHH",           GM_NOTE_OPEN_HI_HAT);
         this->addDrumNode("CHH",           GM_NOTE_CLOSED_HI_HAT);
         #ifdef ENABLE_ENVELOPES
-            this->addNode(new EnvelopeOutput("Cymbal 2",    GM_NOTE_CRASH_CYMBAL_2, MUSO_CC_CV_1, MUSO_CV_CHANNEL, output_wrapper));
-            this->addNode(new EnvelopeOutput("Splash",      GM_NOTE_SPLASH_CYMBAL,  MUSO_CC_CV_2, MUSO_CV_CHANNEL, output_wrapper));
-            this->addNode(new EnvelopeOutput("Vibra",       GM_NOTE_VIBRA_SLAP,     MUSO_CC_CV_3, MUSO_CV_CHANNEL, output_wrapper));
-            this->addNode(new EnvelopeOutput("Ride Bell",   GM_NOTE_RIDE_BELL,      MUSO_CC_CV_4, MUSO_CV_CHANNEL, output_wrapper));
-            this->addNode(new EnvelopeOutput("Ride Cymbal", GM_NOTE_RIDE_CYMBAL_1,  MUSO_CC_CV_5, MUSO_CV_CHANNEL, output_wrapper));
+            this->addNode(new EnvelopeOutput("Cymbal 2",    GM_NOTE_CRASH_CYMBAL_2, MUSO_CC_CV_1, MUSO_CV_CHANNEL, output_target));
+            this->addNode(new EnvelopeOutput("Splash",      GM_NOTE_SPLASH_CYMBAL,  MUSO_CC_CV_2, MUSO_CV_CHANNEL, output_target));
+            this->addNode(new EnvelopeOutput("Vibra",       GM_NOTE_VIBRA_SLAP,     MUSO_CC_CV_3, MUSO_CV_CHANNEL, output_target));
+            this->addNode(new EnvelopeOutput("Ride Bell",   GM_NOTE_RIDE_BELL,      MUSO_CC_CV_4, MUSO_CV_CHANNEL, output_target));
+            this->addNode(new EnvelopeOutput("Ride Cymbal", GM_NOTE_RIDE_CYMBAL_1,  MUSO_CC_CV_5, MUSO_CV_CHANNEL, output_target));
         #else
             this->addDrumNode("Cymbal 2",      GM_NOTE_CRASH_CYMBAL_2); // todo: turn these into something like an EnvelopeOutput?
             this->addDrumNode("Splash",        GM_NOTE_SPLASH_CYMBAL);  // todo: turn these into something like an EnvelopeOutput?
@@ -63,7 +63,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         #endif
 
         #ifdef ENABLE_SCALES
-            this->addNode(new MIDINoteTriggerCountOutput("Bass", this->nodes, output_wrapper));
+            this->addNode(new MIDINoteTriggerCountOutput("Bass", this->nodes, output_target));
             //this->nodes->get(this->nodes->size()-1)->disabled = false;
             //this->nodes->get(0)->is_ = false;
         #endif
@@ -72,7 +72,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         this->nodes->add(node);
     }
     virtual void addDrumNode(const char *label, byte note_number) {
-        this->addNode(new MIDIDrumOutput(label, note_number, this->output_wrapper));
+        this->addNode(new MIDIDrumOutput(label, note_number, this->output_target));
     }
 
     //virtual void on_tick(uint32_t ticks) {
@@ -88,8 +88,8 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
             n->stop();
         }*/
         //count = 0;
-        const int_fast8_t size = this->nodes->size();
-        for (int_fast8_t i = 0 ; i < size ; i++) {
+        const uint_fast8_t size = this->nodes->size();
+        for (uint_fast8_t i = 0 ; i < size ; i++) {
             BaseOutput *o = this->nodes->get(i);
             Debug_printf("\tnode %i\n", i);
             o->process();
@@ -101,7 +101,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
             //count = 35;
         }*/
 
-        for (int_fast8_t i = 0 ; i < size ; i++) {
+        for (uint_fast8_t i = 0 ; i < size ; i++) {
             this->nodes->get(i)->reset();
         }
 
@@ -109,8 +109,8 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
     }
 
     virtual void loop() {
-        const int_fast8_t size = this->nodes->size();
-        for (int_fast8_t i = 0 ; i < size ; i++) {
+        const uint_fast8_t size = this->nodes->size();
+        for (uint_fast8_t i = 0 ; i < size ; i++) {
             BaseOutput *o = this->nodes->get(i);
             Debug_printf("\tnode %i\n", i);
             o->loop();
@@ -123,15 +123,15 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         #ifdef DEBUG_ENVELOPES
             sequencer->configure_pattern_output(11, this->nodes->get(11));
         #else
-            const int_fast8_t size = this->nodes->size();
-            for (int_fast8_t i = 0 ; i < size ; i++) {
+            const uint_fast8_t size = this->nodes->size();
+            for (uint_fast8_t i = 0 ; i < size ; i++) {
                 sequencer->configure_pattern_output(i, this->nodes->get(i));
             }
         #endif
     }
 
     virtual void setup_parameters() {
-        for (int i = 0 ; i < this->nodes->size() ; i++) {
+        for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
             //Serial.printf("MIDIOutputProcessor#setup_parameters processing item [%i/%i]\n", i+1, this->nodes->size());
             //Serial_flush();
             parameter_manager->addParameters(this->nodes->get(i)->get_parameters());
@@ -145,8 +145,8 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
 };
 
 
-void setup_output();
+void setup_output(IMIDINoteAndCCTarget *output_target);
 
-extern MIDIOutputWrapper *output_wrapper;
+//extern MIDIOutputWrapper *output_wrapper;
 extern MIDIOutputProcessor *output_processor;
 
