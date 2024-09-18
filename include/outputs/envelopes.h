@@ -57,6 +57,7 @@ class EnvelopeOutput : public MIDIDrumOutput {
     }
 
     virtual void loop() override {
+        if (!is_enabled()) return;
         this->envelope->process_envelope(ticks);
     }
 
