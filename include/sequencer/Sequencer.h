@@ -2,9 +2,9 @@
 
 #include <Arduino.h>
 
-#if defined(ENABLE_CV_INPUT)
+//#if defined(ENABLE_CV_INPUT)
     #include <LinkedList.h>
-#endif
+//#endif
 
 class SimplePattern;
 class BaseOutput;
@@ -13,6 +13,9 @@ class Menu;
 
 class BaseSequencer {
     public:
+
+    BaseSequencer() {}
+    virtual ~BaseSequencer() = default;
 
     bool running = true;
     uint_fast8_t number_patterns = 20;
@@ -54,9 +57,9 @@ class BaseSequencer {
 
     virtual void configure_pattern_output(int index, BaseOutput *output);
     
-    #if defined(ENABLE_CV_INPUT)
+    //#if defined(ENABLE_CV_INPUT)
         virtual LinkedList<FloatParameter*> *getParameters();
-    #endif
+    //#endif
 
     #if defined(ENABLE_SCREEN)
         virtual void make_menu_items(Menu *menu);

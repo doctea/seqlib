@@ -6,7 +6,7 @@
 
 #include "outputs/base_outputs.h"
 
-#ifdef ENABLE_EUCLIDIAN
+//#ifdef ENABLE_EUCLIDIAN
     arguments_t initial_arguments[] = {
         { LEN,    4, 1,   DEFAULT_DURATION }, //, TRIGGER_KICK },// get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM) },    // kick
         { LEN,    5, 1,   DEFAULT_DURATION }, //, TRIGGER_SIDESTICK }, //get_trigger_for_pitch(GM_NOTE_SIDE_STICK) },    // stick
@@ -29,10 +29,10 @@
         { LEN,    4, 1,   4 }, //, PATTERN_PAD_ROOT }, // root pad
         { LEN,    4, 5,   4 } //,   PATTERN_PAD_PITCH); // root pad
     };
-#endif
+//#endif
 
 
-#if defined(ENABLE_CV_INPUT)
+//#if defined(ENABLE_CV_INPUT)
     #include "parameters/Parameter.h"
     #include "parameters/ProxyParameter.h"
     #include "ParameterManager.h"
@@ -78,9 +78,9 @@
 
         return parameters;
     }
-#endif
+//#endif
 
-#if defined(ENABLE_SCREEN) && defined(ENABLE_CV_INPUT)
+#if defined(ENABLE_SCREEN) //&& defined(ENABLE_CV_INPUT)
     #include "mymenu.h"
     //#include "mymenu/menuitems_pattern_euclidian.h"
 
@@ -241,9 +241,7 @@
 
 #endif
 
-
-
-#if defined(ENABLE_CV_INPUT) && defined(ENABLE_EUCLIDIAN)
+#if defined(ENABLE_EUCLIDIAN) // /*defined(ENABLE_CV_INPUT) &&*/ 
     #include "LinkedList.h"
     #include "parameters/Parameter.h"
 
@@ -262,7 +260,7 @@
             submenu->add(new ObjectNumberControl<EuclidianSequencer,int_fast8_t>("Mut.Amt", sequencer, &EuclidianSequencer::set_mutation_count,       &EuclidianSequencer::get_mutation_count, nullptr, 1, 8));
             menu->add(submenu);
 
-            #ifdef ENABLE_CV_INPUT
+            //#ifdef ENABLE_CV_INPUT
                 menu->add_page("Mutation modulation", C_WHITE, false);
                 //menu->add(new SeparatorMenuItem("Mappable parameters"));
                 // add the sequencer modulation controls to this page
@@ -272,11 +270,11 @@
                 // TODO: this crashes us in the new refactor_seqlib branch?
                 //   isn't RAM, must be that sequencer isn't initialised yet
                 //   TODO: i think this whole block of code (from add_page("Mutation") onwards) can be moved elsewhere anyway and run at a more appropriate time?
-                Serial.printf("about to call sequencer->getParameters(), freeRam is %i\n", freeRam()); Serial_flush();
+                Serial_printf("about to call sequencer->getParameters(), freeRam is %i\n", freeRam()); Serial_flush();
                 LinkedList<FloatParameter*> *sequencer_parameters = sequencer->getParameters();
-                Serial.printf("about to call create_low_memory_parameter_controls() for sequencer_parameters, freeRam is %i\n", freeRam()); Serial_flush();
+                Serial_printf("about to call create_low_memory_parameter_controls() for sequencer_parameters, freeRam is %i\n", freeRam()); Serial_flush();
                 create_low_memory_parameter_controls("Mutation Parameters", sequencer_parameters);
-            #endif
+            //#endif
         #endif
     }
 #endif

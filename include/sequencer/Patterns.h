@@ -11,9 +11,9 @@
     #include "menu.h"
 #endif
 
-#ifdef ENABLE_CV_INPUT
+//#ifdef ENABLE_CV_INPUT
     #include "parameters/Parameter.h"
-#endif
+//#endif
 
 #define DEFAULT_VELOCITY    MIDI_MAX_VELOCITY
 
@@ -98,10 +98,10 @@ class BasePattern {
         return this->locked;
     }
 
-    #ifdef ENABLE_CV_INPUT
+    //#ifdef ENABLE_CV_INPUT
         LinkedList<FloatParameter*> *parameters = nullptr;
         virtual LinkedList<FloatParameter*> *getParameters(int i);
-    #endif
+    //#endif
 
     #ifdef ENABLE_SCREEN
         virtual void create_menu_items(Menu *menu, int index);

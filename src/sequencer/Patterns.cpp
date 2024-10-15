@@ -27,13 +27,13 @@ void SimplePattern::trigger_off_for_step(int step) {
     }
 };
 
-#ifdef ENABLE_CV_INPUT
+//#ifdef ENABLE_CV_INPUT
     LinkedList<FloatParameter*> *BasePattern::getParameters(int i) {
         if (this->parameters==nullptr)
             this->parameters = new LinkedList<FloatParameter*>();
         return this->parameters;
     }
-#endif
+//#endif
 
 #ifdef ENABLE_SCREEN
     void BasePattern::create_menu_items(Menu *menu, int pattern_index) {

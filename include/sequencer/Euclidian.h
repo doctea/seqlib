@@ -58,7 +58,7 @@ class EuclidianPattern : public SimplePattern {
 
     //EuclidianPattern() : SimplePattern() {}
 
-    EuclidianPattern(LinkedList<BaseOutput*> *available_outputs, int steps = MAX_STEPS, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
+    EuclidianPattern(LinkedList<BaseOutput*> *available_outputs, float *global_density, int steps = MAX_STEPS, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
         //: arguments.pulses(pulses), arguments.rotation(arguments.rotation), arguments.duration(arguments.duration), tie_on(tie_on)
         : SimplePattern(available_outputs)
           //default_arguments { .steps = steps, .pulses = pulses, .rotation = rotation, .duration = duration, .tie_on = tie_on }
@@ -73,10 +73,13 @@ class EuclidianPattern : public SimplePattern {
             //if (steps>0)
                 //make_euclid(default_arguments.steps, default_arguments.pulses, default_arguments.rotation, default_arguments.duration, tie_on);
             //make_euclid();
-            // todo: this cause usb_teensy_clocker to crash on initialisation?
+            // todo: this cause usb_teensy_clocker to crash on initialisation?  because of uninitialised global_density!!
+
+            this->global_density = global_density;
             set_arguments(&default_arguments);
             make_euclid();
         }
+    virtual ~EuclidianPattern() {};
 
     virtual void restore_default_arguments() override {
         this->set_arguments(&this->default_arguments);
@@ -116,11 +119,12 @@ class EuclidianPattern : public SimplePattern {
 
     //void make_euclid(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, /*, int trigger = -1,*/ int tie_on = -1) { //}, float effective_euclidian_density = 0.75f) {
     void make_euclid() {
+        //if (Serial) Serial.println("make_euclid.."); Serial.flush();
+        //Serial.printf("used_arguments is %p, global_density points to %p\n", &used_arguments, global_density);
         this->used_arguments.effective_euclidian_density = *this->global_density;
-        //if (Serial) Serial.println("make_euclid..");
 
         if (initialised && 0==memcmp(&this->used_arguments, &this->last_arguments, sizeof(arguments_t))) {
-            //if (Serial) Serial.println("nothing changed, don't do anything");
+            if (Serial) Serial.println("nothing changed, don't do anything"); Serial.flush();
             // nothing changed, dont do anything
             return;
         }
@@ -142,7 +146,7 @@ class EuclidianPattern : public SimplePattern {
 
         int bucket = 0;
         //if (this->used_arguments.rotation!=0)
-        for (uint_fast8_t i = 0 ; i < this->used_arguments.steps ; i++) {
+        for (int_fast8_t i = 0 ; i < this->used_arguments.steps ; i++) {
             int_fast8_t rotation = this->used_arguments.rotation;
             //int new_i = ((used_arguments.steps - rotation) + i) % used_arguments.steps;
             int_fast8_t new_i = (rotation + i) % used_arguments.steps;
@@ -166,7 +170,7 @@ class EuclidianPattern : public SimplePattern {
     // rotate the pattern around specifed number of steps -- 
     // TODO: could actually not change the pattern and just use the rotation in addition to offset in the query_patterns
     void rotate_pattern(int rotate) {
-        unsigned long rotate_time = millis();
+        //unsigned long rotate_time = millis();
         bool temp_pattern[steps];
         int offset = steps - rotate;
         for (int i = 0 ; i < steps ; i++) {
@@ -263,14 +267,14 @@ class EuclidianPattern : public SimplePattern {
         virtual void create_menu_items(Menu *menu, int index) override;
     #endif
     
-    #if defined(ENABLE_CV_INPUT)
+    //#if defined(ENABLE_CV_INPUT)
         virtual LinkedList<FloatParameter*> *getParameters(int i) override;
-    #endif
+    //#endif
 };
 
 
 
-class EuclidianSequencer : public BaseSequencer {
+class EuclidianSequencer : virtual public BaseSequencer {
     // todo: list of EuclidianPatterns...
     EuclidianPattern **patterns = nullptr;
 
@@ -288,11 +292,14 @@ class EuclidianSequencer : public BaseSequencer {
         EuclidianPattern *p = nullptr;
         this->patterns = (EuclidianPattern**) calloc(number_patterns, sizeof(p));
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-            Serial.printf("EuclidianSequencer creating EuclidianPattern %i; available_outputs is @%p (size %i)\n", i, available_outputs, available_outputs->size());
-            this->patterns[i] = new EuclidianPattern(available_outputs);
+            Serial.printf("EuclidianSequencer creating EuclidianPattern %i; available_outputs is @%p (size %i)\n", i, available_outputs, available_outputs->size()); 
+            Serial.flush();
+            this->patterns[i] = new EuclidianPattern(available_outputs, &this->global_density);
             this->patterns[i]->global_density = &this->global_density;
+            Serial.flush();
         }
     }
+    virtual ~EuclidianSequencer() {};
 
     float get_density() {
         return this->global_density;
@@ -353,13 +360,13 @@ class EuclidianSequencer : public BaseSequencer {
     }
 
     void initialise_patterns() {
-        for (int i = 0 ; i < number_patterns ; i++) {
+        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
             this->patterns[i]->set_default_arguments(&initial_arguments[i]);
         }
     }
     void reset_patterns() {
         //if (Serial) Serial.println("reset_patterns!");
-        for (int i = 0 ; i < number_patterns ; i++) {
+        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
             EuclidianPattern *p = (EuclidianPattern*)this->get_pattern(i);
             if (!p->is_locked()) {
                 p->restore_default_arguments();
@@ -460,9 +467,9 @@ class EuclidianSequencer : public BaseSequencer {
         }
     };
     
-    #if defined(ENABLE_CV_INPUT)
+    //#if defined(ENABLE_CV_INPUT)
         virtual LinkedList<FloatParameter*> *getParameters() override;
-    #endif
+    //#endif
 
     #if defined(ENABLE_SCREEN)
         virtual void make_menu_items(Menu *menu) override;
@@ -471,7 +478,7 @@ class EuclidianSequencer : public BaseSequencer {
 };
 
 
-#if defined(ENABLE_CV_INPUT) && defined(ENABLE_EUCLIDIAN)
+#if defined(ENABLE_EUCLIDIAN)
     class EuclidianSequencer;
     void setup_menu_euclidian(EuclidianSequencer *sequencer);
 #endif
