@@ -18,9 +18,12 @@ class CircleDisplay : public MenuItem {
     public:
         //DeviceBehaviour_Beatstep *behaviour_beatstep = nullptr;
         BaseSequencer *target_sequencer = nullptr;
-        int coordinates_x[16];
-        int coordinates_y[16];
-        CircleDisplay(const char *label, BaseSequencer *sequencer) : MenuItem(label) {
+        int coordinates_x[STEPS_PER_BAR];
+        int coordinates_y[STEPS_PER_BAR];
+
+        float dia = 10.0;
+
+        CircleDisplay(const char *label, BaseSequencer *sequencer) : MenuItem(label, false, false) {
             this->set_sequencer(sequencer);
         }
 
@@ -36,15 +39,15 @@ class CircleDisplay : public MenuItem {
         void setup_coordinates() {
             Debug_printf("CircleDisplay() setup_coordinates, tft width is %i\n", tft->width()); Serial.flush();
             //this->set_pattern(target_pattern);
-            const size_t divisions = 16;
+            const size_t divisions = STEPS_PER_BAR;
             const float degrees_per_iter = 360.0 / divisions;
-            float size = 20.0*(tft->width()/2);
+            dia = 20.0*(tft->width()/2.0);
             int position = 4;
             for (int i = 0 ; i < divisions; i++) {
                 Debug_printf("generating coordinate for position %i:\trad(cos()) is %f\n", i, radians(cos(i*degrees_per_iter*PI/180)));
                 Debug_printf("generating coordinate for position %i:\trad(sin()) is %f\n", i, radians(sin(i*degrees_per_iter*PI/180)));
-                coordinates_x[position] = (int)((float)size * radians(cos(((float)i)*degrees_per_iter*PI/180.0)));
-                coordinates_y[position] = (int)((float)size * radians(sin(((float)i)*degrees_per_iter*PI/180.0)));
+                coordinates_x[position] = (int)((float)dia * radians(cos(((float)i)*degrees_per_iter*PI/180.0)));
+                coordinates_y[position] = (int)((float)dia * radians(sin(((float)i)*degrees_per_iter*PI/180.0)));
                 Debug_printf("generating coordinate for position %i:\t[%i,%i]\n---\n", i, coordinates_x[i], coordinates_y[i]); Serial.flush();
                 position++;
                 position = position % divisions;
@@ -56,7 +59,7 @@ class CircleDisplay : public MenuItem {
         virtual int display(Coord pos, bool selected, bool opened) override {
             //return pos.y;
             int initial_y = pos.y;
-            //pos.y = header(label, pos, selected, opened);
+            pos.y = header(label, pos, selected, opened);
 
             //tft->printf("ticks:%4i step:%2i\n", ticks, BPM_CURRENT_STEP_OF_BAR);
             
@@ -85,7 +88,7 @@ class CircleDisplay : public MenuItem {
                 uint16_t colour = pattern->get_colour();
                 if (!pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR))
                     colour = tft->halfbright_565(colour);
-                for (int i = 0 ; i < 16 ; i++) {
+                for (int i = 0 ; i < STEPS_PER_BAR ; i++) {
                     uint_fast8_t coord_x = circle_center_x + coordinates_x[i];
                     uint_fast8_t coord_y = circle_center_y + coordinates_y[i];
                     if (pattern->query_note_on_for_step(i)) {
@@ -110,7 +113,7 @@ class CircleDisplay : public MenuItem {
 
             // draw step markers around circle
             const uint_fast8_t radius = 2;
-            for (uint_fast8_t i = 0 ; i < 16 ; i++) {
+            for (uint_fast8_t i = 0 ; i < STEPS_PER_BAR ; i++) {
                 uint16_t colour = BPM_CURRENT_STEP_OF_BAR == i ? RED : BLUE;
                 tft->fillCircle(
                     circle_center_x + coordinates_x[i], 
@@ -143,6 +146,7 @@ class CircleDisplay : public MenuItem {
                 tft->print(" ");
                 //colours(false, C_WHITE);
                 //tft->printf("%i %s\n", seq, pattern->get_summary());
+                
                 //tft->print(pattern->get_summary());
                 char label[10];
                 snprintf(label, 10, "%9s", (char*)pattern->get_output_label());
@@ -150,7 +154,10 @@ class CircleDisplay : public MenuItem {
                 //tft->printf("%8s", (char*)pattern->get_output_label());
             }
 
-            return tft->height();
+            //tft->printf("dia = %3.3f, cursorY=%i\n\n", dia, tft->getCursorY());
+            tft->setCursor(0, tft->getCursorY() + 16);
+
+            return tft->getCursorY(); //initial_y + (size/2.0); //40; //tft->height();
         }
 };
 
