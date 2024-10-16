@@ -2,6 +2,9 @@
 
 //#include "Config.h"
 
+// todo: move this to build flags or something...
+#define SEQLIB_MUTATE_EVERY_TICK
+
 #include "debug.h"
 
 #include <LinkedList.h>
@@ -279,8 +282,8 @@ class EuclidianSequencer : virtual public BaseSequencer {
     EuclidianPattern **patterns = nullptr;
 
     int seed = 0;
-    int_fast8_t mutate_minimum_pattern = 0, mutate_maximum_pattern = number_patterns;
-    int_fast8_t mutation_count = 3, effective_mutation_count = 3;
+    uint_fast8_t mutate_minimum_pattern = 0, mutate_maximum_pattern = number_patterns;
+    uint_fast8_t mutation_count = 3, effective_mutation_count = 3;
     bool    reset_before_mutate = true, 
             mutate_enabled = true, 
             fills_enabled = true, 
@@ -353,31 +356,37 @@ class EuclidianSequencer : virtual public BaseSequencer {
         this->seed = seed;
     }
     
-    SimplePattern *get_pattern(int pattern) {
+    SimplePattern *get_pattern(unsigned int pattern) {
         if (pattern < 0 || pattern >= number_patterns)
             return nullptr;
         return this->patterns[pattern];
     }
 
+    // tell all patterns what their default arguments are
     void initialise_patterns() {
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
             this->patterns[i]->set_default_arguments(&initial_arguments[i]);
         }
     }
-    void reset_patterns() {
+    // reset all patterns to their default parameters, with optional force param to ignore locked status
+    void reset_patterns(bool force = false) {
         //if (Serial) Serial.println("reset_patterns!");
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-            EuclidianPattern *p = (EuclidianPattern*)this->get_pattern(i);
-            if (!p->is_locked()) {
-                p->restore_default_arguments();
-                p->make_euclid();
-            }
+            reset_pattern(i, false);
+        }
+    }
+    // reset pattern X to its default parameter 
+    void reset_pattern(uint_fast8_t i, bool force = false) {
+        EuclidianPattern *p = (EuclidianPattern*)this->get_pattern(i);
+        if (force || !p->is_locked()) {
+            p->restore_default_arguments();
+            p->make_euclid();
         }
     }
 
     virtual void on_loop(int tick) override {};
     virtual void on_tick(int tick) override {
-        #ifdef MUTATE_EVERY_TICK
+        #ifdef SEQLIB_MUTATE_EVERY_TICK
             if (is_mutate_enabled()) {
                 int_fast8_t tick_of_step = tick % TICKS_PER_STEP;
                 if (tick_of_step==TICKS_PER_STEP-1) {
@@ -405,18 +414,18 @@ class EuclidianSequencer : virtual public BaseSequencer {
         } /*else if (is_bpm_on_sixteenth(tick,1)) {
             this->on_step_end(tick / (PPQN/STEPS_PER_BEAT));
         }*/
-        for (int_fast8_t i = 0 ; i < number_patterns ; i++) {
+        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
             this->patterns[i]->process_tick(tick);
         }
 
     };
     virtual void on_step(int step) override {
-        for (int_fast8_t i = 0 ; i < number_patterns ; i++) {
+        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
             this->patterns[i]->process_step(step);
         }
     };
     virtual void on_step_end(int step) override {
-        for (int_fast8_t i = 0 ; i < number_patterns ; i++) {
+        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
             this->patterns[i]->process_step_end(step);
         }
     }
@@ -472,14 +481,13 @@ class EuclidianSequencer : virtual public BaseSequencer {
     //#endif
 
     #if defined(ENABLE_SCREEN)
-        virtual void make_menu_items(Menu *menu) override;
+        virtual void make_menu_items(Menu *menu) override {
+            this->make_menu_items(menu, false);
+        }
+        virtual void make_menu_items(Menu *menu, bool combine_pages);
+        virtual void create_menu_euclidian_mutation(int number_pages_to_create = 2);
+
     #endif
 
 };
-
-
-#if defined(ENABLE_EUCLIDIAN)
-    class EuclidianSequencer;
-    void setup_menu_euclidian(EuclidianSequencer *sequencer);
-#endif
 

@@ -182,7 +182,9 @@
     #include "mymenu/menuitems_outputselectorcontrol.h"
     #include "menuitems_object_multitoggle.h"
 
-    void EuclidianSequencer::make_menu_items(Menu *menu) {
+    // todo: this should really be called create_menu_items, since it directly adds to menu
+    // todo: do we really need to pass in menu here for some reason?
+    void EuclidianSequencer::make_menu_items(Menu *menu, bool combine_pages) {
         // add a page for the 'boxed' sequence display of all tracks
         menu->add_page("Euclidian", TFT_CYAN);
         for (int i = 0 ; i < this->number_patterns ; i++) {
@@ -193,26 +195,16 @@
         }
 
         // add a page for the circle display that shows all tracks simultaneously
-        menu->add_page("Circle");
+        if (combine_pages) {
+            menu->add_page("Circle & locks");
+        } else {          
+            menu->add_page("Circle");
+        }
         menu->add(new CircleDisplay("Circle", this));
 
-        /*
-        // create a dedicated page for the sequencer modulations
-        menu->add_page("Sequencer mods");
-        LinkedList<FloatParameter*> *parameters = getParameters();
-        //parameter_manager->addParameters(parameters);
-        for (int i = 0 ; i < parameters->size() ; i++) {
-            menu->add(parameters->get(i)->makeControls());
-        }*/
-
-        //using option=ObjectSelectorControl<EuclidianPattern,BaseOutput*>::option;
-        /*LinkedList<BaseOutput*> *nodes = new LinkedList<BaseOutput*>();
-        for (int i = 0 ; i < output_processor.nodes.size() ; i++) {
-            nodes->add(output_processor.nodes.get(i));
-        }*/
-
-        // single page for multitoggle to lock patterns
-        menu->add_page("Pattern locks", C_WHITE, false);
+        // multitoggle to lock patterns
+        if (!combine_pages)
+            menu->add_page("Pattern locks", C_WHITE, false);
         ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Allow changes", true);
         for (unsigned int i = 0 ; i < this->number_patterns ; i++) {
             BasePattern *p = (BasePattern *)this->get_pattern(i);
@@ -229,6 +221,29 @@
         }
         menu->add(toggle);
 
+        menu->add_page("Mutation");
+        if (!combine_pages)
+            create_menu_euclidian_mutation(2);
+        else
+            create_menu_euclidian_mutation(0);
+
+        /*
+        // create a dedicated page for the sequencer modulations
+        menu->add_page("Sequencer mods");
+        LinkedList<FloatParameter*> *parameters = getParameters();
+        //parameter_manager->addParameters(parameters);
+        for (int i = 0 ; i < parameters->size() ; i++) {
+            menu->add(parameters->get(i)->makeControls());
+        }*/
+
+        //using option=ObjectSelectorControl<EuclidianPattern,BaseOutput*>::option;
+        /*LinkedList<BaseOutput*> *nodes = new LinkedList<BaseOutput*>();
+        for (int i = 0 ; i < output_processor.nodes.size() ; i++) {
+            nodes->add(output_processor.nodes.get(i));
+        }*/
+
+
+
         // ask each pattern to add their menu pages
         for (int i = 0 ; i < this->number_patterns ; i++) {
             //Serial.printf("adding controls for pattern %i..\n", i);
@@ -239,42 +254,49 @@
     }
 
 
-#endif
-
-#if defined(ENABLE_EUCLIDIAN) // /*defined(ENABLE_CV_INPUT) &&*/ 
+//#if defined(ENABLE_EUCLIDIAN) // /*defined(ENABLE_CV_INPUT) &&*/ 
     #include "LinkedList.h"
     #include "parameters/Parameter.h"
 
     #include "mymenu_items/ParameterMenuItems_lowmemory.h"
 
-    void setup_menu_euclidian(EuclidianSequencer *sequencer) {
-        #ifdef ENABLE_EUCLIDIAN
+    void EuclidianSequencer::create_menu_euclidian_mutation(int number_pages_to_create) {
+        if (number_pages_to_create>0) {
             menu->add_page("Mutation");
-            SubMenuItemColumns *submenu = new SubMenuItemColumns("Euclidian Mutations", 3);
-            submenu->add(new ObjectNumberControl<EuclidianSequencer,float>("Density", sequencer, &EuclidianSequencer::set_density,        &EuclidianSequencer::get_density, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
-            submenu->add(new ObjectToggleControl<EuclidianSequencer>("Mutate", sequencer, &EuclidianSequencer::set_mutated_enabled,       &EuclidianSequencer::is_mutate_enabled));
-            submenu->add(new ObjectToggleControl<EuclidianSequencer>("Reset", sequencer,  &EuclidianSequencer::set_reset_before_mutate,   &EuclidianSequencer::should_reset_before_mutate));
-            submenu->add(new ObjectToggleControl<EuclidianSequencer>("Add phrase", sequencer, &EuclidianSequencer::set_add_phrase_enabled,&EuclidianSequencer::is_add_phrase_enabled));
-            submenu->add(new ObjectToggleControl<EuclidianSequencer>("Fills", sequencer,  &EuclidianSequencer::set_fills_enabled,         &EuclidianSequencer::is_fills_enabled));
-            submenu->add(new ObjectNumberControl<EuclidianSequencer,int>("Seed", sequencer, &EuclidianSequencer::set_euclidian_seed,      &EuclidianSequencer::get_euclidian_seed, nullptr, 0, 16384, true, false));
-            submenu->add(new ObjectNumberControl<EuclidianSequencer,int_fast8_t>("Mut.Amt", sequencer, &EuclidianSequencer::set_mutation_count,       &EuclidianSequencer::get_mutation_count, nullptr, 1, 8));
-            menu->add(submenu);
+            number_pages_to_create--;
+        }
+        menu->add(new SeparatorMenuItem("Euclidian Mutations"));
+        SubMenuItemColumns *submenu = new SubMenuItemColumns("Euclidian Mutations", 3, true, false);
+        submenu->add(new ObjectNumberControl<EuclidianSequencer,float>("Density", this, &EuclidianSequencer::set_density,        &EuclidianSequencer::get_density, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+        submenu->add(new ObjectToggleControl<EuclidianSequencer>("Mutate", this, &EuclidianSequencer::set_mutated_enabled,       &EuclidianSequencer::is_mutate_enabled));
+        submenu->add(new ObjectToggleControl<EuclidianSequencer>("Reset", this,  &EuclidianSequencer::set_reset_before_mutate,   &EuclidianSequencer::should_reset_before_mutate));
+        submenu->add(new ObjectToggleControl<EuclidianSequencer>("Add phrase", this, &EuclidianSequencer::set_add_phrase_enabled,&EuclidianSequencer::is_add_phrase_enabled));
+        submenu->add(new ObjectToggleControl<EuclidianSequencer>("Fills", this,  &EuclidianSequencer::set_fills_enabled,         &EuclidianSequencer::is_fills_enabled));
+        submenu->add(new ObjectNumberControl<EuclidianSequencer,int>("Seed", this, &EuclidianSequencer::set_euclidian_seed,      &EuclidianSequencer::get_euclidian_seed, nullptr, 0, 16384, true, false));
+        submenu->add(new ObjectNumberControl<EuclidianSequencer,int_fast8_t>("Mut.Amt", this, &EuclidianSequencer::set_mutation_count,       &EuclidianSequencer::get_mutation_count, nullptr, 1, 8));
+        menu->add(submenu);
 
-            //#ifdef ENABLE_CV_INPUT
+        //#ifdef ENABLE_CV_INPUT
+            if (number_pages_to_create>0) {
                 menu->add_page("Mutation modulation", C_WHITE, false);
-                //menu->add(new SeparatorMenuItem("Mappable parameters"));
-                // add the sequencer modulation controls to this page
-                /*for (int i = 0 ; i < sequencer_parameters->size() ; i++) {
-                    menu->add(sequencer_parameters->get(i)->makeControls());
-                }*/
-                // TODO: this crashes us in the new refactor_seqlib branch?
-                //   isn't RAM, must be that sequencer isn't initialised yet
-                //   TODO: i think this whole block of code (from add_page("Mutation") onwards) can be moved elsewhere anyway and run at a more appropriate time?
-                Serial_printf("about to call sequencer->getParameters(), freeRam is %i\n", freeRam()); Serial_flush();
-                LinkedList<FloatParameter*> *sequencer_parameters = sequencer->getParameters();
-                Serial_printf("about to call create_low_memory_parameter_controls() for sequencer_parameters, freeRam is %i\n", freeRam()); Serial_flush();
-                create_low_memory_parameter_controls("Mutation Parameters", sequencer_parameters);
-            //#endif
-        #endif
+                number_pages_to_create--;
+            } else {
+                menu->add(new SeparatorMenuItem("Modulation"));
+            }
+            //menu->add(new SeparatorMenuItem("Mappable parameters"));
+            // add the sequencer modulation controls to this page
+            /*for (int i = 0 ; i < sequencer_parameters->size() ; i++) {
+                menu->add(sequencer_parameters->get(i)->makeControls());
+            }*/
+            // TODO: this crashes us in the new refactor_seqlib branch?
+            //   isn't RAM, must be that sequencer isn't initialised yet
+            //   TODO: i think this whole block of code (from add_page("Mutation") onwards) can be moved elsewhere anyway and run at a more appropriate time?
+            //Serial.printf("about to call sequencer->getParameters(), freeRam is %i\n", freeRam()); Serial_flush();
+            LinkedList<FloatParameter*> *sequencer_parameters = this->getParameters();
+            //Serial.printf("about to call create_low_memory_parameter_controls() for sequencer_parameters, freeRam is %i\n", freeRam()); Serial_flush();
+            create_low_memory_parameter_controls("Mutation Parameters", sequencer_parameters);
+        //#endif
     }
 #endif
+
+//#endif
