@@ -18,8 +18,8 @@ class CircleDisplay : public MenuItem {
     public:
         //DeviceBehaviour_Beatstep *behaviour_beatstep = nullptr;
         BaseSequencer *target_sequencer = nullptr;
-        int coordinates_x[16];
-        int coordinates_y[16];
+        int coordinates_x[STEPS_PER_BAR];
+        int coordinates_y[STEPS_PER_BAR];
         CircleDisplay(const char *label, BaseSequencer *sequencer) : MenuItem(label) {
             this->set_sequencer(sequencer);
         }
@@ -36,7 +36,7 @@ class CircleDisplay : public MenuItem {
         void setup_coordinates() {
             Debug_printf("CircleDisplay() setup_coordinates, tft width is %i\n", tft->width()); Serial.flush();
             //this->set_pattern(target_pattern);
-            const size_t divisions = 16;
+            const size_t divisions = STEPS_PER_BAR;
             const float degrees_per_iter = 360.0 / divisions;
             float size = 20.0*(tft->width()/2);
             int position = 4;
@@ -85,7 +85,7 @@ class CircleDisplay : public MenuItem {
                 uint16_t colour = pattern->get_colour();
                 if (!pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR))
                     colour = tft->halfbright_565(colour);
-                for (int i = 0 ; i < 16 ; i++) {
+                for (int i = 0 ; i < STEPS_PER_BAR ; i++) {
                     uint_fast8_t coord_x = circle_center_x + coordinates_x[i];
                     uint_fast8_t coord_y = circle_center_y + coordinates_y[i];
                     if (pattern->query_note_on_for_step(i)) {
@@ -110,7 +110,7 @@ class CircleDisplay : public MenuItem {
 
             // draw step markers around circle
             const uint_fast8_t radius = 2;
-            for (uint_fast8_t i = 0 ; i < 16 ; i++) {
+            for (uint_fast8_t i = 0 ; i < STEPS_PER_BAR ; i++) {
                 uint16_t colour = BPM_CURRENT_STEP_OF_BAR == i ? RED : BLUE;
                 tft->fillCircle(
                     circle_center_x + coordinates_x[i], 

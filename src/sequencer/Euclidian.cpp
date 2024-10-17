@@ -187,7 +187,7 @@
     void EuclidianSequencer::make_menu_items(Menu *menu, bool combine_pages) {
         // add a page for the 'boxed' sequence display of all tracks
         menu->add_page("Euclidian", TFT_CYAN);
-        for (int i = 0 ; i < this->number_patterns ; i++) {
+        for (unsigned int i = 0 ; i < this->number_patterns ; i++) {
             char label[MENU_C_MAX];
             snprintf(label, MENU_C_MAX, "Pattern %i", i);
             menu->add(new PatternDisplay(label, this->get_pattern(i)));
@@ -242,10 +242,8 @@
             nodes->add(output_processor.nodes.get(i));
         }*/
 
-
-
         // ask each pattern to add their menu pages
-        for (int i = 0 ; i < this->number_patterns ; i++) {
+        for (unsigned int i = 0 ; i < this->number_patterns ; i++) {
             //Serial.printf("adding controls for pattern %i..\n", i);
             BasePattern *p = (BasePattern *)this->get_pattern(i);
 

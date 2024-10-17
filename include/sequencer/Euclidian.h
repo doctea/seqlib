@@ -295,12 +295,13 @@ class EuclidianSequencer : virtual public BaseSequencer {
         EuclidianPattern *p = nullptr;
         this->patterns = (EuclidianPattern**) calloc(number_patterns, sizeof(p));
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-            Serial.printf("EuclidianSequencer creating EuclidianPattern %i; available_outputs is @%p (size %i)\n", i, available_outputs, available_outputs->size()); 
+            Serial.printf("EuclidianSequencer constructor creating EuclidianPattern %i; available_outputs is @%p (size %i)\n", i, available_outputs, available_outputs->size()); 
             Serial.flush();
             this->patterns[i] = new EuclidianPattern(available_outputs, &this->global_density);
             this->patterns[i]->global_density = &this->global_density;
             Serial.flush();
         }
+        Serial.println("Exiting EuclidianSequencer constructor.");
     }
     virtual ~EuclidianSequencer() {};
 
@@ -388,9 +389,9 @@ class EuclidianSequencer : virtual public BaseSequencer {
     virtual void on_tick(int tick) override {
         #ifdef SEQLIB_MUTATE_EVERY_TICK
             if (is_mutate_enabled()) {
-                int_fast8_t tick_of_step = tick % TICKS_PER_STEP;
+                uint_fast8_t tick_of_step = tick % TICKS_PER_STEP;
                 if (tick_of_step==TICKS_PER_STEP-1) {
-                    for (int_fast8_t i = 0 ; i < number_patterns ; i++) {
+                    for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
                         if (!patterns[i]->is_locked()) {
                             //if (Serial) Serial.println("mutate every tick!");
                             this->patterns[i]->make_euclid();
@@ -439,7 +440,7 @@ class EuclidianSequencer : virtual public BaseSequencer {
             // do fill
             uint_fast8_t effective_mutation_count = this->get_effective_mutation_count();
             for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
-                uint_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
+                uint_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, (unsigned int)0, number_patterns));
                 if (!patterns[ran]->is_locked()) {
                     //this->patterns[ran]->arguments.rotation += 2;
                     this->patterns[ran]->set_rotation(this->patterns[ran]->get_rotation() + 2);
@@ -447,7 +448,7 @@ class EuclidianSequencer : virtual public BaseSequencer {
                 }
             }
             for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
-                uint_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
+                uint_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, (unsigned int)0, number_patterns));
                 if (!patterns[ran]->is_locked()) {
                     this->patterns[ran]->set_rotation(this->patterns[ran]->get_rotation() * 2);
                     //this->patterns[ran]->arguments.pulses *= 2;
@@ -467,7 +468,7 @@ class EuclidianSequencer : virtual public BaseSequencer {
             uint_fast8_t effective_mutation_count = this->get_effective_mutation_count();
             for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
                 // choose a pattern to mutate, out of all those for whom mutate is enabled
-                uint_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, 0, number_patterns));
+                uint_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, (unsigned int)0, number_patterns));
                 randomSeed(seed + ran);
                 if (!patterns[ran]->is_locked()) {
                     this->patterns[ran]->mutate();
@@ -488,6 +489,47 @@ class EuclidianSequencer : virtual public BaseSequencer {
         virtual void create_menu_euclidian_mutation(int number_pages_to_create = 2);
 
     #endif
+
+
+    // save/load stuff
+    virtual LinkedList<String> *save_pattern_add_lines(LinkedList<String> *lines) override {
+        lines = BaseSequencer::save_pattern_add_lines(lines);
+
+        return lines;
+    }
+    virtual bool load_parse_key_value(String key, String value) override {
+        return BaseSequencer::load_parse_key_value(key, value);
+    }
+
+    virtual void setup_saveable_parameters() override {
+        if (this->saveable_parameters==nullptr) {
+            BaseSequencer::setup_saveable_parameters();
+
+            this->saveable_parameters->add(new LSaveableParameter<float>("global_density", "Euclidian", &this->global_density));
+            this->saveable_parameters->add(new LSaveableParameter<bool>("mutate_enabled", "Euclidian", &this->mutate_enabled));
+            this->saveable_parameters->add(new LSaveableParameter<bool>("reset_before_mutate", "Euclidian", &this->reset_before_mutate));
+            this->saveable_parameters->add(new LSaveableParameter<bool>("add_phrase", "Euclidian", &this->add_phrase_to_seed));
+            this->saveable_parameters->add(new LSaveableParameter<bool>("fills_enabled", "Euclidian", &this->fills_enabled));
+            this->saveable_parameters->add(new LSaveableParameter<int>("seed", "Euclidian", &this->seed));
+            this->saveable_parameters->add(new LSaveableParameter<uint_fast8_t>("mutation_count", "Euclidian", &this->mutation_count));
+
+            // and add all the lines for the individual patterns (todo: probably rename Patterns to Tracks)
+            /*this->saveable_parameters->add(new SaveableParameter<DeviceBehaviour_Bamble, int8_t> ("euclidian_mode", "Euclidian", this, &this->demo_mode, nullptr, nullptr, &DeviceBehaviour_Bamble::setDemoMode,   &DeviceBehaviour_Bamble::getDemoMode));
+            this->saveable_parameters->add(new SaveableParameter<DeviceBehaviour_Bamble, bool>   ("fills_mode",     "Euclidian", this, &this->fills_mode, nullptr, nullptr, &DeviceBehaviour_Bamble::setFillsMode,  &DeviceBehaviour_Bamble::getFillsMode));
+            this->saveable_parameters->add(new SaveableParameter<DeviceBehaviour_Bamble, float>  ("density",        "Euclidian", this, &this->density, nullptr, nullptr, &DeviceBehaviour_Bamble::setDensity,    &DeviceBehaviour_Bamble::getDensity));
+            this->saveable_parameters->add(new SaveableParameter<DeviceBehaviour_Bamble, int8_t> ("mutate_low",     "Mutate",    this, &this->minimum_pattern, nullptr, nullptr, &DeviceBehaviour_Bamble::setMinimumPattern,    &DeviceBehaviour_Bamble::getMinimumPattern));
+            this->saveable_parameters->add(new SaveableParameter<DeviceBehaviour_Bamble, int8_t> ("mutate_high",    "Mutate",    this, &this->maximum_pattern, nullptr, nullptr, &DeviceBehaviour_Bamble::setMaximumPattern,    &DeviceBehaviour_Bamble::getMaximumPattern));
+            this->saveable_parameters->add(new SaveableParameter<DeviceBehaviour_Bamble, uint16_t>("mutate_seed_modifier", "Mutate",    this, &this->euclidian_seed_modifier, nullptr, nullptr, &DeviceBehaviour_Bamble::setEuclidianSeedModifier,    &DeviceBehaviour_Bamble::getEuclidianSeedModifier)); // aka 'Seed Modifier' / 'Seed bank'
+            this->saveable_parameters->add(new SaveableParameter<DeviceBehaviour_Bamble, bool>   ("reset_before_mutate", "Mutate",    this, &this->euclidian_reset_before_mutate, nullptr, nullptr, &DeviceBehaviour_Bamble::setEuclidianResetBeforeMutate,    &DeviceBehaviour_Bamble::getEuclidianResetBeforeMutate)); // aka 'auto-reset'
+            this->saveable_parameters->add(new SaveableParameter<DeviceBehaviour_Bamble, bool>   ("seed_use_phrase","Mutate",    this, &this->euclidian_seed_use_phrase, nullptr, nullptr, &DeviceBehaviour_Bamble::setEuclidianSeedUsePhrase,    &DeviceBehaviour_Bamble::getEuclidianSeedUsePhrase)); // aka 'Use Phrase')
+
+            const unsigned int size = NUM_EUCLIDIAN_PATTERNS;
+            for (unsigned int i = 0 ; i < size ; i++) {
+                this->saveable_parameters->add(new SaveableParameterPatternEnabled(this, i));
+            }*/
+        }
+    }
+
 
 };
 

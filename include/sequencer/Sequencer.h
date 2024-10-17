@@ -6,12 +6,15 @@
     #include <LinkedList.h>
 //#endif
 
+#include "SaveableParameters.h"
+
+class BasePattern;
 class SimplePattern;
 class BaseOutput;
 class FloatParameter;
 class Menu;
 
-class BaseSequencer {
+class BaseSequencer : virtual public ISaveableParameterHost {
     public:
 
     BaseSequencer() {}
@@ -21,23 +24,6 @@ class BaseSequencer {
     uint_fast8_t number_patterns = 20;
     virtual SimplePattern *get_pattern(unsigned int pattern) = 0;
 
-    /*virtual void process_tick(int tick) {
-        static int last_processed = -1;
-        if (tick == last_processed) return;
-
-        if (!running) return;
-
-        //this->process_tick_internal(tick);
-        */
-
-        /*if (is_tick_on_phrase(tick))
-            this->on_phrase(phrase_number);
-        if (is_tick_on_bar(tick))
-            this->on_bar(tick);
-        if (is_tick_on_beat(tick))
-            this->on_beat(tick);*/
-        
-    //}
     virtual bool is_running() {
         return this->running;
     }
@@ -65,4 +51,17 @@ class BaseSequencer {
         virtual void make_menu_items(Menu *menu);
     #endif
 
+    // save/load stuff
+    // todo: ideally, all this can be dealt with by inheriting from a file_manager "ISaveableParameterHost" class, or something like this
+    virtual LinkedList<String> *save_pattern_add_lines(LinkedList<String> *lines) {
+        ISaveableParameterHost::add_save_lines_saveable_parameters(lines);
+        return lines;
+    }
+    virtual bool load_parse_key_value(String key, String value) {
+        if (ISaveableParameterHost::load_parse_key_value_saveable_parameters(key, value))
+            return true;
+        return false;
+    }
+
+    virtual void setup_saveable_parameters() override;
 };

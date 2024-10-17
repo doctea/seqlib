@@ -7,7 +7,7 @@
     #include "menu.h"
 #endif
 
-class IEventReceiver {
+class ISequencerEventReceiver {
     public:
     virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3) = 0;
 };
@@ -15,7 +15,7 @@ class IEventReceiver {
 class FloatParameter;
 
 // class to receive triggers from a sequencer and return values to the owner Processor
-class BaseOutput : public IEventReceiver {
+class BaseOutput : public ISequencerEventReceiver {
     public:
     bool enabled = true;
 

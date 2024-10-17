@@ -40,7 +40,7 @@ class SingleCircleDisplay : public MenuItem {
             const float degrees_per_iter = 360.0 / divisions;
             float size = 20.0*(tft->width()/2);
             int position = 4;
-            for (int i = 0 ; i < divisions; i++) {
+            for (unsigned int i = 0 ; i < divisions; i++) {
                 Debug_printf("generating coordinate for position %i:\trad(cos()) is %f\n", i, radians(cos(i*degrees_per_iter*PI/180)));
                 Debug_printf("generating coordinate for position %i:\trad(sin()) is %f\n", i, radians(sin(i*degrees_per_iter*PI/180)));
                 coordinates_x[position] = (int)((float)size * radians(cos(((float)i)*degrees_per_iter*PI/180.0)));
