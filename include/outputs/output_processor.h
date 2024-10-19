@@ -140,7 +140,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
 
 
     #ifdef ENABLE_SCREEN
-        virtual void create_menu_items();
+        virtual void create_menu_items(bool combine_pages = false);
     #endif
 };
 

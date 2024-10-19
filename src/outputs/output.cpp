@@ -95,11 +95,11 @@ void setup_output(IMIDINoteAndCCTarget *output_target) {
     #include "mymenu.h"
     #include "menuitems_object_multitoggle.h"
 
-    void MIDIOutputProcessor::create_menu_items() {
+    void MIDIOutputProcessor::create_menu_items(bool combine_pages) {
         for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
             BaseOutput *node = this->nodes->get(i);
             node->make_menu_items(menu, i);
-            node->make_parameter_menu_items(menu, i);
+            node->make_parameter_menu_items(menu, i, C_WHITE, combine_pages);
         }
 
         menu->add_page("Outputs");
@@ -159,16 +159,20 @@ void setup_output(IMIDINoteAndCCTarget *output_target) {
     }
 
     #include "mymenu_items/ParameterMenuItems_lowmemory.h"
-    void BaseOutput::make_parameter_menu_items(Menu *menu, int index, uint16_t colour) {
+    void BaseOutput::make_parameter_menu_items(Menu *menu, int index, uint16_t colour, bool combine_pages) {
         // don't make a menu page if no parameters to use
         LinkedList<FloatParameter*> *parameters = this->get_parameters();
         if (parameters==nullptr || parameters->size()==0)
             return;
 
-        // create page
-        char label[40];
-        snprintf(label, 40, "Modulation %i: %s", index, this->label);
-        menu->add_page(label, C_WHITE, false);
+        if (combine_pages) {
+            menu->add(new SeparatorMenuItem("Modulation", colour));
+        } else {
+            // create page
+            char label[40];
+            snprintf(label, 40, "Modulation %i: %s", index, this->label);
+            menu->add_page(label, C_WHITE, false);
+        }
 
         // create lowmemory parameter controls
         create_low_memory_parameter_controls(label, parameters, colour);

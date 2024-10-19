@@ -50,7 +50,7 @@ class BaseOutput : public ISequencerEventReceiver {
 
     #ifdef ENABLE_SCREEN
         virtual void make_menu_items(Menu *menu, int index) {}
-        virtual void make_parameter_menu_items(Menu *menu, int index, uint16_t colour = C_WHITE);
+        virtual void make_parameter_menu_items(Menu *menu, int index, uint16_t colour = C_WHITE, bool combine_pages = false);
     #endif
 
     //#ifdef ENABLE_PARAMETERS
