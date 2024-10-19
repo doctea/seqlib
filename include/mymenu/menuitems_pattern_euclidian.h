@@ -110,7 +110,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
             //if (item_index==items_size-1) width = width/2;
 
             //if (item_index==0) width -= tft->characterWidth();  // adjust by 1 character if necessary
-            const int temp_y = this->small_display(
+            const uint_fast16_t temp_y = this->small_display(
                 item_index, 
                 start_x, 
                 start_y, 
@@ -119,7 +119,6 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 this->currently_opened==(int)item_index,
                 !opened && selected
             );
-
 
             //start_x += width;
             //Serial.printf("for item %i '%s':\tgot column=\t%i, wrap=\t%s => start_x=%i\t, start_y=%i\t((item_index-1)%%2=%i\n", item_index, this->items->get(item_index)->label, column, wrap?"Y":"N", start_x, start_y, (item_index-1)%2);

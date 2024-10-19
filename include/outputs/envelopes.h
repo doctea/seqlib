@@ -67,7 +67,7 @@ class EnvelopeOutput : public MIDIDrumOutput {
         };
     #endif
 
-    #ifdef ENABLE_CV_INPUT
+    #ifdef ENABLE_PARAMETERS
         virtual LinkedList<FloatParameter*> *get_parameters() override {
             return this->envelope->get_parameters();
         }

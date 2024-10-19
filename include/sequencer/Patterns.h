@@ -11,9 +11,11 @@
     #include "menu.h"
 #endif
 
-#ifdef ENABLE_CV_INPUT
+#ifdef ENABLE_PARAMETERS
     #include "parameters/Parameter.h"
 #endif
+
+#include "SaveableParameters.h"
 
 #define DEFAULT_VELOCITY    MIDI_MAX_VELOCITY
 
@@ -24,9 +26,9 @@ class BaseOutput;
 class BasePattern {
     public:
 
-    byte steps = MAX_STEPS;
-    int steps_per_beat = STEPS_PER_BEAT;
-    int ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
+    uint8_t steps = MAX_STEPS;
+    uint8_t steps_per_beat = STEPS_PER_BEAT;
+    uint32_t ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
     bool note_held = false;
 
     bool locked = false;
@@ -98,14 +100,21 @@ class BasePattern {
         return this->locked;
     }
 
-    #ifdef ENABLE_CV_INPUT
+    #ifdef ENABLE_PARAMETERS
         LinkedList<FloatParameter*> *parameters = nullptr;
-        virtual LinkedList<FloatParameter*> *getParameters(int i);
+        virtual LinkedList<FloatParameter*> *getParameters(unsigned int i);
     #endif
 
     #ifdef ENABLE_SCREEN
         virtual void create_menu_items(Menu *menu, int index);
     #endif
+
+    virtual void add_saveable_parameters(int pattern_index, LinkedList<SaveableParameterBase*> *target) {
+        char prefix[40];
+        snprintf(prefix, 40, "track_%i_steps_", pattern_index);
+        target->add(new LSaveableParameter<uint8_t>(prefix, "EuclidianTrack", &this->steps));
+        // todo: add the rest of the params...
+    }
 };
 
 class SimplePattern : public BasePattern {
@@ -182,7 +191,7 @@ class SimplePattern : public BasePattern {
         int step = (ticks / ticks_per_step); // % steps;
         //ticks = ticks % (ticks_per_step * steps);
 
-        if ((triggered_on_step * ticks_per_step) + this->current_duration <= ticks || ticks < triggered_on_step * ticks_per_step) {
+        if ((triggered_on_step * (int)ticks_per_step) + this->current_duration <= ticks || ticks < triggered_on_step * (int)ticks_per_step) {
             this->trigger_off_for_step(step);
         }
     }

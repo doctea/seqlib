@@ -23,7 +23,7 @@ class CircleDisplay : public MenuItem {
 
         float dia = 10.0;
 
-        CircleDisplay(const char *label, BaseSequencer *sequencer) : MenuItem(label, false, false) {
+        CircleDisplay(const char *label, BaseSequencer *sequencer, bool show_header = false) : MenuItem(label, false, show_header) {
             this->set_sequencer(sequencer);
         }
 
@@ -42,8 +42,8 @@ class CircleDisplay : public MenuItem {
             const size_t divisions = STEPS_PER_BAR;
             const float degrees_per_iter = 360.0 / divisions;
             dia = 20.0*(tft->width()/2.0);
-            int position = 4;
-            for (int i = 0 ; i < divisions; i++) {
+            unsigned int position = STEPS_PER_BAR / STEPS_PER_BEAT;
+            for (unsigned int i = 0 ; i < divisions; i++) {
                 Debug_printf("generating coordinate for position %i:\trad(cos()) is %f\n", i, radians(cos(i*degrees_per_iter*PI/180)));
                 Debug_printf("generating coordinate for position %i:\trad(sin()) is %f\n", i, radians(sin(i*degrees_per_iter*PI/180)));
                 coordinates_x[position] = (int)((float)dia * radians(cos(((float)i)*degrees_per_iter*PI/180.0)));

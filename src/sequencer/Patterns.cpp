@@ -27,8 +27,8 @@ void SimplePattern::trigger_off_for_step(int step) {
     }
 };
 
-#ifdef ENABLE_CV_INPUT
-    LinkedList<FloatParameter*> *BasePattern::getParameters(int i) {
+#ifdef ENABLE_PARAMETERS
+    LinkedList<FloatParameter*> *BasePattern::getParameters(unsigned int i) {
         if (this->parameters==nullptr)
             this->parameters = new LinkedList<FloatParameter*>();
         return this->parameters;

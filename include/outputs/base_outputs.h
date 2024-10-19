@@ -7,13 +7,15 @@
     #include "menu.h"
 #endif
 
-class IEventReceiver {
+class ISequencerEventReceiver {
     public:
     virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3) = 0;
 };
 
+class FloatParameter;
+
 // class to receive triggers from a sequencer and return values to the owner Processor
-class BaseOutput : public IEventReceiver {
+class BaseOutput : public ISequencerEventReceiver {
     public:
     bool enabled = true;
 
@@ -51,10 +53,10 @@ class BaseOutput : public IEventReceiver {
         virtual void make_parameter_menu_items(Menu *menu, int index, uint16_t colour = C_WHITE);
     #endif
 
-    #ifdef ENABLE_CV_INPUT
+    //#ifdef ENABLE_PARAMETERS
         virtual LinkedList<FloatParameter*> *get_parameters() {
             return nullptr;
         }
-    #endif
+    //#endif
 };
 
