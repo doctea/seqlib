@@ -24,11 +24,11 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
     }
 #endif
 
-//#ifdef ENABLE_CV_INPUT
+#ifdef ENABLE_PARAMETERS
     LinkedList<FloatParameter*> *BaseSequencer::getParameters() {
         return nullptr;
     }
-//#endif
+#endif
 
 void BaseSequencer::setup_saveable_parameters() {
     if (this->saveable_parameters==nullptr) {

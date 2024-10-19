@@ -270,9 +270,9 @@ class EuclidianPattern : public SimplePattern {
         virtual void create_menu_items(Menu *menu, int index) override;
     #endif
     
-    //#if defined(ENABLE_CV_INPUT)
-        virtual LinkedList<FloatParameter*> *getParameters(int i) override;
-    //#endif
+    #if defined(ENABLE_PARAMETERS)
+        virtual LinkedList<FloatParameter*> *getParameters(unsigned int i) override;
+    #endif
 };
 
 
@@ -477,9 +477,9 @@ class EuclidianSequencer : virtual public BaseSequencer {
         }
     };
     
-    //#if defined(ENABLE_CV_INPUT)
+    #if defined(ENABLE_PARAMETERS)
         virtual LinkedList<FloatParameter*> *getParameters() override;
-    //#endif
+    #endif
 
     #if defined(ENABLE_SCREEN)
         virtual void make_menu_items(Menu *menu) override {
@@ -487,7 +487,6 @@ class EuclidianSequencer : virtual public BaseSequencer {
         }
         virtual void make_menu_items(Menu *menu, bool combine_pages);
         virtual void create_menu_euclidian_mutation(int number_pages_to_create = 2);
-
     #endif
 
 

@@ -38,11 +38,16 @@ struct note_message_t {
 };
 note_message_t convert_note_for_muso_drum(int8_t pitch, int8_t velocity, int8_t channel);
 
-enum OUTPUT_TYPE {
+enum OUTPUT_TYPE : uint8_t {
     DRUMS,
     DRUMS_MIDIMUSO,
-    PITCHED
+    PITCHED,
+    MIN_OUTPUT_TYPE = DRUMS,
+    MAX_OUTPUT_TYPE = PITCHED
 };
+OUTPUT_TYPE operator ++( OUTPUT_TYPE &id, int );
+OUTPUT_TYPE operator --( OUTPUT_TYPE &id, int );
+
 struct output_type_t {
     OUTPUT_TYPE type_id;
     const char *label = "n/a";
@@ -259,10 +264,6 @@ class MIDIDrumOutput : public MIDIBaseOutput {
             #endif
 
     };
-#endif
-
-#ifdef ENABLE_SCREEN
-    void setup_output_menu();
 #endif
 
 void setup_output_parameters();

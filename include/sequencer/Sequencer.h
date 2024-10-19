@@ -2,9 +2,9 @@
 
 #include <Arduino.h>
 
-//#if defined(ENABLE_CV_INPUT)
+#if defined(ENABLE_PARAMETERS)
     #include <LinkedList.h>
-//#endif
+#endif
 
 #include "SaveableParameters.h"
 
@@ -43,9 +43,9 @@ class BaseSequencer : virtual public ISaveableParameterHost {
 
     virtual void configure_pattern_output(int index, BaseOutput *output);
     
-    //#if defined(ENABLE_CV_INPUT)
+    #if defined(ENABLE_PARAMETERS)
         virtual LinkedList<FloatParameter*> *getParameters();
-    //#endif
+    #endif
 
     #if defined(ENABLE_SCREEN)
         virtual void make_menu_items(Menu *menu);

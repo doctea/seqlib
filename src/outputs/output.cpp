@@ -4,6 +4,27 @@
 
 #include "clock.h"
 
+
+OUTPUT_TYPE operator ++( OUTPUT_TYPE &id, int )
+{
+   OUTPUT_TYPE currentID = id;
+
+   if ( MAX_OUTPUT_TYPE < id + 1 ) id = MAX_OUTPUT_TYPE;
+   else id = static_cast<OUTPUT_TYPE>( id + 1 );
+
+   return ( currentID );
+}
+OUTPUT_TYPE operator --( OUTPUT_TYPE &id, int )
+{
+   OUTPUT_TYPE currentID = id;
+
+   if ( MIN_OUTPUT_TYPE < id - 1 ) id = MIN_OUTPUT_TYPE;
+   else id = static_cast<OUTPUT_TYPE>( id - 1 );
+
+   return ( currentID );
+}
+
+
 uint32_t external_cv_ticks_per_pulse_values[] = { 1, 2, 3, 4, 6, 8, 12, 16, 24 };
 #define NUM_EXTERNAL_CV_TICKS_VALUES (sizeof(external_cv_ticks_per_pulse_values)/sizeof(uint32_t))
 #ifdef ENABLE_CLOCK_INPUT_CV
@@ -64,18 +85,15 @@ void setup_output(IMIDINoteAndCCTarget *output_target) {
     Serial.println("exiting setup_output"); Serial_flush();
 }
 
-void setup_output_parameters() {
-    output_processor->setup_parameters();
-}
+#ifdef ENABLE_PARAMETERS
+    void setup_output_parameters() {
+        output_processor->setup_parameters();
+    }
+#endif
 
 #ifdef ENABLE_SCREEN
     #include "mymenu.h"
     #include "menuitems_object_multitoggle.h"
-
-    void setup_output_menu() {
-        //output_wrapper->create_menu_items();
-        output_processor->create_menu_items();
-    }
 
     void MIDIOutputProcessor::create_menu_items() {
         for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {

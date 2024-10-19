@@ -11,9 +11,9 @@
     #include "menu.h"
 #endif
 
-//#ifdef ENABLE_CV_INPUT
+#ifdef ENABLE_PARAMETERS
     #include "parameters/Parameter.h"
-//#endif
+#endif
 
 #include "SaveableParameters.h"
 
@@ -100,10 +100,10 @@ class BasePattern {
         return this->locked;
     }
 
-    //#ifdef ENABLE_CV_INPUT
+    #ifdef ENABLE_PARAMETERS
         LinkedList<FloatParameter*> *parameters = nullptr;
-        virtual LinkedList<FloatParameter*> *getParameters(int i);
-    //#endif
+        virtual LinkedList<FloatParameter*> *getParameters(unsigned int i);
+    #endif
 
     #ifdef ENABLE_SCREEN
         virtual void create_menu_items(Menu *menu, int index);
@@ -191,7 +191,7 @@ class SimplePattern : public BasePattern {
         int step = (ticks / ticks_per_step); // % steps;
         //ticks = ticks % (ticks_per_step * steps);
 
-        if ((triggered_on_step * ticks_per_step) + this->current_duration <= ticks || ticks < triggered_on_step * ticks_per_step) {
+        if ((triggered_on_step * (int)ticks_per_step) + this->current_duration <= ticks || ticks < triggered_on_step * (int)ticks_per_step) {
             this->trigger_off_for_step(step);
         }
     }

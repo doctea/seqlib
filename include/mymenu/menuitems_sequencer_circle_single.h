@@ -1,5 +1,4 @@
-#ifndef MENUITEMS_SEQUENCER_CIRCLE__H
-#define MENUITEMS_SEQUENCER_CIRCLE__H
+#pragma once
 
 #include "sequencer/Euclidian.h"
 #include "sequencer/Patterns.h"
@@ -18,9 +17,9 @@ class SingleCircleDisplay : public MenuItem {
         //DeviceBehaviour_Beatstep *behaviour_beatstep = nullptr;
         //BaseSequencer *target_sequencer = nullptr;
         EuclidianPattern *target_pattern = nullptr;
-        int_fast8_t coordinates_x[16];
-        int_fast8_t coordinates_y[16];
-        SingleCircleDisplay(const char *label, EuclidianPattern *target_pattern) : MenuItem(label, false) {
+        int_fast8_t coordinates_x[STEPS_PER_BAR];
+        int_fast8_t coordinates_y[STEPS_PER_BAR];
+        SingleCircleDisplay(const char *label, EuclidianPattern *target_pattern, bool show_header = false) : MenuItem(label, false, show_header) {
             this->set_target(target_pattern);
         }
 
@@ -36,10 +35,10 @@ class SingleCircleDisplay : public MenuItem {
         void setup_coordinates() {
             Debug_printf("SingleCircleDisplay() setup_coordinates, tft width is %i\n", tft->width()); Serial.flush();
             //this->set_pattern(target_pattern);
-            const size_t divisions = 16;
+            const size_t divisions = STEPS_PER_BAR;
             const float degrees_per_iter = 360.0 / divisions;
             float size = 20.0*(tft->width()/2);
-            int position = 4;
+            int position = STEPS_PER_BAR / STEPS_PER_BEAT;
             for (unsigned int i = 0 ; i < divisions; i++) {
                 Debug_printf("generating coordinate for position %i:\trad(cos()) is %f\n", i, radians(cos(i*degrees_per_iter*PI/180)));
                 Debug_printf("generating coordinate for position %i:\trad(sin()) is %f\n", i, radians(sin(i*degrees_per_iter*PI/180)));
@@ -55,8 +54,8 @@ class SingleCircleDisplay : public MenuItem {
 
         virtual int display(Coord pos, bool selected, bool opened) override {
             //return pos.y;
-            int initial_y = pos.y;
-            //pos.y = header(label, pos, selected, opened);
+            pos.y = header(label, pos, selected, opened);
+            uint_fast16_t initial_y = pos.y;
             //tft->printf("ticks:%4i step:%i\n", ticks, BPM_CURRENT_STEP_OF_BAR);
             
             /*static int last_rendered_step = -1;
@@ -85,8 +84,8 @@ class SingleCircleDisplay : public MenuItem {
             if (!is_step_on) pattern_colour = tft->halfbright_565(pattern_colour);
             // todo: if STEPS_PER_PHRASE is a multiple of get_steps, should be able to limit number of loops we do here?
             for (int i = 0 ; i < STEPS_PER_PHRASE/*max(target_pattern->get_steps(),16*/ ; i++) {
-                int_fast8_t coord_x = circle_center_x + coordinates_x[i%16];
-                int_fast8_t coord_y = circle_center_y + coordinates_y[i%16];
+                int_fast8_t coord_x = circle_center_x + coordinates_x[i%STEPS_PER_BAR];
+                int_fast8_t coord_y = circle_center_y + coordinates_y[i%STEPS_PER_BAR];
                 if (target_pattern->query_note_on_for_step(i)) {
                     if (count>0) {
                         tft->drawLine(
@@ -97,8 +96,8 @@ class SingleCircleDisplay : public MenuItem {
                         first_x = coord_x;
                         first_y = coord_y;
                     }
-                    last_x = circle_center_x + coordinates_x[i%16];
-                    last_y = circle_center_y + coordinates_y[i%16];
+                    last_x = circle_center_x + coordinates_x[i%STEPS_PER_BAR];
+                    last_y = circle_center_y + coordinates_y[i%STEPS_PER_BAR];
 
                     tft->fillCircle(last_x, last_y, 6, (is_step_on ? target_pattern->get_colour() : pattern_colour));  // draw a slightly larger colour circle
                     count++;
@@ -110,8 +109,8 @@ class SingleCircleDisplay : public MenuItem {
 
             // draw step markers around circle
             const int_fast8_t radius = 2;
-            for (int_fast8_t i = 0 ; i < 16 ; i++) {
-                const int_fast16_t colour = BPM_CURRENT_STEP_OF_BAR == i ? RED : (is_step_on ? target_pattern->get_colour() : pattern_colour);
+            for (uint_fast8_t i = 0 ; i < STEPS_PER_BAR ; i++) {
+                const uint_fast16_t colour = BPM_CURRENT_STEP_OF_BAR == i ? RED : (is_step_on ? target_pattern->get_colour() : pattern_colour);
                 tft->fillCircle(
                     circle_center_x + coordinates_x[i], 
                     circle_center_y + coordinates_y[i], 
@@ -123,5 +122,3 @@ class SingleCircleDisplay : public MenuItem {
             return tft->height();
         }
 };
-
-#endif
