@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef ENABLE_SCREEN
-
 #include "sequencer/Sequencer.h"
 #include "sequencer/Patterns.h"
 
@@ -21,7 +19,7 @@ class CircleDisplay : public MenuItem {
         int coordinates_x[STEPS_PER_BAR];
         int coordinates_y[STEPS_PER_BAR];
 
-        float dia = 10.0;
+        float dia = 20.0;
 
         CircleDisplay(const char *label, BaseSequencer *sequencer, bool show_header = false) : MenuItem(label, false, show_header) {
             this->set_sequencer(sequencer);
@@ -76,7 +74,7 @@ class CircleDisplay : public MenuItem {
             tft->setCursor(pos.x, pos.y);
 
             static const uint_fast8_t circle_center_x = tft->width()/4;
-            static const uint_fast8_t circle_center_y = tft->width()/3;
+            static const uint_fast8_t circle_center_y = pos.y + tft->width()/4;
 
             // draw circle
             for (uint_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++) {
@@ -161,4 +159,3 @@ class CircleDisplay : public MenuItem {
         }
 };
 
-#endif

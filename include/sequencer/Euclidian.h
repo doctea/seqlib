@@ -267,7 +267,7 @@ class EuclidianPattern : public SimplePattern {
     }*/
 
     #ifdef ENABLE_SCREEN
-        virtual void create_menu_items(Menu *menu, int index) override;
+        virtual void create_menu_items(Menu *menu, int index, bool combine_pages = false) override;
     #endif
     
     #if defined(ENABLE_PARAMETERS)

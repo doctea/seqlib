@@ -59,9 +59,20 @@ class PatternDisplay : public MenuItem {
             //int columns = target_pattern->get_steps();
 
             static int width_per_cell = tft->width() / MAX_COLUMNS;
-            static int STEP_GAP = 2; //width_per_cell - (width_per_cell/4);
-            static int STEP_WIDTH = width_per_cell - STEP_GAP;
-            static int STEP_HEIGHT = STEP_WIDTH;
+            int STEP_GAP_H = 2, STEP_GAP_V = 2; //width_per_cell - (width_per_cell/4);
+            static int STEP_WIDTH = width_per_cell - STEP_GAP_H;
+            int STEP_HEIGHT = STEP_WIDTH;
+
+            if (target_pattern->get_effective_steps() > MAX_COLUMNS) {
+                // number of steps puts us onto two rows, so adjust height of row so that we 
+                // still fit into the same vertical space
+                int_fast8_t div = 1 + (target_pattern->get_effective_steps() / MAX_COLUMNS);
+                STEP_HEIGHT /= div;
+                //STEP_GAP_V /= div;
+                //STEP_GAP_V += 1;
+                STEP_GAP_V = 0;
+                STEP_HEIGHT += 4;
+            }
 
             int actual_current_step = target_pattern->get_step_for_tick(ticks);
 
@@ -71,8 +82,8 @@ class PatternDisplay : public MenuItem {
                 // first calculate the row, column and on-screen coordinates
                 const int row = step / MAX_COLUMNS;
                 const int col = step % MAX_COLUMNS;
-                const int x = col * (STEP_WIDTH+STEP_GAP);
-                const int y = base_row + (row*(STEP_HEIGHT+STEP_GAP));
+                const int x = col * (STEP_WIDTH+STEP_GAP_H);
+                const int y = base_row + (row*(STEP_HEIGHT+STEP_GAP_V));
 
                 const bool is_step_on = target_pattern->query_note_on_for_step(step);
                 const uint16_t colour = is_step_on ? 
@@ -91,8 +102,8 @@ class PatternDisplay : public MenuItem {
             //base_row += (MAX_COLUMNS/STEP_HEIGHT) * ((STEP_HEIGHT + STEP_GAP) * (max(1+(target_pattern->get_steps() / MAX_COLUMNS), 1)));
             //base_row += (1+(target_pattern->get_steps() / MAX_COLUMNS)) * (STEP_HEIGHT + STEP_GAP);
             base_row += max(
-                STEP_HEIGHT+STEP_GAP,
-                ((target_pattern->get_effective_steps() / MAX_COLUMNS)) * (STEP_HEIGHT + STEP_GAP)
+                STEP_HEIGHT+STEP_GAP_V,
+                ((target_pattern->get_effective_steps() / MAX_COLUMNS)) * (STEP_HEIGHT + STEP_GAP_V)
             );
             tft->setCursor(0, base_row);
             return base_row;

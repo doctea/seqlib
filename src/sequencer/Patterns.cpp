@@ -36,7 +36,7 @@ void SimplePattern::trigger_off_for_step(int step) {
 #endif
 
 #ifdef ENABLE_SCREEN
-    void BasePattern::create_menu_items(Menu *menu, int pattern_index) {
+    void BasePattern::create_menu_items(Menu *menu, int pattern_index, bool combine_patterns) {
         // nothing to be done for base pattern case
         //pattern_index += 1;
     }

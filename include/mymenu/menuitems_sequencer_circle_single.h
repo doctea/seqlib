@@ -70,8 +70,8 @@ class SingleCircleDisplay : public MenuItem {
 
             tft->setCursor(pos.x, pos.y);
 
-            static const int_fast8_t circle_center_x = tft->width()/4;
-            static const int_fast8_t circle_center_y = pos.y + ((tft->height() - pos.y) / 2);
+            static const uint_fast8_t circle_center_x = tft->width()/4;
+            static const uint_fast8_t circle_center_y = pos.y + tft->width()/4; //pos.y + ((tft->height() - pos.y) / 2);
 
             // draw circle
             int_fast8_t first_x, first_y;
@@ -84,8 +84,8 @@ class SingleCircleDisplay : public MenuItem {
             if (!is_step_on) pattern_colour = tft->halfbright_565(pattern_colour);
             // todo: if STEPS_PER_PHRASE is a multiple of get_steps, should be able to limit number of loops we do here?
             for (int i = 0 ; i < STEPS_PER_PHRASE/*max(target_pattern->get_steps(),16*/ ; i++) {
-                int_fast8_t coord_x = circle_center_x + coordinates_x[i%STEPS_PER_BAR];
-                int_fast8_t coord_y = circle_center_y + coordinates_y[i%STEPS_PER_BAR];
+                uint_fast8_t coord_x = circle_center_x + coordinates_x[i%STEPS_PER_BAR];
+                uint_fast8_t coord_y = circle_center_y + coordinates_y[i%STEPS_PER_BAR];
                 if (target_pattern->query_note_on_for_step(i)) {
                     if (count>0) {
                         tft->drawLine(

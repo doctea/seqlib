@@ -144,16 +144,20 @@
         #include "mymenu_items/ParameterMenuItems_lowmemory.h"
         #include "mymenu/menuitems_pattern_euclidian.h"
 
-        void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index) {
+        void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index, bool merge_pages) {
             char label[MENU_C_MAX];
             snprintf(label, MENU_C_MAX, "Pattern %i", pattern_index);
-            menu->add_page(label, this->get_colour());
+            menu->add_page(label, this->get_colour(), false);
 
             EuclidianPatternControl *epc = new EuclidianPatternControl(label, this);
             menu->add(epc);
 
-            snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
-            menu->add_page(label, this->get_colour(), false);
+            if (merge_pages) {
+                menu->add(new SeparatorMenuItem("Modulation"));
+            } else {
+                snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
+                menu->add_page(label, this->get_colour(), false);
+            }
 
             //snprintf(label, MENU_C_MAX, "Pattern %i")
             LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
@@ -249,7 +253,7 @@
                 //Serial.printf("adding controls for pattern %i..\n", i);
                 BasePattern *p = (BasePattern *)this->get_pattern(i);
 
-                p->create_menu_items(menu, i);
+                p->create_menu_items(menu, i, combine_pages);
             }
         }
 
