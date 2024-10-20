@@ -351,10 +351,10 @@ class EuclidianSequencer : virtual public BaseSequencer {
     }
     
     int get_euclidian_seed() {
-        return seed + add_phrase_to_seed ? BPM_CURRENT_PHRASE : 0; //BPM_CURRENT_PHRASE;
+        return seed + (is_add_phrase_enabled() ? BPM_CURRENT_PHRASE : 0);
     }
     void set_euclidian_seed(int seed) {
-        this->seed = seed;
+        this->seed = is_add_phrase_enabled() ? seed - BPM_CURRENT_PHRASE : seed;
     }
     
     SimplePattern *get_pattern(unsigned int pattern) {
