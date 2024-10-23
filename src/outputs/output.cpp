@@ -79,6 +79,7 @@ note_message_t convert_note_for_muso_drum(int8_t pitch, int8_t velocity, int8_t 
 //IMIDINoteAndCCTarget *output_wrapper = nullptr;
 MIDIOutputProcessor *output_processor = nullptr;
 
+//FLASHMEM
 void setup_output(IMIDINoteAndCCTarget *output_target) {
     Serial.println("setup_output.."); Serial_flush();
     output_processor = new MIDIOutputProcessor(output_target);     // todo: set this up dynamically, probably reading from a config file
@@ -95,6 +96,7 @@ void setup_output(IMIDINoteAndCCTarget *output_target) {
     #include "mymenu.h"
     #include "menuitems_object_multitoggle.h"
 
+    //FLASHMEM
     void MIDIOutputProcessor::create_menu_items(bool combine_pages) {
         for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
             BaseOutput *node = this->nodes->get(i);
@@ -128,7 +130,7 @@ void setup_output(IMIDINoteAndCCTarget *output_target) {
     #include "mymenu/menuitems_scale.h"
     #include "mymenu/menuitems_harmony.h"
 
-
+    //FLASHMEM
     void MIDINoteTriggerCountOutput::make_menu_items(Menu *menu, int index) {
         //#ifdef ENABLE_ENVELOPE_MENUS
             char label[40];
@@ -158,24 +160,27 @@ void setup_output(IMIDINoteAndCCTarget *output_target) {
         //#endif
     }
 
-    #include "mymenu_items/ParameterMenuItems_lowmemory.h"
-    void BaseOutput::make_parameter_menu_items(Menu *menu, int index, uint16_t colour, bool combine_pages) {
-        // don't make a menu page if no parameters to use
-        LinkedList<FloatParameter*> *parameters = this->get_parameters();
-        if (parameters==nullptr || parameters->size()==0)
-            return;
+    #ifdef ENABLE_PARAMETERS
+        #include "mymenu_items/ParameterMenuItems_lowmemory.h"
+        //FLASHMEM
+        void BaseOutput::make_parameter_menu_items(Menu *menu, int index, uint16_t colour, bool combine_pages) {
+            // don't make a menu page if no parameters to use
+            LinkedList<FloatParameter*> *parameters = this->get_parameters();
+            if (parameters==nullptr || parameters->size()==0)
+                return;
 
-        if (combine_pages) {
-            menu->add(new SeparatorMenuItem("Modulation", colour));
-        } else {
-            // create page
-            char label[40];
-            snprintf(label, 40, "Modulation %i: %s", index, this->label);
-            menu->add_page(label, C_WHITE, false);
+            if (combine_pages) {
+                menu->add(new SeparatorMenuItem("Modulation", colour));
+            } else {
+                // create page
+                char label[40];
+                snprintf(label, 40, "Modulation %i: %s", index, this->label);
+                menu->add_page(label, C_WHITE, false);
+            }
+
+            // create lowmemory parameter controls
+            create_low_memory_parameter_controls(label, parameters, colour);
         }
-
-        // create lowmemory parameter controls
-        create_low_memory_parameter_controls(label, parameters, colour);
-    }
+    #endif
 
 #endif

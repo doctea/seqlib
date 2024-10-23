@@ -49,14 +49,19 @@ class BaseOutput : public ISequencerEventReceiver {
     }
 
     #ifdef ENABLE_SCREEN
+        //FLASHMEM
         virtual void make_menu_items(Menu *menu, int index) {}
-        virtual void make_parameter_menu_items(Menu *menu, int index, uint16_t colour = C_WHITE, bool combine_pages = false);
+        //FLASHMEM
+        #ifdef ENABLE_PARAMETERS
+            //FLASHMEM
+            virtual void make_parameter_menu_items(Menu *menu, int index, uint16_t colour = C_WHITE, bool combine_pages = false);
+        #endif
     #endif
 
-    //#ifdef ENABLE_PARAMETERS
+    #ifdef ENABLE_PARAMETERS
         virtual LinkedList<FloatParameter*> *get_parameters() {
             return nullptr;
         }
-    //#endif
+    #endif
 };
 
