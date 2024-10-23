@@ -260,6 +260,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
             
 
             #ifdef ENABLE_SCREEN
+                //FLASHMEM
                 virtual void make_menu_items(Menu *menu, int index) override;
             #endif
 

@@ -138,6 +138,7 @@ void setup_output(IMIDINoteAndCCTarget *output_target) {
             menu->add_page(label);
 
             SubMenuItemColumns *sub_menu_item_columns = new SubMenuItemColumns("Options", 2);
+            // todo: convert all these ObjectNumberControls and ObjectToggleControls into LambdaNumberControls and LambdaToggleControls
             sub_menu_item_columns->add(new ObjectToggleControl<MIDINoteTriggerCountOutput>("Quantise", this, &MIDINoteTriggerCountOutput::set_quantise, &MIDINoteTriggerCountOutput::is_quantise));
             sub_menu_item_columns->add(new DirectNumberControl<int_fast8_t>("Octave", &this->octave, this->octave, (int_fast8_t)0, (int_fast8_t)10));
 

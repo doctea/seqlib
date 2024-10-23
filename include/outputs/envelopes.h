@@ -62,6 +62,7 @@ class EnvelopeOutput : public MIDIDrumOutput {
     }
 
     #ifdef ENABLE_SCREEN
+        //FLASHMEM
         virtual void make_menu_items(Menu *menu, int index) override {
             this->envelope->make_menu_items(menu, index);
         };

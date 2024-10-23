@@ -121,6 +121,7 @@ class EuclidianPattern : public SimplePattern {
     }*/
 
     //void make_euclid(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, /*, int trigger = -1,*/ int tie_on = -1) { //}, float effective_euclidian_density = 0.75f) {
+    FLASHMEM
     void make_euclid() {
         //if (Serial) Serial.println("make_euclid.."); Serial.flush();
         //Serial.printf("used_arguments is %p, global_density points to %p\n", &used_arguments, global_density);
@@ -267,6 +268,7 @@ class EuclidianPattern : public SimplePattern {
     }*/
 
     #ifdef ENABLE_SCREEN
+        //FLASHMEM
         virtual void create_menu_items(Menu *menu, int index, bool combine_pages = false) override;
     #endif
     
@@ -482,10 +484,13 @@ class EuclidianSequencer : virtual public BaseSequencer {
     #endif
 
     #if defined(ENABLE_SCREEN)
+        FLASHMEM
         virtual void make_menu_items(Menu *menu) override {
             this->make_menu_items(menu, false);
         }
+        //FLASHMEM
         virtual void make_menu_items(Menu *menu, bool combine_pages);
+        //FLASHMEM
         virtual void create_menu_euclidian_mutation(int number_pages_to_create = 2);
     #endif
 

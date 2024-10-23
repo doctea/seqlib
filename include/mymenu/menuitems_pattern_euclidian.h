@@ -44,6 +44,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
         #ifdef ENABLE_OTHER_CONTROLS
             //SubMenuItemBar *bar = new SubMenuItemBar("Arguments");
             //Menu *bar = menu;
+            // todo: convert to LambdaNumberControl etc
             this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Steps",    pattern, &EuclidianPattern::set_steps,      &EuclidianPattern::get_steps,    nullptr, 1, pattern->maximum_steps, true, true));
             this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Pulses",   pattern, &EuclidianPattern::set_pulses,     &EuclidianPattern::get_pulses,   nullptr, 1, STEPS_PER_BAR, true, true));
             this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Rotation", pattern, &EuclidianPattern::set_rotation,   &EuclidianPattern::get_rotation, nullptr, 1, pattern->maximum_steps, true, true));

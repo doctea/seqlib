@@ -119,6 +119,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
     }
 
     // configure target sequencer to use the output nodes held by this OutputProcessor
+    FLASHMEM
     virtual void configure_sequencer(BaseSequencer *sequencer) {
         #ifdef DEBUG_ENVELOPES
             sequencer->configure_pattern_output(11, this->nodes->get(11));
@@ -130,6 +131,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         #endif
     }
 
+    FLASHMEM
     virtual void setup_parameters() {
         for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
             //Serial.printf("MIDIOutputProcessor#setup_parameters processing item [%i/%i]\n", i+1, this->nodes->size());
@@ -140,6 +142,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
 
 
     #ifdef ENABLE_SCREEN
+        //FLASHMEM
         virtual void create_menu_items(bool combine_pages = false);
     #endif
 };
