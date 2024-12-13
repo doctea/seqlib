@@ -1,5 +1,4 @@
-#ifndef OUTPUTSELECTOR_MENUITEMS__INCLUDED
-#define OUTPUTSELECTOR_MENUITEMS__INCLUDED
+#pragma once
 
 #include "menuitems.h"
 #include "outputs/base_outputs.h"
@@ -7,10 +6,8 @@
 
 #include <LinkedList.h>
 
-//class BaseOutput;
-
 // Selector to choose an OutputNode from the available list to use as target 
-template<class TargetClass> //,class BaseOutput>
+template<class TargetClass>
 class OutputSelectorControl : public SelectorControl<int_least16_t> {
     BaseOutput *initial_selected_object = nullptr;
     LinkedList<BaseOutput*> *available_objects = nullptr;
@@ -131,8 +128,8 @@ class OutputSelectorControl : public SelectorControl<int_least16_t> {
 
         //pos.y = header(label, pos, selected, opened);
       
-        num_values = this->available_objects->size(); //NUM_AVAILABLE_PARAMETERS;
-        //Serial.printf(F("\tdisplay got num_values %i\n"), num_values); Serial_flush();
+        this->num_values = this->get_num_values(); //this->available_objects->size(); 
+        //Serial.printf("\tdisplay got num_values %i\n", num_values); Serial_flush();
 
         if (!opened) {
             // not selected, so just show the current value on one row
@@ -213,6 +210,11 @@ class OutputSelectorControl : public SelectorControl<int_least16_t> {
         this->num_values = this->available_objects->size();
     }
 
+    virtual int get_num_values() {
+        if (this->available_objects!=nullptr)
+            return this->available_objects->size();;
+        return 0;
+    }
+
 };
 
-#endif

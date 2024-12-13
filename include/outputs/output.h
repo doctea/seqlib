@@ -167,7 +167,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
 
 #ifdef ENABLE_SCALES
     #include "scales.h"
-
+    
     // class that counts up all active triggers from passed-in nodes, and calculates a note from that, for eg monophonic basslines
     class MIDINoteTriggerCountOutput : public MIDIBaseOutput {
         public:

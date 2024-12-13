@@ -227,7 +227,6 @@
             }
             menu->add(toggle);
 
-            menu->add_page("Mutation");
             if (!combine_pages)
                 create_menu_euclidian_mutation(2);
             else
