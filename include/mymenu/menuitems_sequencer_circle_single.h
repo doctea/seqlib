@@ -32,18 +32,19 @@ class SingleCircleDisplay : public MenuItem {
             this->target_pattern = target_pattern;
         }
 
+        float circle_size = 20.0;
         void setup_coordinates() {
             Debug_printf("SingleCircleDisplay() setup_coordinates, tft width is %i\n", tft->width()); Serial.flush();
             //this->set_pattern(target_pattern);
             const size_t divisions = STEPS_PER_BAR;
             const float degrees_per_iter = 360.0 / divisions;
-            float size = 20.0*(tft->width()/2);
+            circle_size = 20.0*(tft->width()/2);
             int position = STEPS_PER_BAR / STEPS_PER_BEAT;
             for (unsigned int i = 0 ; i < divisions; i++) {
                 Debug_printf("generating coordinate for position %i:\trad(cos()) is %f\n", i, radians(cos(i*degrees_per_iter*PI/180)));
                 Debug_printf("generating coordinate for position %i:\trad(sin()) is %f\n", i, radians(sin(i*degrees_per_iter*PI/180)));
-                coordinates_x[position] = (int)((float)size * radians(cos(((float)i)*degrees_per_iter*PI/180.0)));
-                coordinates_y[position] = (int)((float)size * radians(sin(((float)i)*degrees_per_iter*PI/180.0)));
+                coordinates_x[position] = (int)((float)circle_size * radians(cos(((float)i)*degrees_per_iter*PI/180.0)));
+                coordinates_y[position] = (int)((float)circle_size * radians(sin(((float)i)*degrees_per_iter*PI/180.0)));
                 Debug_printf("generating coordinate for position %i:\t[%i,%i]\n---\n", i, coordinates_x[i], coordinates_y[i]); Serial.flush();
                 position++;
                 position = position % divisions;
@@ -68,10 +69,16 @@ class SingleCircleDisplay : public MenuItem {
                 return tft->getCursorY();
             }
 
+            //tft->drawLine(0, pos.y, tft->width(), pos.y, random(0, 65535));
+
             tft->setCursor(pos.x, pos.y);
 
-            static const uint_fast8_t circle_center_x = tft->width()/4;
-            static const uint_fast8_t circle_center_y = pos.y + tft->width()/4; //pos.y + ((tft->height() - pos.y) / 2);
+            //static const uint_fast8_t circle_center_x = tft->width()/4;
+            //static const uint_fast8_t circle_center_y = pos.y + tft->width()/4; //pos.y + ((tft->height() - pos.y) / 2);
+            static const uint_fast16_t tft_width_quartered = tft->width()/4;
+            static const uint_fast16_t tft_height_quartered = tft->height()/4;
+            const uint_fast16_t circle_center_x = tft_width_quartered;
+            const uint_fast16_t circle_center_y = 6 + pos.y + coordinates_y[STEPS_PER_BAR/2];
 
             // draw circle
             int_fast8_t first_x, first_y;
