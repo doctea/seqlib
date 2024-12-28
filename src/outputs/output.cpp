@@ -81,13 +81,13 @@ MIDIOutputProcessor *output_processor = nullptr;
 
 //FLASHMEM
 void setup_output(IMIDINoteAndCCTarget *output_target) {
-    Serial.println("setup_output.."); Serial_flush();
+    if (Serial) Serial.println("setup_output.."); Serial_flush();
     output_processor = new MIDIOutputProcessor(output_target);     // todo: set this up dynamically, probably reading from a config file
-    Serial.println("exiting setup_output"); Serial_flush();
+    if (Serial) Serial.println("exiting setup_output"); Serial_flush();
 }
 
 #ifdef ENABLE_PARAMETERS
-    void setup_output_parameters() {
+    void setup_output_processor_parameters() {
         output_processor->setup_parameters();
     }
 #endif

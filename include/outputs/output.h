@@ -267,4 +267,4 @@ class MIDIDrumOutput : public MIDIBaseOutput {
     };
 #endif
 
-void setup_output_parameters();
+void setup_output_processor_parameters();
