@@ -22,6 +22,7 @@ class BaseSequencer : virtual public ISaveableParameterHost {
 
     bool running = true;
     uint_fast8_t number_patterns = 20;
+    bool debug = false;
     virtual SimplePattern *get_pattern(unsigned int pattern) = 0;
 
     virtual bool is_running() {

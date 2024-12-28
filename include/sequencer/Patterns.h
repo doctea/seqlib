@@ -28,13 +28,14 @@ class BasePattern {
 
     uint8_t steps = MAX_STEPS;
     uint8_t steps_per_beat = STEPS_PER_BEAT;
-    uint32_t ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
     bool note_held = false;
-
     bool locked = false;
+    uint32_t ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
 
     BaseOutput *output = nullptr;
     LinkedList<BaseOutput*> *available_outputs = nullptr;
+
+    bool debug = false;
 
     virtual void set_available_outputs(LinkedList<BaseOutput*> *available_outputs) {
         this->available_outputs = available_outputs;

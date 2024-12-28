@@ -297,13 +297,17 @@ class EuclidianSequencer : virtual public BaseSequencer {
         EuclidianPattern *p = nullptr;
         this->patterns = (EuclidianPattern**) calloc(number_patterns, sizeof(p));
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-            Serial.printf("EuclidianSequencer constructor creating EuclidianPattern %i; available_outputs is @%p (size %i)\n", i, available_outputs, available_outputs->size()); 
-            Serial.flush();
+            if (this->debug && Serial) {
+                Serial.printf("EuclidianSequencer constructor creating EuclidianPattern %i; available_outputs is @%p (size %i)\n", i, available_outputs, available_outputs->size()); 
+                Serial.flush();
+            }
             this->patterns[i] = new EuclidianPattern(available_outputs, &this->global_density);
             this->patterns[i]->global_density = &this->global_density;
-            Serial.flush();
+            if (this->debug && Serial) {
+                Serial.flush();
+            }
         }
-        Serial.println("Exiting EuclidianSequencer constructor.");
+        if (this->debug && Serial) Serial.println("Exiting EuclidianSequencer constructor.");
     }
     virtual ~EuclidianSequencer() {};
 
