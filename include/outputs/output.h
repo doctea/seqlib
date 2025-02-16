@@ -195,7 +195,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 if (!this->is_quantise())
                     return get_base_note() + get_note_number_count();
                 else
-                    return quantise_pitch(get_base_note() + get_note_number_count()/*+ BPM_CURRENT_BEAT_OF_PHRASE*/, scale_root, scale_number);
+                    return quantise_pitch_to_scale(get_base_note() + get_note_number_count()/*+ BPM_CURRENT_BEAT_OF_PHRASE*/, scale_root, scale_number);
             }
 
             // get the number of outputs that are also triggering this step
@@ -210,7 +210,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                     count += o->should_go_on() ? (i%12) : 0;
                 }
                 Debug_printf("get_note_number in MIDINoteTriggerCountOutput is %i\n", count);
-                //return base_note + quantise_pitch(count);
+                //return base_note + quantise_pitch_to_scale(count);
 
                 // test mode, increment over 2 octaves to test scale quantisation
                 // best used with pulses = 6 so that it loops round
