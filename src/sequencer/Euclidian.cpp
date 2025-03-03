@@ -31,6 +31,7 @@
     };
 #endif
 
+float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS];
 
 #if defined(ENABLE_PARAMETERS)
     #include "parameters/Parameter.h"
@@ -45,16 +46,18 @@
             
         parameters = new LinkedList<FloatParameter*>();
 
-        // todo: store these in the object, create a page for the local-only ones
+        // todo: unsure what this comment originally meant?!.... store these in the object, create a page for the local-only ones
 
-        parameters->add(new DataParameter<EuclidianSequencer,float> (
-            "Density",
-            this,
-            &EuclidianSequencer::set_density,
-            &EuclidianSequencer::get_density,
-            MINIMUM_DENSITY,
-            MAXIMUM_DENSITY
-        ));
+        // multiple global density parameters
+        for (int i = 0  ; i < NUM_GLOBAL_DENSITY_CHANNELS ; i++) {
+            parameters->add(new LDataParameter<float>(
+                (String("Global density ") + String(i)).c_str(),
+                [=] (float v) { all_global_density[i] = v; },
+                [=] () -> float { return all_global_density[i]; },                
+                MINIMUM_DENSITY,
+                MAXIMUM_DENSITY
+            ));
+        }
 
         parameters->add(new ProxyParameter<uint_fast8_t>(
             "Mutation amount", 
@@ -259,6 +262,8 @@
         #include "LinkedList.h"
         #include "parameters/Parameter.h"
 
+        #include "menuitems_lambda.h"
+        
         #include "mymenu_items/ParameterMenuItems_lowmemory.h"
 
         void EuclidianSequencer::create_menu_euclidian_mutation(int number_pages_to_create) {
@@ -267,9 +272,19 @@
                 number_pages_to_create--;
             }
             menu->add(new SeparatorMenuItem("Euclidian Mutations"));
+
+            // add controls for the 4 density channels
+            SubMenuItemColumns *submenu_densities = new SubMenuItemColumns("Global densities", 3, true, false);
+            //submenu->add(new ObjectNumberControl<EuclidianSequencer,float>("Density", this, &EuclidianSequencer::set_density,        &EuclidianSequencer::get_density, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+            submenu_densities->add(new LambdaNumberControl<float>("0", [=](float v) -> void { all_global_density[0] = v; }, [=]() -> float { return all_global_density[0]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+            submenu_densities->add(new LambdaNumberControl<float>("1", [=](float v) -> void { all_global_density[1] = v; }, [=]() -> float { return all_global_density[1]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+            submenu_densities->add(new LambdaNumberControl<float>("2", [=](float v) -> void { all_global_density[2] = v; }, [=]() -> float { return all_global_density[2]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+            submenu_densities->add(new LambdaNumberControl<float>("3", [=](float v) -> void { all_global_density[3] = v; }, [=]() -> float { return all_global_density[3]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+            menu->add(submenu_densities);
+
+            // add controls for the global euclidian mutation settings
             SubMenuItemColumns *submenu = new SubMenuItemColumns("Euclidian Mutations", 3, true, false);
             // todo: convert to LambdaNumberControl etc
-            submenu->add(new ObjectNumberControl<EuclidianSequencer,float>("Density", this, &EuclidianSequencer::set_density,        &EuclidianSequencer::get_density, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
             submenu->add(new ObjectToggleControl<EuclidianSequencer>("Mutate", this, &EuclidianSequencer::set_mutated_enabled,       &EuclidianSequencer::is_mutate_enabled));
             submenu->add(new ObjectToggleControl<EuclidianSequencer>("Reset", this,  &EuclidianSequencer::set_reset_before_mutate,   &EuclidianSequencer::should_reset_before_mutate));
             submenu->add(new ObjectToggleControl<EuclidianSequencer>("Add phrase", this, &EuclidianSequencer::set_add_phrase_enabled,&EuclidianSequencer::is_add_phrase_enabled));

@@ -112,9 +112,11 @@ class BasePattern {
 
     virtual void add_saveable_parameters(int pattern_index, LinkedList<SaveableParameterBase*> *target) {
         char prefix[40];
-        snprintf(prefix, 40, "track_%i_steps_", pattern_index);
-        target->add(new LSaveableParameter<uint8_t>(prefix, "EuclidianTrack", &this->steps));
-        // todo: add the rest of the params...
+        snprintf(prefix, 40, "track_%i_", pattern_index);
+        target->add(new LSaveableParameter<uint8_t>((String(prefix) + String("steps")).c_str(), "BasePattern", &this->steps));
+        target->add(new LSaveableParameter<bool>((String(prefix) + String("locked")).c_str(), "BasePattern", &this->locked));
+
+        // todo: add the rest of the params...?
     }
 };
 

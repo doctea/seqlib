@@ -8,6 +8,7 @@
 #include "mymenu/menuitems_sequencer_circle_single.h"
 
 #include "mymenu/menuitems_outputselectorcontrol.h"
+#include "menuitems_lambda.h"
 
 //#include "outputs/output_processor.h"
 //extern MIDIOutputProcessor *output_processor;
@@ -49,6 +50,10 @@ class EuclidianPatternControl : public SubMenuItemBar {
             this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Pulses",   pattern, &EuclidianPattern::set_pulses,     &EuclidianPattern::get_pulses,   nullptr, 1, STEPS_PER_BAR, true, true));
             this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Rotation", pattern, &EuclidianPattern::set_rotation,   &EuclidianPattern::get_rotation, nullptr, 1, pattern->maximum_steps, true, true));
             this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Duration", pattern, &EuclidianPattern::set_duration,   &EuclidianPattern::get_duration, nullptr, MINIMUM_DURATION, PPQN*BEATS_PER_BAR, true, true));  // minimum duration needs to be 2 , otherwise can end up with note on's getting missed by usb_teensy_clocker!
+
+            // choose global density channel to use
+            this->add(new LambdaNumberControl<int8_t> ("Density channel", [=](int8_t v) -> int8_t { pattern->global_density_channel = v; return v; }, [=]() -> int8_t { return pattern->global_density_channel; }, nullptr, 0, NUM_GLOBAL_DENSITY_CHANNELS-1, true, true));
+            
             //menu->debug = true;
             this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
             this->add(new ObjectActionConfirmItem<EuclidianPattern> ("Store" /*"Store as default"*/, pattern, &EuclidianPattern::store_current_arguments_as_default));

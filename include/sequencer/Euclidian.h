@@ -19,6 +19,8 @@ class Menu;
 
 #define MINIMUM_DENSITY 0.0f  // 0.10f
 #define MAXIMUM_DENSITY 1.5f
+#define NUM_GLOBAL_DENSITY_CHANNELS 4
+
 #define DEFAULT_DURATION 2      // minimum duration needs to be >=2 ticks -- if any lower then can end up with on+off happening within the same tick and usb_teensy_clocker gets notes stuck!
 #define MINIMUM_DURATION 2
 #define DEFAULT_DURATION_ENVELOPES 8
@@ -40,6 +42,7 @@ struct arguments_t {
 };
 
 extern arguments_t initial_arguments[];
+extern float all_global_density[];
 
 class EuclidianPattern : public SimplePattern {
     public:
@@ -57,11 +60,12 @@ class EuclidianPattern : public SimplePattern {
     int maximum_steps = steps;
     //int tie_on = 0;
 
-    float *global_density = nullptr;
+    //float *global_density = nullptr;
+    int8_t global_density_channel = 0;
 
     //EuclidianPattern() : SimplePattern() {}
 
-    EuclidianPattern(LinkedList<BaseOutput*> *available_outputs, float *global_density, int steps = MAX_STEPS, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
+    EuclidianPattern(LinkedList<BaseOutput*> *available_outputs, int8_t global_density_channel, int steps = MAX_STEPS, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
         //: arguments.pulses(pulses), arguments.rotation(arguments.rotation), arguments.duration(arguments.duration), tie_on(tie_on)
         : SimplePattern(available_outputs)
           //default_arguments { .steps = steps, .pulses = pulses, .rotation = rotation, .duration = duration, .tie_on = tie_on }
@@ -78,7 +82,7 @@ class EuclidianPattern : public SimplePattern {
             //make_euclid();
             // todo: this cause usb_teensy_clocker to crash on initialisation?  because of uninitialised global_density!!
 
-            this->global_density = global_density;
+            this->global_density_channel = global_density_channel;
             set_arguments(&default_arguments);
             make_euclid();
         }
@@ -120,12 +124,22 @@ class EuclidianPattern : public SimplePattern {
         );
     }*/
 
+    virtual float get_global_density() {
+        return all_global_density[this->global_density_channel];
+    }
+    virtual int8_t get_global_density_channel() {
+        return this->global_density_channel;
+    }
+    virtual void set_global_density_channel(int8_t channel) {
+        this->global_density_channel = channel % NUM_GLOBAL_DENSITY_CHANNELS;
+    }
+
     //void make_euclid(int steps = 0, int pulses = 0, int rotation = -1, int duration = -1, /*, int trigger = -1,*/ int tie_on = -1) { //}, float effective_euclidian_density = 0.75f) {
     FLASHMEM
-    void make_euclid() {
+    virtual void make_euclid() {
         //if (Serial) Serial.println("make_euclid.."); Serial.flush();
         //Serial.printf("used_arguments is %p, global_density points to %p\n", &used_arguments, global_density);
-        this->used_arguments.effective_euclidian_density = *this->global_density;
+        this->used_arguments.effective_euclidian_density = this->get_global_density();
 
         if (initialised && 0==memcmp(&this->used_arguments, &this->last_arguments, sizeof(arguments_t))) {
             if (Serial) Serial.println("nothing changed, don't do anything"); Serial.flush();
@@ -139,7 +153,7 @@ class EuclidianPattern : public SimplePattern {
         */
 
         int_fast8_t original_pulses = this->used_arguments.pulses;
-        float multiplier = 1.5f*(MINIMUM_DENSITY+*global_density);
+        float multiplier = 1.5f*(MINIMUM_DENSITY + this->used_arguments.effective_euclidian_density);
         int_fast8_t temp_pulses = 0.5f + (((float)original_pulses) * multiplier);
         //int_fast8_t temp_pulses = original_pulses;    // for disabling density for testing purposes
 
@@ -275,6 +289,30 @@ class EuclidianPattern : public SimplePattern {
     #if defined(ENABLE_PARAMETERS)
         virtual LinkedList<FloatParameter*> *getParameters(unsigned int i) override;
     #endif
+
+    virtual void add_saveable_parameters(int pattern_index, LinkedList<SaveableParameterBase*> *target) override {
+        SimplePattern::add_saveable_parameters(pattern_index, target);
+
+        // need to remove the parent's 'steps' parameter and replace it with the one for this pattern 
+        // which uses arguments.steps instead of BasePattern::steps
+        for (unsigned int i = 0 ; i < target->size() ; i++) {
+            if (strcmp(target->get(i)->label, "steps")==0) {
+                target->remove(i);
+                break;
+            }
+        }
+
+        char prefix[40];
+        snprintf(prefix, 40, "track_%i_", pattern_index);
+        target->add(new LSaveableParameter<int8_t>((String(prefix) + String("global_density_channel")).c_str(), "EuclidianPattern", &this->global_density_channel));
+        target->add(new LSaveableParameter<int_fast8_t>((String(prefix) + String("steps")).c_str(), "EuclidianPattern", &this->arguments.steps));
+        target->add(new LSaveableParameter<int_fast8_t>((String(prefix) + String("pulses")).c_str(), "EuclidianPattern", &this->arguments.pulses));
+        target->add(new LSaveableParameter<int_fast8_t>((String(prefix) + String("rotation")).c_str(), "EuclidianPattern", &this->arguments.rotation));
+        target->add(new LSaveableParameter<int_fast8_t>((String(prefix) + String("duration")).c_str(), "EuclidianPattern", &this->arguments.duration));
+        //target->add(new LSaveableParameter<float>(String(prefix) + String("effective_euclidian_density"), "EuclidianPattern", &this->arguments.effective_euclidian_density));
+        target->add(new LSaveableParameter<int_fast8_t>((String(prefix) + String("tie_on")).c_str(), "EuclidianPattern", &this->arguments.tie_on));
+    }
+
 };
 
 
@@ -290,7 +328,7 @@ class EuclidianSequencer : virtual public BaseSequencer {
             mutate_enabled = true, 
             fills_enabled = true, 
             add_phrase_to_seed = true;
-    float global_density = 0.6666f;
+    //float global_density = 0.6666f;
 
     public:
     EuclidianSequencer(LinkedList<BaseOutput*> *available_outputs) : BaseSequencer() {
@@ -301,8 +339,8 @@ class EuclidianSequencer : virtual public BaseSequencer {
                 Serial.printf("EuclidianSequencer constructor creating EuclidianPattern %i; available_outputs is @%p (size %i)\n", i, available_outputs, available_outputs->size()); 
                 Serial.flush();
             }
-            this->patterns[i] = new EuclidianPattern(available_outputs, &this->global_density);
-            this->patterns[i]->global_density = &this->global_density;
+            this->patterns[i] = new EuclidianPattern(available_outputs, i / NUM_GLOBAL_DENSITY_CHANNELS);
+            //this->patterns[i]->global_density = &this->global_density;
             if (this->debug && Serial) {
                 Serial.flush();
             }
@@ -311,11 +349,13 @@ class EuclidianSequencer : virtual public BaseSequencer {
     }
     virtual ~EuclidianSequencer() {};
 
-    float get_density() {
-        return this->global_density;
+    float get_density(int8_t channel) {
+        //return this->global_density;
+        return all_global_density[channel];
     }
-    void set_density(float v) {
-        this->global_density = v;
+    void set_density(int8_t channel, float v) {
+        //this->global_density = v;
+        all_global_density[channel] = v;
     }
 
     bool is_mutate_enabled() {
@@ -513,7 +553,10 @@ class EuclidianSequencer : virtual public BaseSequencer {
         if (this->saveable_parameters==nullptr) {
             BaseSequencer::setup_saveable_parameters();
 
-            this->saveable_parameters->add(new LSaveableParameter<float>("global_density", "Euclidian", &this->global_density));
+            this->saveable_parameters->add(new LSaveableParameter<float>("global_density_0", "Euclidian", &all_global_density[0]));
+            this->saveable_parameters->add(new LSaveableParameter<float>("global_density_1", "Euclidian", &all_global_density[1]));
+            this->saveable_parameters->add(new LSaveableParameter<float>("global_density_2", "Euclidian", &all_global_density[2]));
+            this->saveable_parameters->add(new LSaveableParameter<float>("global_density_3", "Euclidian", &all_global_density[3]));
             this->saveable_parameters->add(new LSaveableParameter<bool>("mutate_enabled", "Euclidian", &this->mutate_enabled));
             this->saveable_parameters->add(new LSaveableParameter<bool>("reset_before_mutate", "Euclidian", &this->reset_before_mutate));
             this->saveable_parameters->add(new LSaveableParameter<bool>("add_phrase", "Euclidian", &this->add_phrase_to_seed));
