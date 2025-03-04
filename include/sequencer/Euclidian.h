@@ -19,6 +19,7 @@ class Menu;
 
 #define MINIMUM_DENSITY 0.0f  // 0.10f
 #define MAXIMUM_DENSITY 1.5f
+#define DEFAULT_DENSITY 0.6666f
 #define NUM_GLOBAL_DENSITY_CHANNELS 4
 
 #define DEFAULT_DURATION 2      // minimum duration needs to be >=2 ticks -- if any lower then can end up with on+off happening within the same tick and usb_teensy_clocker gets notes stuck!
@@ -340,7 +341,7 @@ class EuclidianSequencer : virtual public BaseSequencer {
                 Serial.printf("EuclidianSequencer constructor creating EuclidianPattern %i; available_outputs is @%p (size %i)\n", i, available_outputs, available_outputs->size()); 
                 Serial.flush();
             }
-            this->patterns[i] = new EuclidianPattern(available_outputs, i / NUM_GLOBAL_DENSITY_CHANNELS);
+            this->patterns[i] = new EuclidianPattern(available_outputs, i / (number_patterns / NUM_GLOBAL_DENSITY_CHANNELS));
             //this->patterns[i]->global_density = &this->global_density;
             if (this->debug && Serial) {
                 Serial.flush();

@@ -31,7 +31,9 @@
     };
 #endif
 
-float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS];
+float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
+    DEFAULT_DENSITY, DEFAULT_DENSITY, DEFAULT_DENSITY, DEFAULT_DENSITY
+};
 
 #if defined(ENABLE_PARAMETERS)
     #include "parameters/Parameter.h"
