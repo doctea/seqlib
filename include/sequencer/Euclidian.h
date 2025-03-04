@@ -334,7 +334,7 @@ class EuclidianSequencer : virtual public BaseSequencer {
     public:
     EuclidianSequencer(LinkedList<BaseOutput*> *available_outputs) : BaseSequencer() {
         EuclidianPattern *p = nullptr;
-        this->patterns = (EuclidianPattern**) calloc(number_patterns, sizeof(p));
+        this->patterns = (EuclidianPattern**) CALLOC_FUNC(number_patterns, sizeof(p));
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
             if (this->debug && Serial) {
                 Serial.printf("EuclidianSequencer constructor creating EuclidianPattern %i; available_outputs is @%p (size %i)\n", i, available_outputs, available_outputs->size()); 

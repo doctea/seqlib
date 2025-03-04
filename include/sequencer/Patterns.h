@@ -7,6 +7,13 @@
 #include <clock.h>
 #include <midi_helpers.h>
 
+#ifndef CALLOC_FUNC
+    #define CALLOC_FUNC calloc
+#endif
+#ifndef MALLOC_FUNC
+    #define MALLOC_FUNC malloc
+#endif
+
 #ifdef ENABLE_SCREEN
     #include "menu.h"
 #endif
@@ -135,7 +142,7 @@ class SimplePattern : public BasePattern {
     event *events = nullptr;
 
     SimplePattern(LinkedList<BaseOutput*> *available_outputs) : BasePattern(available_outputs) {
-        this->events = (event*)calloc(sizeof(event), steps);
+        this->events = (event*)CALLOC_FUNC(sizeof(event), steps);
     }
 
     virtual void set_output(BaseOutput *output) {

@@ -274,7 +274,7 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS];
             menu->add(new SeparatorMenuItem("Euclidian Mutations"));
 
             // add controls for the 4 density channels
-            SubMenuItemColumns *submenu_densities = new SubMenuItemColumns("Global densities", 3, true, false);
+            SubMenuItemColumns *submenu_densities = new SubMenuItemColumns("Global densities", 4, true, false);
             //submenu->add(new ObjectNumberControl<EuclidianSequencer,float>("Density", this, &EuclidianSequencer::set_density,        &EuclidianSequencer::get_density, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
             submenu_densities->add(new LambdaNumberControl<float>("0", [=](float v) -> void { all_global_density[0] = v; }, [=]() -> float { return all_global_density[0]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
             submenu_densities->add(new LambdaNumberControl<float>("1", [=](float v) -> void { all_global_density[1] = v; }, [=]() -> float { return all_global_density[1]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
