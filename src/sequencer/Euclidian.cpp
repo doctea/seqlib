@@ -85,6 +85,10 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
     }
 #endif
 
+#ifndef MENU_C_MAX
+    #define MENU_C_MAX 32
+#endif
+
 #if defined(ENABLE_PARAMETERS)
     //#include "mymenu.h"
     //#include "mymenu/menuitems_pattern_euclidian.h"

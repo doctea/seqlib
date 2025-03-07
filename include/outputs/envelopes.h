@@ -45,7 +45,7 @@ class EnvelopeOutput : public MIDIDrumOutput {
                 } 
             );
 
-            #if defined(ENABLE_PARAMETERS) && defined(ENABLE_ENVELOPES_AS_PARAMETER_INPUTS)
+            #if defined(ENABLE_PARAMETERS) && defined(ENABLE_ENVELOPES) && defined(ENABLE_ENVELOPES_AS_PARAMETER_INPUTS)
                 parameter_manager->addInput(
                     new EnvelopeParameterInput((char*)label, "Env", this->envelope)
                 );
