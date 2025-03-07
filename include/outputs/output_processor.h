@@ -131,15 +131,16 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         #endif
     }
 
-    FLASHMEM
-    virtual void setup_parameters() {
-        for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
-            //Serial.printf("MIDIOutputProcessor#setup_parameters processing item [%i/%i]\n", i+1, this->nodes->size());
-            //Serial_flush();
-            parameter_manager->addParameters(this->nodes->get(i)->get_parameters());
+    #ifdef ENABLE_PARAMETERS
+        FLASHMEM
+        virtual void setup_parameters() {
+            for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
+                //Serial.printf("MIDIOutputProcessor#setup_parameters processing item [%i/%i]\n", i+1, this->nodes->size());
+                //Serial_flush();
+                parameter_manager->addParameters(this->nodes->get(i)->get_parameters());
+            }
         }
-    }
-
+    #endif
 
     #ifdef ENABLE_SCREEN
         //FLASHMEM
