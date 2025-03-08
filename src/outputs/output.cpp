@@ -81,9 +81,9 @@ MIDIOutputProcessor *output_processor = nullptr;
 
 //FLASHMEM
 void setup_output(IMIDINoteAndCCTarget *output_target) {
-    if (Serial) Serial.println("setup_output.."); Serial_flush();
+    if (Serial) { Serial.println("setup_output.."); Serial_flush(); }
     output_processor = new MIDIOutputProcessor(output_target);     // todo: set this up dynamically, probably reading from a config file
-    if (Serial) Serial.println("exiting setup_output"); Serial_flush();
+    if (Serial) { Serial.println("exiting setup_output"); Serial_flush(); }
 }
 
 #ifdef ENABLE_PARAMETERS
@@ -101,7 +101,9 @@ void setup_output(IMIDINoteAndCCTarget *output_target) {
         for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
             BaseOutput *node = this->nodes->get(i);
             node->make_menu_items(menu, i);
-            node->make_parameter_menu_items(menu, i, C_WHITE, combine_pages);
+            #ifdef ENABLE_PARAMETERS
+                node->make_parameter_menu_items(menu, i, C_WHITE, combine_pages);
+            #endif
         }
 
         menu->add_page("Outputs");

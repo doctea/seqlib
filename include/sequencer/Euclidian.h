@@ -143,7 +143,7 @@ class EuclidianPattern : public SimplePattern {
         this->used_arguments.effective_euclidian_density = this->get_global_density();
 
         if (initialised && 0==memcmp(&this->used_arguments, &this->last_arguments, sizeof(arguments_t))) {
-            if (Serial) Serial.println("nothing changed, don't do anything"); Serial.flush();
+            if (Serial) { Serial.println("nothing changed, don't do anything"); Serial.flush(); }
             // nothing changed, dont do anything
             return;
         }
