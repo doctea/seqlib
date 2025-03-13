@@ -175,10 +175,10 @@ class MIDIDrumOutput : public MIDIBaseOutput {
 
             int_fast8_t octave = 3;
             int_fast8_t scale_root = SCALE_ROOT_A;
-            SCALE scale_number = SCALE::MAJOR;
+            scale_index_t scale_number = SCALE_FIRST;
             //int base_note = scale_root * octave;
 
-            MIDINoteTriggerCountOutput(const char *label, LinkedList<BaseOutput*> *nodes, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t channel = 1, int_fast8_t scale_root = SCALE_ROOT_A, SCALE scale_number = SCALE::MAJOR, int_fast8_t octave = 3) 
+            MIDINoteTriggerCountOutput(const char *label, LinkedList<BaseOutput*> *nodes, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t channel = 1, int_fast8_t scale_root = SCALE_ROOT_A, scale_index_t scale_number = SCALE_MAJOR, int_fast8_t octave = 3) 
                 : MIDIBaseOutput(label, 0, output_wrapper) {
                 this->channel = channel;
                 this->nodes = nodes;
@@ -226,10 +226,10 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 return (octave * 12) + scale_root;
             }
 
-            SCALE get_scale_number() {
+            scale_index_t get_scale_number() {
                 return scale_number;
             }
-            void set_scale_number(SCALE scale_number) {
+            void set_scale_number(scale_index_t scale_number) {
                 this->scale_number = scale_number;
             }
 

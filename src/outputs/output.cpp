@@ -150,8 +150,8 @@ void setup_output(IMIDINoteAndCCTarget *output_target) {
 
             menu->add(new LambdaScaleMenuItemBar(
                 "Scale / Key", 
-                [=](SCALE scale) -> void { this->set_scale_number(scale); }, 
-                [=]() -> SCALE { return this->get_scale_number(); },
+                [=](scale_index_t scale) -> void { this->set_scale_number(scale); }, 
+                [=]() -> scale_index_t { return this->get_scale_number(); },
                 [=](int_fast8_t scale_root) -> void { this->set_scale_root(scale_root); },
                 [=]() -> int_fast8_t { return this->get_scale_root(); },
                 true,
