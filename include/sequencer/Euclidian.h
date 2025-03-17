@@ -22,6 +22,10 @@ class Menu;
 #define DEFAULT_DENSITY 0.6666f
 #define NUM_GLOBAL_DENSITY_CHANNELS 4
 
+#define MINIMUM_MUTATION_COUNT 0
+#define MAXIMUM_MUTATION_COUNT 8
+#define DEFAULT_MUTATION_COUNT 3
+
 #define DEFAULT_DURATION 2      // minimum duration needs to be >=2 ticks -- if any lower then can end up with on+off happening within the same tick and usb_teensy_clocker gets notes stuck!
 #define MINIMUM_DURATION 2
 #define DEFAULT_DURATION_ENVELOPES 8
@@ -325,7 +329,7 @@ class EuclidianSequencer : virtual public BaseSequencer {
 
     int seed = 0;
     uint_fast8_t mutate_minimum_pattern = 0, mutate_maximum_pattern = number_patterns;
-    uint_fast8_t mutation_count = 3, effective_mutation_count = 3;
+    uint_fast8_t mutation_count = DEFAULT_MUTATION_COUNT, effective_mutation_count = DEFAULT_MUTATION_COUNT;
     bool    reset_before_mutate = true, 
             mutate_enabled = true, 
             fills_enabled = true, 

@@ -65,8 +65,8 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
             "Mutation amount", 
             &this->mutation_count,
             &this->effective_mutation_count,
-            1,
-            8
+            MINIMUM_MUTATION_COUNT,
+            MAXIMUM_MUTATION_COUNT
         ));
 
         for (unsigned int i = 0 ; i < this->number_patterns ; i++) {
@@ -296,7 +296,7 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
             submenu->add(new ObjectToggleControl<EuclidianSequencer>("Add phrase", this, &EuclidianSequencer::set_add_phrase_enabled,&EuclidianSequencer::is_add_phrase_enabled));
             submenu->add(new ObjectToggleControl<EuclidianSequencer>("Fills", this,  &EuclidianSequencer::set_fills_enabled,         &EuclidianSequencer::is_fills_enabled));
             submenu->add(new ObjectNumberControl<EuclidianSequencer,int>("Seed", this, &EuclidianSequencer::set_euclidian_seed,      &EuclidianSequencer::get_euclidian_seed, nullptr, 0, 16384, true, false));
-            submenu->add(new ObjectNumberControl<EuclidianSequencer,int_fast8_t>("Mut.Amt", this, &EuclidianSequencer::set_mutation_count,       &EuclidianSequencer::get_mutation_count, nullptr, 1, 8));
+            submenu->add(new ObjectNumberControl<EuclidianSequencer,int_fast8_t>("Mut.Amt", this, &EuclidianSequencer::set_mutation_count,       &EuclidianSequencer::get_mutation_count, nullptr, MINIMUM_MUTATION_COUNT, MAXIMUM_MUTATION_COUNT));
             menu->add(submenu);
 
             #ifdef ENABLE_PARAMETERS
