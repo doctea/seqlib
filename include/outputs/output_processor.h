@@ -67,6 +67,9 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
             //this->nodes->get(this->nodes->size()-1)->disabled = false;
             //this->nodes->get(0)->is_ = false;
         #endif
+
+        this->addNode(new MIDIDrumOutput("Misc8", 0, 8, output_target));
+        this->addNode(new MIDIDrumOutput("Misc9", 0, 8, output_target));
     }
     virtual void addNode(BaseOutput* node) {
         this->nodes->add(node);

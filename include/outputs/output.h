@@ -178,7 +178,10 @@ class MIDIDrumOutput : public MIDIBaseOutput {
             scale_index_t scale_number = SCALE_FIRST;
             //int base_note = scale_root * octave;
 
-            MIDINoteTriggerCountOutput(const char *label, LinkedList<BaseOutput*> *nodes, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t channel = 1, int_fast8_t scale_root = SCALE_ROOT_A, scale_index_t scale_number = SCALE_MAJOR, int_fast8_t octave = 3) 
+            int start_count_at = 0;
+            int finish_count_at = -1;
+
+            MIDINoteTriggerCountOutput(const char *label, LinkedList<BaseOutput*> *nodes, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t channel = 1, int start_count_at = 0, int finish_count_at = -1, int_fast8_t scale_root = SCALE_ROOT_A, scale_index_t scale_number = SCALE_MAJOR, int_fast8_t octave = 3) 
                 : MIDIBaseOutput(label, 0, output_wrapper) {
                 this->channel = channel;
                 this->nodes = nodes;
@@ -187,6 +190,11 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 this->scale_root = scale_root;
                 this->scale_number = scale_number;
                 //this->base_note = scale_root * octave;
+
+                this->start_count_at = start_count_at;
+                this->finish_count_at = finish_count_at;
+                if (this->finish_count_at==-1)
+                    this->finish_count_at = this->nodes->size();
             }
 
             //int note_mode = 0;
@@ -204,8 +212,9 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 // then quantise according to selected scale to get final note number
                 int count = 0;
                 uint_fast16_t size = this->nodes->size();
-                for (uint_fast16_t i = 0 ; i < size ; i++) {
+                for (uint_fast16_t i = start_count_at ; i < start_count_at+1 ; i++) {
                     BaseOutput *o = this->nodes->get(i);
+                    if (o==nullptr) continue;
                     if (o==this) continue;
                     count += o->should_go_on() ? (i%12) : 0;
                 }
