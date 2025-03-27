@@ -268,7 +268,7 @@ class EuclidianPattern : public SimplePattern {
     }
 
     virtual int8_t get_tick_duration() override {
-        return this->used_arguments.duration;
+        return this->used_arguments.duration + (is_shuffled() ? uClock.getTrackShuffleLength(1) : 0);
     }
 
     /*virtual bool is_locked() {
@@ -323,7 +323,7 @@ class EuclidianPattern : public SimplePattern {
 
 
 
-class EuclidianSequencer : virtual public BaseSequencer {
+class EuclidianSequencer : public BaseSequencer {
     // todo: list of EuclidianPatterns...
     EuclidianPattern **patterns = nullptr;
 
@@ -346,6 +346,13 @@ class EuclidianSequencer : virtual public BaseSequencer {
                 Serial.flush();
             }
             this->patterns[i] = new EuclidianPattern(available_outputs, i / (number_patterns / NUM_GLOBAL_DENSITY_CHANNELS));
+
+            // for testing shuffled, make every other pattern shuffled
+            // todo: remove this, make configurable
+            //if (i%2==0) {
+            //    this->patterns[i]->set_shuffled(true);
+            //}
+
             //this->patterns[i]->global_density = &this->global_density;
             if (this->debug && Serial) {
                 Serial.flush();
@@ -452,6 +459,11 @@ class EuclidianSequencer : virtual public BaseSequencer {
                 }
             }
         #endif
+
+        // todo: move this basic functionality into BaseSequencer
+
+        //BaseSequencer::on_tick(tick);
+
         if (is_bpm_on_phrase(tick)) {
             this->on_phrase(BPM_CURRENT_PHRASE);
         }
@@ -474,12 +486,30 @@ class EuclidianSequencer : virtual public BaseSequencer {
     };
     virtual void on_step(int step) override {
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-            this->patterns[i]->process_step(step);
+            if (!is_shuffle_enabled() || !this->patterns[i]->is_shuffled())
+                this->patterns[i]->process_step(step);
+        }
+    };
+    virtual void on_step_shuffled(int8_t track, int step) override {
+        Serial.printf("at tick %i, on_step_shuffled(%i, %i)\n", ticks, track, step);
+        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+            if (is_shuffle_enabled() && this->patterns[i]->is_shuffled()) {
+                //if (this->patterns[i]->note_held) 
+                //    this->patterns[i]->trigger_off_for_step(step);
+                this->patterns[i]->process_step(step);
+            }
         }
     };
     virtual void on_step_end(int step) override {
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-            this->patterns[i]->process_step_end(step);
+            if (!is_shuffle_enabled() || !this->patterns[i]->is_shuffled())
+                this->patterns[i]->process_step_end(step);
+        }
+    }
+    virtual void on_step_end_shuffled(int8_t track, int step) override {
+        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+            if (is_shuffle_enabled() && this->patterns[i]->is_shuffled())
+                this->patterns[i]->process_step_end(step);
         }
     }
     virtual void on_beat(int beat) override {

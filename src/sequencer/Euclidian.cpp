@@ -209,6 +209,9 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
                 this->get_pattern(i)->colour = menu->get_next_colour();
             }
 
+            // controls to enable+disable shuffle
+            menu->add(new ObjectToggleControl<EuclidianSequencer>("Shuffle", this, &EuclidianSequencer::set_shuffle_enabled, &EuclidianSequencer::is_shuffle_enabled));
+
             // add a page for the circle display that shows all tracks simultaneously
             if (combine_pages) {
                 menu->add_page("Circle & locks");

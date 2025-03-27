@@ -39,6 +39,8 @@ class BasePattern {
     bool locked = false;
     uint32_t ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
 
+    bool shuffled = false;
+
     BaseOutput *output = nullptr;
     LinkedList<BaseOutput*> *available_outputs = nullptr;
 
@@ -108,6 +110,13 @@ class BasePattern {
         return this->locked;
     }
 
+    virtual void set_shuffled(bool v = true) {
+        this->shuffled = v;
+    }
+    virtual bool is_shuffled() {
+        return this->shuffled;
+    }
+
     #ifdef ENABLE_PARAMETERS
         LinkedList<FloatParameter*> *parameters = nullptr;
         virtual LinkedList<FloatParameter*> *getParameters(unsigned int i);
@@ -137,6 +146,7 @@ class SimplePattern : public BasePattern {
     };
 
     int triggered_on_step = -1;
+    int32_t triggered_on_tick = -1;
     int current_duration = PPQN;
 
     event *events = nullptr;
@@ -186,13 +196,18 @@ class SimplePattern : public BasePattern {
         }*/
         if (this->query_note_on_for_step(step)) {
             //Serial.printf("query_note_on_for_step!,");
-            this->trigger_on_for_step(step);
+            //if (this->is_shuffled() && !this->note_held) {
+            //    Serial.printf("%s: going to trigger_on_for_step at tick %i because step %i is on\n", this->get_output_label(), ticks, step);
+                if (!this->note_held)
+                    this->trigger_on_for_step(step);
+            //}
         }
         //Serial.println();
     };
     virtual void process_step_end(int step) override {
         if (this->query_note_off_for_step((step+1) % this->get_effective_steps()) && this->note_held) {
-            //Serial.printf("%i: note off for step!");
+        //if (this->note_held) {
+            //Serial.printf("%i: note off for step %i!", step);
             this->trigger_off_for_step(step);
         }
     }
@@ -201,7 +216,13 @@ class SimplePattern : public BasePattern {
         int step = (ticks / ticks_per_step); // % steps;
         //ticks = ticks % (ticks_per_step * steps);
 
-        if ((triggered_on_step * (int)ticks_per_step) + this->current_duration <= ticks || ticks < triggered_on_step * (int)ticks_per_step) {
+        if (
+            this->note_held && 
+            (ticks >= triggered_on_tick + this->current_duration  || ticks < triggered_on_tick)
+        ) {
+            /*if (this->is_shuffled() ) {
+                Serial.printf("%s: going to trigger_off_for_step because ticks=%i, triggered_on_tick=%i, current_duration=%i, shufflelength=%i so should turn off at %i\n", this->get_output_label(), ticks, triggered_on_tick, this->current_duration, uClock.getTrackShuffleLength(1), triggered_on_tick + this->current_duration + uClock.getTrackShuffleLength(1));
+            }*/
             this->trigger_off_for_step(step);
         }
     }

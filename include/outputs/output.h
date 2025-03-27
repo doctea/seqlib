@@ -111,15 +111,16 @@ class MIDIBaseOutput : public BaseOutput {
             this->stop();
 
             int8_t note_number = get_note_number();
-            Debug_printf("\t\tgoes on note\t%i\t(%s), ", note_number, get_note_name_c(note_number));
             //Serial.printf("Sending note on  for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
             if (is_enabled() && is_valid_note(note_number)) {
+                Serial.printf("\t\tMIDIBaseOutput#process: goes on note\t%i\t(%s) \n", note_number, get_note_name_c(note_number));
                 set_last_note_number(note_number);
                 output_wrapper->sendNoteOn(note_number, MIDI_MAX_VELOCITY, get_channel());
                 //this->went_on();
             }
             //count += i;
         }
+        this->reset();
     }
 
     virtual bool should_go_on() {
@@ -212,7 +213,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 // then quantise according to selected scale to get final note number
                 int count = 0;
                 uint_fast16_t size = this->nodes->size();
-                for (uint_fast16_t i = start_count_at ; i < start_count_at+1 ; i++) {
+                for (uint_fast16_t i = start_count_at ; i < start_count_at+1 && i < size ; i++) {
                     BaseOutput *o = this->nodes->get(i);
                     if (o==nullptr) continue;
                     if (o==this) continue;

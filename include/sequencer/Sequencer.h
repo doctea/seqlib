@@ -23,6 +23,8 @@ class BaseSequencer : virtual public ISaveableParameterHost {
     bool running = true;
     uint_fast8_t number_patterns = 20;
     bool debug = false;
+    bool shuffle_enabled = false;
+
     virtual SimplePattern *get_pattern(unsigned int pattern) = 0;
 
     virtual bool is_running() {
@@ -36,11 +38,21 @@ class BaseSequencer : virtual public ISaveableParameterHost {
 
     virtual void on_loop(int tick) = 0;
     virtual void on_tick(int tick) = 0;
-    virtual void on_step(int step) = 0;
-    virtual void on_step_end(int step) = 0;
     virtual void on_beat(int beat) = 0;
     virtual void on_bar(int bar) = 0;
     virtual void on_phrase(int phrase) = 0;
+
+    virtual void on_step(int step) = 0;
+    virtual void on_step_end(int step) = 0;
+    virtual void on_step_shuffled(int8_t track, int step) = 0;
+    virtual void on_step_end_shuffled(int8_t track, int step) = 0;
+
+    virtual bool is_shuffle_enabled() {
+        return this->shuffle_enabled;
+    }
+    virtual void set_shuffle_enabled(bool state = true) {
+        this->shuffle_enabled = state;
+    }
 
     virtual void configure_pattern_output(int index, BaseOutput *output);
     
