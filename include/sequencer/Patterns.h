@@ -28,7 +28,10 @@
 
 #define MAX_STEPS 32
 
+#define NUMBER_SHUFFLE_PATTERNS 16
+
 class BaseOutput;
+class BaseSequencer;
 
 class BasePattern {
     public:
@@ -39,7 +42,7 @@ class BasePattern {
     bool locked = false;
     uint32_t ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
 
-    bool shuffled = false;
+    uint8_t shuffle_track = 0;
 
     BaseOutput *output = nullptr;
     LinkedList<BaseOutput*> *available_outputs = nullptr;
@@ -110,11 +113,14 @@ class BasePattern {
         return this->locked;
     }
 
-    virtual void set_shuffled(bool v = true) {
-        this->shuffled = v;
+    virtual void set_shuffle_track(uint8_t v) {
+        this->shuffle_track = v;
     }
     virtual bool is_shuffled() {
-        return this->shuffled;
+        return this->shuffle_track > 0;
+    }
+    virtual uint8_t get_shuffle_track() {
+        return this->shuffle_track;
     }
 
     #ifdef ENABLE_PARAMETERS
@@ -123,7 +129,7 @@ class BasePattern {
     #endif
 
     #ifdef ENABLE_SCREEN
-        virtual void create_menu_items(Menu *menu, int index, bool combine_pages = false);
+        virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, bool combine_pages = false);
     #endif
 
     virtual void add_saveable_parameters(int pattern_index, LinkedList<SaveableParameterBase*> *target) {
@@ -131,6 +137,9 @@ class BasePattern {
         snprintf(prefix, 40, "track_%i_", pattern_index);
         target->add(new LSaveableParameter<uint8_t>((String(prefix) + String("steps")).c_str(), "BasePattern", &this->steps));
         target->add(new LSaveableParameter<bool>((String(prefix) + String("locked")).c_str(), "BasePattern", &this->locked));
+
+        //target->add(new LSaveableParameter<bool>((String(prefix) + String("active_status")).c_str(), "EuclidianPattern", &this->active_status));
+        target->add(new LSaveableParameter<uint8_t>((String(prefix) + String("shuffle_track")).c_str(), "EuclidianPattern", &this->shuffle_track));
 
         // todo: add the rest of the params...?
     }
@@ -195,12 +204,8 @@ class SimplePattern : public BasePattern {
             this->trigger_off_for_step(step);
         }*/
         if (this->query_note_on_for_step(step)) {
-            //Serial.printf("query_note_on_for_step!,");
-            //if (this->is_shuffled() && !this->note_held) {
-            //    Serial.printf("%s: going to trigger_on_for_step at tick %i because step %i is on\n", this->get_output_label(), ticks, step);
-                if (!this->note_held)
-                    this->trigger_on_for_step(step);
-            //}
+            if (!this->note_held)
+                this->trigger_on_for_step(step);
         }
         //Serial.println();
     };
@@ -220,9 +225,6 @@ class SimplePattern : public BasePattern {
             this->note_held && 
             (ticks >= triggered_on_tick + this->current_duration  || ticks < triggered_on_tick)
         ) {
-            /*if (this->is_shuffled() ) {
-                Serial.printf("%s: going to trigger_off_for_step because ticks=%i, triggered_on_tick=%i, current_duration=%i, shufflelength=%i so should turn off at %i\n", this->get_output_label(), ticks, triggered_on_tick, this->current_duration, uClock.getTrackShuffleLength(1), triggered_on_tick + this->current_duration + uClock.getTrackShuffleLength(1));
-            }*/
             this->trigger_off_for_step(step);
         }
     }

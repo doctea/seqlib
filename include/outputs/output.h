@@ -113,7 +113,7 @@ class MIDIBaseOutput : public BaseOutput {
             int8_t note_number = get_note_number();
             //Serial.printf("Sending note on  for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
             if (is_enabled() && is_valid_note(note_number)) {
-                Serial.printf("\t\tMIDIBaseOutput#process: goes on note\t%i\t(%s) \n", note_number, get_note_name_c(note_number));
+                Debug_printf("\t\tMIDIBaseOutput#process: goes on note\t%i\t(%s) \n", note_number, get_note_name_c(note_number));
                 set_last_note_number(note_number);
                 output_wrapper->sendNoteOn(note_number, MIDI_MAX_VELOCITY, get_channel());
                 //this->went_on();

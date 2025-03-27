@@ -153,12 +153,12 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
         #include "mymenu_items/ParameterMenuItems_lowmemory.h"
         #include "mymenu/menuitems_pattern_euclidian.h"
 
-        void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index, bool merge_pages) {
+        void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index, BaseSequencer *target_sequencer, bool merge_pages) {
             char label[MENU_C_MAX];
             snprintf(label, MENU_C_MAX, "Pattern %i", pattern_index);
             menu->add_page(label, this->get_colour(), false);
 
-            EuclidianPatternControl *epc = new EuclidianPatternControl(label, this);
+            EuclidianPatternControl *epc = new EuclidianPatternControl(label, this, target_sequencer);
             menu->add(epc);
 
             if (merge_pages) {
@@ -264,7 +264,7 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
                 //Serial.printf("adding controls for pattern %i..\n", i);
                 BasePattern *p = (BasePattern *)this->get_pattern(i);
 
-                p->create_menu_items(menu, i, combine_pages);
+                p->create_menu_items(menu, i, this, combine_pages);
             }
         }
 

@@ -53,10 +53,9 @@ class EuclidianPattern : public SimplePattern {
     public:
 
     bool locked = false;
-
     bool initialised = false;
 
-    bool active_status = true;
+    //bool active_status = true;
     //int pulses, rotation, duration;
     arguments_t arguments;
     arguments_t last_arguments;
@@ -268,7 +267,7 @@ class EuclidianPattern : public SimplePattern {
     }
 
     virtual int8_t get_tick_duration() override {
-        return this->used_arguments.duration + (is_shuffled() ? uClock.getTrackShuffleLength(1) : 0);
+        return this->used_arguments.duration + uClock.getTrackShuffleLength(this->get_shuffle_track());
     }
 
     /*virtual bool is_locked() {
@@ -288,7 +287,7 @@ class EuclidianPattern : public SimplePattern {
 
     #ifdef ENABLE_SCREEN
         //FLASHMEM
-        virtual void create_menu_items(Menu *menu, int index, bool combine_pages = false) override;
+        virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, bool combine_pages = false) override;
     #endif
     
     #if defined(ENABLE_PARAMETERS)
@@ -485,30 +484,28 @@ class EuclidianSequencer : public BaseSequencer {
 
     };
     virtual void on_step(int step) override {
-        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+        /*for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
             if (!is_shuffle_enabled() || !this->patterns[i]->is_shuffled())
                 this->patterns[i]->process_step(step);
-        }
+        }*/
     };
     virtual void on_step_shuffled(int8_t track, int step) override {
-        Serial.printf("at tick %i, on_step_shuffled(%i, %i)\n", ticks, track, step);
+        //Serial.printf("at tick %i, on_step_shuffled(%i, %i)\n", ticks, track, step);
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-            if (is_shuffle_enabled() && this->patterns[i]->is_shuffled()) {
-                //if (this->patterns[i]->note_held) 
-                //    this->patterns[i]->trigger_off_for_step(step);
+            if (this->patterns[i]->get_shuffle_track()==track) {
                 this->patterns[i]->process_step(step);
             }
         }
     };
     virtual void on_step_end(int step) override {
-        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+        /*for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
             if (!is_shuffle_enabled() || !this->patterns[i]->is_shuffled())
                 this->patterns[i]->process_step_end(step);
-        }
+        }*/
     }
     virtual void on_step_end_shuffled(int8_t track, int step) override {
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-            if (is_shuffle_enabled() && this->patterns[i]->is_shuffled())
+            if (this->patterns[i]->get_shuffle_track()==track)
                 this->patterns[i]->process_step_end(step);
         }
     }

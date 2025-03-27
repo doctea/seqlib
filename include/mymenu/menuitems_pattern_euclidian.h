@@ -15,6 +15,8 @@
 
 // compound control for Euclidian Patterns; shows step sequence view, animated circle sequence view, and controls 
 class EuclidianPatternControl : public SubMenuItemBar {
+    BaseSequencer *target_sequencer = nullptr;
+
     public:
 
     #ifdef ENABLE_STEP_DISPLAYS
@@ -23,10 +25,11 @@ class EuclidianPatternControl : public SubMenuItemBar {
     #endif
     EuclidianPattern *pattern = nullptr;
 
-    EuclidianPatternControl(const char *label, EuclidianPattern *pattern) : SubMenuItemBar(label), pattern(pattern) {
+    EuclidianPatternControl(const char *label, EuclidianPattern *pattern, BaseSequencer *target_sequencer) : SubMenuItemBar(label), pattern(pattern) {
         #ifdef ENABLE_STEP_DISPLAYS
             this->circle_display = new SingleCircleDisplay(label, pattern);     // circle display first - don't add this as a submenu item, because it isn't selectable
             this->step_display = new PatternDisplay(label, pattern, false, false);    // step sequence view next - not selectable, don't draw header
+            this->target_sequencer = target_sequencer;
         #endif
 
         #ifdef ENABLE_OUTPUT_SELECTOR
@@ -54,7 +57,12 @@ class EuclidianPatternControl : public SubMenuItemBar {
             // choose global density channel to use
             this->add(new LambdaNumberControl<int8_t> ("Density channel", [=](int8_t v) -> int8_t { pattern->global_density_channel = v; return v; }, [=]() -> int8_t { return pattern->global_density_channel; }, nullptr, 0, NUM_GLOBAL_DENSITY_CHANNELS-1, true, true));
 
-            this->add(new ObjectToggleControl<EuclidianPattern> ("Shuffled", pattern, &EuclidianPattern::set_shuffled, &EuclidianPattern::is_shuffled));
+            this->add(new LambdaNumberControl<int8_t> (
+                "Shuffle #", 
+                [=](int8_t track) -> void { pattern->set_shuffle_track(track); }, 
+                [=]() -> int8_t { return pattern->get_shuffle_track(); },
+                nullptr, 0, NUMBER_SHUFFLE_PATTERNS-1, true, true
+            ));
             
             //menu->debug = true;
             this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
