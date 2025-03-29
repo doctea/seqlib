@@ -28,8 +28,6 @@
 
 #define MAX_STEPS 32
 
-#define NUMBER_SHUFFLE_PATTERNS 16
-
 class BaseOutput;
 class BaseSequencer;
 

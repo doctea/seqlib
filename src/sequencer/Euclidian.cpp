@@ -197,6 +197,8 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
         #include "mymenu/menuitems_outputselectorcontrol.h"
         #include "menuitems_object_multitoggle.h"
 
+        #include "mymenu/menuitems_shuffleeditor.h"
+
         // todo: this should really be called create_menu_items, since it directly adds to menu
         // todo: do we really need to pass in menu here for some reason?
         void EuclidianSequencer::make_menu_items(Menu *menu, bool combine_pages) {
@@ -266,6 +268,14 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
 
                 p->create_menu_items(menu, i, this, combine_pages);
             }
+
+            menu->add_page("Shuffle patterns");
+            for (int i = 0 ; i < NUMBER_SHUFFLE_PATTERNS ; i++) {
+                char label[MENU_C_MAX];
+                snprintf(label, MENU_C_MAX, "Shuffle %i", i);
+                menu->add(new ShufflePatternEditorControl((const char*)label, shuffle_pattern_wrapper[i]));
+            }
+            menu->remember_opened_page();
         }
 
         #include "LinkedList.h"
