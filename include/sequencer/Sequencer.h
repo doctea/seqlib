@@ -37,7 +37,7 @@ class ShufflePatternWrapper {
         void set_active(bool active) {
             uClock.setTrackShuffle(this->track_number, active);
         }
-        bool get_active() {
+        bool is_active() {
             return uClock.isTrackShuffled(this->track_number);
         }
 
@@ -76,6 +76,11 @@ class ShufflePatternWrapper {
 
         void update_target() {
             uClock.setTrackShuffleSize(this->track_number, this->size);
+            if (this->amount == 0.0f) {
+                uClock.setTrackShuffle(this->track_number, false);
+            } else {
+                uClock.setTrackShuffle(this->track_number, true);
+            }
             for (int i = 0 ; i < size ; i++) {
                 int t = step[i] * this->amount;
                 if (t!=last_sent_step[i]) {

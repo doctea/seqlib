@@ -273,7 +273,11 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
             for (int i = 0 ; i < NUMBER_SHUFFLE_PATTERNS ; i++) {
                 char label[MENU_C_MAX];
                 snprintf(label, MENU_C_MAX, "Shuffle %i", i);
-                menu->add(new ShufflePatternEditorControl((const char*)label, shuffle_pattern_wrapper[i]));
+                SubMenuItemBar *submenu = new SubMenuItemColumns(label, 1, true, true);
+                submenu->add(new LambdaNumberControl<float>("Amount", [=](float v) -> void { shuffle_pattern_wrapper[i]->set_amount(v); shuffle_pattern_wrapper[i]->update_target(); }, [=]() -> float { return shuffle_pattern_wrapper[i]->get_amount(); }, nullptr, 0.0, 1.0, true, true));
+                //submenu->add(new LambdaToggleControl("Active", [=](bool v) -> void { shuffle_pattern_wrapper[i]->set_active(v); shuffle_pattern_wrapper[i]->update_target(); }, [=]() -> bool { return shuffle_pattern_wrapper[i]->is_active(); }));
+                submenu->add(new ShufflePatternEditorControl((const char*)label, shuffle_pattern_wrapper[i]));
+                menu->add(submenu);
             }
             menu->remember_opened_page();
         }
