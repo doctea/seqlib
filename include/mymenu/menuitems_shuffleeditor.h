@@ -35,10 +35,14 @@ class ShufflePatternEditorControl : public MenuItem {
                 int row = i+1 >= (shufflewrapper->size / 2) ? 1 : 0;
                 int column = i % (shufflewrapper->size / 2);
 
+                if (column == 0 && row == 1) {
+                    tft->setCursor(initial_x, initial_y + tft->getRowHeight() - 3);
+                } 
+
                 this->colours(false);
 
                 if (column == STEPS_PER_BEAT) {
-                    tft->print(" | ");
+                    tft->print(" ");
                 } 
                
                 if (i==selected_step) 
@@ -47,8 +51,8 @@ class ShufflePatternEditorControl : public MenuItem {
                     this->colours(false);
 
                 tft->printf("%-2i", shufflewrapper->get_step(i));
-                if (i+1 == shufflewrapper->size / 2)
-                    tft->println();
+                //if (i+1 == shufflewrapper->size / 2)
+                //    tft->println();
             }
 
             tft->println();

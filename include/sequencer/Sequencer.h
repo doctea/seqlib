@@ -82,7 +82,7 @@ class ShufflePatternWrapper {
                 uClock.setTrackShuffle(this->track_number, true);
             }
             for (int i = 0 ; i < size ; i++) {
-                int t = step[i] * this->amount;
+                int t = (float)step[i] * this->amount;
                 if (t!=last_sent_step[i]) {
                     uClock.setTrackShuffleData(this->track_number, i, t);
                     last_sent_step[i] = t;
