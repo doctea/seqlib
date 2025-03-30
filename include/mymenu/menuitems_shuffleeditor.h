@@ -4,14 +4,16 @@
 
 #include "sequencer/Sequencer.h"
 
+#ifdef ENABLE_SHUFFLE
+
 class ShufflePatternEditorControl : public MenuItem {
     ShufflePatternWrapper *shufflewrapper = nullptr;
 
     int selected_step = 0;
     bool editing = false;
 
-    const int SHUFFLE_MINIMUM = -3;
-    const int SHUFFLE_MAXIMUM =  3;
+    const int SHUFFLE_MINIMUM = -9;
+    const int SHUFFLE_MAXIMUM =  9;
 
     public:
         ShufflePatternEditorControl(const char *label, ShufflePatternWrapper *shuffwrapper) : MenuItem(label) {
@@ -42,17 +44,33 @@ class ShufflePatternEditorControl : public MenuItem {
                 this->colours(false);
 
                 if (column == STEPS_PER_BEAT) {
+                    // reached the middle of a beat, so print a space
+                    // actually
                     tft->print(" ");
                 } 
                
-                if (i==selected_step) 
+                /*if (i==selected_step) 
                     this->colours(selected || opened, editing ? GREEN : this->default_fg, this->default_bg);
                 else
-                    this->colours(false);
+                    this->colours(false);*/
 
-                tft->printf("%-2i", shufflewrapper->get_step(i));
+                int8_t step_value = shufflewrapper->get_step(i);
+                uint16_t shufcolour;
+                if (step_value < 0)
+                    shufcolour = RED;
+                else if (step_value > 0)
+                    shufcolour = GREEN;
+                else
+                    shufcolour = this->default_fg;
+
+                this->colours((selected && !opened) || (opened && i==selected_step), shufcolour, this->default_bg);
+
+                //tft->printf("%-1i", shufflewrapper->get_step(i));
+                tft->printf("%1i", abs(shufflewrapper->get_step(i)));
                 //if (i+1 == shufflewrapper->size / 2)
                 //    tft->println();
+                this->colours(false);
+                tft->print(" ");
             }
 
             tft->println();
@@ -134,3 +152,5 @@ class ShufflePatternEditorControl : public MenuItem {
         }
 
 };
+
+#endif

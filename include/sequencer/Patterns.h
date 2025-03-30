@@ -40,7 +40,9 @@ class BasePattern {
     bool locked = false;
     uint32_t ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
 
-    uint8_t shuffle_track = 0;
+    #ifdef ENABLE_SHUFFLE
+        uint8_t shuffle_track = 0;
+    #endif
 
     BaseOutput *output = nullptr;
     LinkedList<BaseOutput*> *available_outputs = nullptr;
@@ -111,15 +113,17 @@ class BasePattern {
         return this->locked;
     }
 
-    virtual void set_shuffle_track(uint8_t v) {
-        this->shuffle_track = v;
-    }
-    virtual bool is_shuffled() {
-        return this->shuffle_track > 0;
-    }
-    virtual uint8_t get_shuffle_track() {
-        return this->shuffle_track;
-    }
+    #ifdef ENABLE_SHUFFLE
+        virtual void set_shuffle_track(uint8_t v) {
+            this->shuffle_track = v;
+        }
+        virtual bool is_shuffled() {
+            return this->shuffle_track > 0;
+        }
+        virtual uint8_t get_shuffle_track() {
+            return this->shuffle_track;
+        }
+    #endif
 
     #ifdef ENABLE_PARAMETERS
         LinkedList<FloatParameter*> *parameters = nullptr;
@@ -137,7 +141,9 @@ class BasePattern {
         target->add(new LSaveableParameter<bool>((String(prefix) + String("locked")).c_str(), "BasePattern", &this->locked));
 
         //target->add(new LSaveableParameter<bool>((String(prefix) + String("active_status")).c_str(), "EuclidianPattern", &this->active_status));
-        target->add(new LSaveableParameter<uint8_t>((String(prefix) + String("shuffle_track")).c_str(), "EuclidianPattern", &this->shuffle_track));
+        #ifdef ENABLE_SHUFFLE
+            target->add(new LSaveableParameter<uint8_t>((String(prefix) + String("shuffle_track")).c_str(), "EuclidianPattern", &this->shuffle_track));
+        #endif
 
         // todo: add the rest of the params...?
     }

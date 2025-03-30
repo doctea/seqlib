@@ -197,7 +197,9 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
         #include "mymenu/menuitems_outputselectorcontrol.h"
         #include "menuitems_object_multitoggle.h"
 
-        #include "mymenu/menuitems_shuffleeditor.h"
+        #ifdef ENABLE_SHUFFLE
+            #include "mymenu/menuitems_shuffleeditor.h"
+        #endif
 
         // todo: this should really be called create_menu_items, since it directly adds to menu
         // todo: do we really need to pass in menu here for some reason?
@@ -211,8 +213,10 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
                 this->get_pattern(i)->colour = menu->get_next_colour();
             }
 
-            // controls to enable+disable shuffle
-            menu->add(new ObjectToggleControl<EuclidianSequencer>("Shuffle", this, &EuclidianSequencer::set_shuffle_enabled, &EuclidianSequencer::is_shuffle_enabled));
+            /*#ifdef ENABLE_SHUFFLE
+                // controls to enable+disable shuffle
+                menu->add(new ObjectToggleControl<EuclidianSequencer>("Shuffle", this, &EuclidianSequencer::set_shuffle_enabled, &EuclidianSequencer::is_shuffle_enabled));
+            #endif*/
 
             // add a page for the circle display that shows all tracks simultaneously
             if (combine_pages) {
@@ -269,18 +273,20 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
                 p->create_menu_items(menu, i, this, combine_pages);
             }
 
-            menu->add_page("Shuffle patterns");
-            for (int i = 0 ; i < NUMBER_SHUFFLE_PATTERNS ; i++) {
-                char label[MENU_C_MAX];
-                snprintf(label, MENU_C_MAX, "Shuffle %i", i);
-                //SubMenuItemBar *submenu = new SubMenuItemColumns(label, 2, true, true);
-                SubMenuItemBar *submenu = new DualMenuItem(label, false, true, 48);
-                submenu->add(new LambdaNumberControl<float>("Amount", [=](float v) -> void { shuffle_pattern_wrapper[i]->set_amount(v); shuffle_pattern_wrapper[i]->update_target(); }, [=]() -> float { return shuffle_pattern_wrapper[i]->get_amount(); }, nullptr, 0.0, 1.0, true, true));
-                //submenu->add(new LambdaToggleControl("Active", [=](bool v) -> void { shuffle_pattern_wrapper[i]->set_active(v); shuffle_pattern_wrapper[i]->update_target(); }, [=]() -> bool { return shuffle_pattern_wrapper[i]->is_active(); }));
-                submenu->add(new ShufflePatternEditorControl((const char*)label, shuffle_pattern_wrapper[i]));
-                menu->add(submenu);
-            }
-            menu->remember_opened_page();
+            #ifdef ENABLE_SHUFFLE
+                menu->add_page("Shuffle patterns");
+                for (int i = 0 ; i < NUMBER_SHUFFLE_PATTERNS ; i++) {
+                    char label[MENU_C_MAX];
+                    snprintf(label, MENU_C_MAX, "Shuffle %i", i);
+                    //SubMenuItemBar *submenu = new SubMenuItemColumns(label, 2, true, true);
+                    SubMenuItemBar *submenu = new DualMenuItem(label, false, true, 48);
+                    submenu->add(new LambdaNumberControl<float>("Amount", [=](float v) -> void { shuffle_pattern_wrapper[i]->set_amount(v); shuffle_pattern_wrapper[i]->update_target(); }, [=]() -> float { return shuffle_pattern_wrapper[i]->get_amount(); }, nullptr, 0.0, 1.0, true, true));
+                    //submenu->add(new LambdaToggleControl("Active", [=](bool v) -> void { shuffle_pattern_wrapper[i]->set_active(v); shuffle_pattern_wrapper[i]->update_target(); }, [=]() -> bool { return shuffle_pattern_wrapper[i]->is_active(); }));
+                    submenu->add(new ShufflePatternEditorControl((const char*)label, shuffle_pattern_wrapper[i]));
+                    menu->add(submenu);
+                }
+                menu->remember_opened_page();
+            #endif
         }
 
         #include "LinkedList.h"

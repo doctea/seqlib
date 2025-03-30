@@ -57,12 +57,14 @@ class EuclidianPatternControl : public SubMenuItemBar {
             // choose global density channel to use
             this->add(new LambdaNumberControl<int8_t> ("Density channel", [=](int8_t v) -> int8_t { pattern->global_density_channel = v; return v; }, [=]() -> int8_t { return pattern->global_density_channel; }, nullptr, 0, NUM_GLOBAL_DENSITY_CHANNELS-1, true, true));
 
-            this->add(new LambdaNumberControl<int8_t> (
-                "Shuffle #", 
-                [=](int8_t track) -> void { pattern->set_shuffle_track(track); }, 
-                [=]() -> int8_t { return pattern->get_shuffle_track(); },
-                nullptr, 0, NUMBER_SHUFFLE_PATTERNS-1, true, true
-            ));
+            #ifdef ENABLE_SHUFFLE
+                this->add(new LambdaNumberControl<int8_t> (
+                    "Shuffle #", 
+                    [=](int8_t track) -> void { pattern->set_shuffle_track(track); }, 
+                    [=]() -> int8_t { return pattern->get_shuffle_track(); },
+                    nullptr, 0, NUMBER_SHUFFLE_PATTERNS-1, true, true
+                ));
+            #endif
             
             //menu->debug = true;
             this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));

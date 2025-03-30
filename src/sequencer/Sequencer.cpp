@@ -7,24 +7,27 @@
 
 //#include "outputs/base_output.h"
 
-ShufflePatternWrapper *shuffle_pattern_wrapper[NUMBER_SHUFFLE_PATTERNS] = {
-    new ShufflePatternWrapper(0),
-    new ShufflePatternWrapper(1),
-    new ShufflePatternWrapper(2),
-    new ShufflePatternWrapper(3),
-    new ShufflePatternWrapper(4),
-    new ShufflePatternWrapper(5),
-    new ShufflePatternWrapper(6),
-    new ShufflePatternWrapper(7),
-    new ShufflePatternWrapper(8),
-    new ShufflePatternWrapper(9),
-    new ShufflePatternWrapper(10),
-    new ShufflePatternWrapper(11),
-    new ShufflePatternWrapper(12),
-    new ShufflePatternWrapper(13),
-    new ShufflePatternWrapper(14),
-    new ShufflePatternWrapper(15)
-};
+#ifdef ENABLE_SHUFFLE
+    #include "shuffle.h"
+    ShufflePatternWrapper *shuffle_pattern_wrapper[NUMBER_SHUFFLE_PATTERNS] = {
+        new ShufflePatternWrapper(0),
+        new ShufflePatternWrapper(1),
+        new ShufflePatternWrapper(2),
+        new ShufflePatternWrapper(3),
+        new ShufflePatternWrapper(4),
+        new ShufflePatternWrapper(5),
+        new ShufflePatternWrapper(6),
+        new ShufflePatternWrapper(7),
+        new ShufflePatternWrapper(8),
+        new ShufflePatternWrapper(9),
+        new ShufflePatternWrapper(10),
+        new ShufflePatternWrapper(11),
+        new ShufflePatternWrapper(12),
+        new ShufflePatternWrapper(13),
+        new ShufflePatternWrapper(14),
+        new ShufflePatternWrapper(15)
+    };
+#endif
 
 void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
     if (index >= (int)this->number_patterns) {
