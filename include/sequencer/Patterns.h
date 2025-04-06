@@ -118,7 +118,11 @@ class BasePattern {
             this->shuffle_track = v;
         }
         virtual bool is_shuffled() {
-            return uClock.isTrackShuffled(shuffle_track);
+            #ifdef SHUFFLE_MULTIPLE_TRACKS
+                return uClock.isTrackShuffled(this->shuffle_track);
+            #else
+                return uClock.isShuffled();
+            #endif
         }
         virtual uint8_t get_shuffle_track() {
             return this->shuffle_track;
@@ -126,7 +130,11 @@ class BasePattern {
         virtual int8_t get_shuffle_length() {
             #ifdef ENABLE_SHUFFLE
                 if (this->is_shuffled())
-                    return uClock.getTrackShuffleLength(this->get_shuffle_track());
+                    #ifdef SHUFFLE_MULTIPLE_TRACKS
+                        return uClock.getTrackShuffleLength(this->get_shuffle_track());
+                    #else
+                        return uClock.getShuffleLength();
+                    #endif
                 else
             #endif
             return 0;
