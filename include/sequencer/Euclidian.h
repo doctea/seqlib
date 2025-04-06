@@ -269,7 +269,7 @@ class EuclidianPattern : public SimplePattern {
     virtual int8_t get_tick_duration() override {
         return this->used_arguments.duration 
         #ifdef ENABLE_SHUFFLE 
-            + uClock.getTrackShuffleLength(this->get_shuffle_track())
+            + this->get_shuffle_length()
         #endif
         ;
     }
@@ -350,11 +350,13 @@ class EuclidianSequencer : public BaseSequencer {
             }
             this->patterns[i] = new EuclidianPattern(available_outputs, i / (number_patterns / NUM_GLOBAL_DENSITY_CHANNELS));
 
-            // for testing shuffled, make every other pattern shuffled
-            // todo: remove this, make configurable
-            //if (i%2==0) {
-            //    this->patterns[i]->set_shuffled(true);
-            //}
+            #ifdef ENABLE_SHUFFLE
+                // for testing shuffled, make every other pattern shuffled
+                // todo: remove this, make configurable
+                //if (i%2==0) {
+                //    this->patterns[i]->set_shuffled(true);
+                //}
+            #endif
 
             //this->patterns[i]->global_density = &this->global_density;
             if (this->debug && Serial) {
@@ -488,42 +490,49 @@ class EuclidianSequencer : public BaseSequencer {
 
     };
     virtual void on_step(int step) override {
-        #ifndef ENABLE_SHUFFLE
-            for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-                #ifdef ENABLE_SHUFFLE
-                if (!is_shuffle_enabled() || !this->patterns[i]->is_shuffled())
-                #endif
+        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+            #ifdef ENABLE_SHUFFLE
+                if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->patterns[i]->is_shuffled())) {
+                    //Serial.printf("at tick %i, received on_step(%i, %i) callback for non-shuffled pattern\n", ticks, step, i);
                     this->patterns[i]->process_step(step);
-            }
-        #endif
+                }
+            #else
+                this->patterns[i]->process_step(step);
+            #endif
+        }
     };
+
+    virtual void on_step_end(int step) override {
+        //Serial.printf("at tick %i, on_step_end(%i)\n", ticks, step);
+        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+            #ifdef ENABLE_SHUFFLE
+                if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->patterns[i]->is_shuffled())) {
+                    this->patterns[i]->process_step_end(step);
+                }
+            #else
+                this->patterns[i]->process_step_end(step);
+            #endif
+        }
+    }
     #ifdef ENABLE_SHUFFLE
         virtual void on_step_shuffled(int8_t track, int step) override {
-            //Serial.printf("at tick %i, on_step_shuffled(%i, %i)\n", ticks, track, step);
+            if (!is_shuffle_enabled()) return;
+
             for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-                if (this->patterns[i]->get_shuffle_track()==track) {
+                if (this->patterns[i]->is_shuffled() && this->patterns[i]->get_shuffle_track()==track) {
+                    Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
                     this->patterns[i]->process_step(step);
                 }
             }
         };
-    #endif
 
-    virtual void on_step_end(int step) override {
-        #ifndef ENABLE_SHUFFLE
-            //Serial.printf("at tick %i, on_step_end(%i)\n", ticks, step);
-            for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-                #ifdef ENABLE_SHUFFLE
-                if (!is_shuffle_enabled() || !this->patterns[i]->is_shuffled())
-                #endif
-                    this->patterns[i]->process_step_end(step);
-            }
-        #endif
-    }
-    #ifdef ENABLE_SHUFFLE
         virtual void on_step_end_shuffled(int8_t track, int step) override {
+            if (!is_shuffle_enabled()) return;
+
             for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-                if (this->patterns[i]->get_shuffle_track()==track)
+                if (this->patterns[i]->is_shuffled() && this->patterns[i]->get_shuffle_track()==track) {
                     this->patterns[i]->process_step_end(step);
+                }
             }
         }
     #endif

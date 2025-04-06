@@ -1,5 +1,6 @@
+#pragma once
+
 #ifdef ENABLE_SHUFFLE
-    #include "shuffle.h"
     #include "uClock.h"
     #define NUMBER_SHUFFLE_PATTERNS 16
 
@@ -17,7 +18,7 @@
                 for (int i = 0 ; i < MAX_SHUFFLE_TEMPLATE_SIZE ; i++) {
                     set_step(i, 0);
                 }
-                update_target();
+                update_target(true);
             }
     
             void set_active(bool active) {
@@ -55,21 +56,21 @@
     
             void set_amount(float amount) {
                 this->amount = amount;
+                if (this->amount > 0.0f)
+                    this->set_active(true);
+                else
+                    this->set_active(false);
             }
             float get_amount() {
                 return amount;
             }
     
-            void update_target() {
+            void update_target(bool force = false) {
                 uClock.setTrackShuffleSize(this->track_number, this->size);
-                if (this->amount == 0.0f) {
-                    uClock.setTrackShuffle(this->track_number, false);
-                } else {
-                    uClock.setTrackShuffle(this->track_number, true);
-                }
+                uClock.setTrackShuffle(this->track_number, this->amount > 0.0f);
                 for (int i = 0 ; i < size ; i++) {
                     int t = (float)step[i] * this->amount;
-                    if (t!=last_sent_step[i]) {
+                    if (force || t!=last_sent_step[i]) {
                         uClock.setTrackShuffleData(this->track_number, i, t);
                         last_sent_step[i] = t;
                     }                

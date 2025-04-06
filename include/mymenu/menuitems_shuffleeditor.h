@@ -12,8 +12,8 @@ class ShufflePatternEditorControl : public MenuItem {
     int selected_step = 0;
     bool editing = false;
 
-    const int SHUFFLE_MINIMUM = -9;
-    const int SHUFFLE_MAXIMUM =  9;
+    const int SHUFFLE_MINIMUM = -12;
+    const int SHUFFLE_MAXIMUM =  12;
 
     public:
         ShufflePatternEditorControl(const char *label, ShufflePatternWrapper *shuffwrapper) : MenuItem(label) {
@@ -66,7 +66,7 @@ class ShufflePatternEditorControl : public MenuItem {
                 this->colours((selected && !opened) || (opened && i==selected_step), shufcolour, this->default_bg);
 
                 //tft->printf("%-1i", shufflewrapper->get_step(i));
-                tft->printf("%1i", abs(shufflewrapper->get_step(i)));
+                tft->printf("%1X", abs(shufflewrapper->get_step(i)));
                 //if (i+1 == shufflewrapper->size / 2)
                 //    tft->println();
                 this->colours(false);

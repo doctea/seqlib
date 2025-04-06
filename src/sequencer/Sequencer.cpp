@@ -5,10 +5,8 @@
 
 #include "menu_messages.h"
 
-//#include "outputs/base_output.h"
-
 #ifdef ENABLE_SHUFFLE
-    #include "shuffle.h"
+    #include "sequencer/shuffle.h"
     ShufflePatternWrapper *shuffle_pattern_wrapper[NUMBER_SHUFFLE_PATTERNS] = {
         new ShufflePatternWrapper(0),
         new ShufflePatternWrapper(1),
@@ -56,7 +54,8 @@ void BaseSequencer::setup_saveable_parameters() {
     if (this->saveable_parameters==nullptr) {
         ISaveableParameterHost::setup_saveable_parameters();
 
-        // todo: setup the saveable parameters for all the Patterns owned by this *Sequencer...
+        // todo: setup saveable parameters for the shuffle patterns
+
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
             Serial.printf("BaseSequencer::setup_saveable_parameters() for pattern [%i/%i]...\n", i+1, number_patterns); Serial.flush();
             BasePattern *p = this->get_pattern(i);
