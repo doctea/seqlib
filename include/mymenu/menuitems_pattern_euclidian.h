@@ -104,18 +104,38 @@ class EuclidianPatternControl : public SubMenuItemBar {
         //int width_per_item = this->tft->width() / (this->items->size() /*+1*/);
         int start_x = tft->width()/2;
         Debug_printf(F("display in SubMenuItemBar got width_per_item=%i\tfrom tftwidth\t%i / itemsize\t%i\n"), width_per_item, this->tft->width(), this->items->size());
+
+        int widget_height = 0;
+
         const uint_fast16_t items_size = this->items->size();
         for (uint_fast16_t item_index = 0 ; item_index < items_size ; item_index++) {
 
             uint_fast16_t column = (item_index-1)%2==1;   // first menu item ('output' should span both columns, s
             if (item_index==0   // first item forced to first column
                 //|| item_index==items_size-1    // last item forced to first column?
-            )
-            column = 0;
+            ) column = 0;
+
+            #ifdef ENABLE_SHUFFLE
+                static const int last_item_index = items_size-2;
+            #else
+                static const int last_item_index = items_size-1;
+            #endif
+            if (item_index >= last_item_index) {
+                column = -1;   // last item forced to first column
+            }
 
             if (column==0)
                 start_x = tft->width()/2;
-            else 
+            else if (column==-1) {
+                // put last items under the circle display
+                if (item_index < items_size-1) {
+                    start_x = 0;
+                    start_y = start_y - widget_height;
+                } else {
+                    start_x = tft->width()/4;
+                    //start_y = start_y - widget_height;
+                }
+            } else 
                 start_x = (tft->width()/2)  + (tft->width()/4);
 
             bool wrap = item_index==0   // first item moves cursor to next row
@@ -137,6 +157,8 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 this->currently_opened==(int)item_index,
                 !opened && selected
             );
+
+            widget_height = temp_y - start_y;
 
             //start_x += width;
             //Serial.printf("for item %i '%s':\tgot column=\t%i, wrap=\t%s => start_x=%i\t, start_y=%i\t((item_index-1)%%2=%i\n", item_index, this->items->get(item_index)->label, column, wrap?"Y":"N", start_x, start_y, (item_index-1)%2);
