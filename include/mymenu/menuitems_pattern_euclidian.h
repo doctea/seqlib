@@ -110,7 +110,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
         const uint_fast16_t items_size = this->items->size();
         for (uint_fast16_t item_index = 0 ; item_index < items_size ; item_index++) {
 
-            uint_fast16_t column = (item_index-1)%2==1;   // first menu item ('output' should span both columns, s
+            int_fast16_t column = (item_index-1)%2==1;   // first menu item ('output' should span both columns, s
             if (item_index==0   // first item forced to first column
                 //|| item_index==items_size-1    // last item forced to first column?
             ) column = 0;
