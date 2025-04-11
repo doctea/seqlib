@@ -490,6 +490,7 @@ class EuclidianSequencer : public BaseSequencer {
 
     };
     virtual void on_step(int step) override {
+        //Serial.printf("EuclidianSequencer::on_step(%i), is_shuffle_enabled()=%i\n", step, is_shuffle_enabled());
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
             #ifdef ENABLE_SHUFFLE
                 if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->patterns[i]->is_shuffled())) {
@@ -520,7 +521,7 @@ class EuclidianSequencer : public BaseSequencer {
 
             for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
                 if (this->patterns[i]->is_shuffled() && this->patterns[i]->get_shuffle_track()==track) {
-                    Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
+                    //Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
                     this->patterns[i]->process_step(step);
                 }
             }

@@ -1,14 +1,14 @@
 #include "sequencer/Sequencer.h"
 #include "sequencer/Patterns.h"
-
 #include "debug.h"
-
 #include "menu_messages.h"
 
 #ifdef ENABLE_SHUFFLE
     #include "sequencer/shuffle.h"
     ShufflePatternWrapper *shuffle_pattern_wrapper[NUMBER_SHUFFLE_PATTERNS] = {
-        new ShufflePatternWrapper(0),
+        new ShufflePatternWrapper(0)
+        #ifdef SHUFFLE_MULTIPLE_TRACKS
+        ,
         new ShufflePatternWrapper(1),
         new ShufflePatternWrapper(2),
         new ShufflePatternWrapper(3),
@@ -24,6 +24,7 @@
         new ShufflePatternWrapper(13),
         new ShufflePatternWrapper(14),
         new ShufflePatternWrapper(15)
+        #endif
     };
 #endif
 
