@@ -218,15 +218,6 @@ class SimplePattern : public BasePattern {
     }
 
     virtual void process_step(int step) override {
-        /*bool debug = false;
-        if (strcmp(this->get_output_label(),"Clap")==0 || strcmp(this->get_output_label(),"Kick")==0) {
-            debug = true;
-        }*/
-        //if (debug) Serial.printf("%s:\tprocess_step(%4i)\t", this->get_output_label(), step);
-        /*if (this->query_note_off_for_step((step-1) % this->get_effective_steps()) && this->note_held) {
-            //Serial.printf("%i: note off for step!");
-            this->trigger_off_for_step(step);
-        }*/
         if (this->query_note_on_for_step(step)) {
             //if (debug) Serial.printf("note on for step! (ticks=%6u)", ticks);
             if (!this->note_held)

@@ -63,14 +63,27 @@ class ShufflePatternEditorControl : public MenuItem {
                 else
                     shufcolour = this->default_fg;
 
-                this->colours((selected && !opened) || (opened && i==selected_step), shufcolour, this->default_bg);
+                this->colours((selected && !opened) || (editing && opened && i==selected_step), shufcolour, this->default_bg);
+
+                if (opened && !editing && i==selected_step) {
+                    // draw a box around the selected step to indicate that we're in editing mode
+                    tft->drawRect(
+                        tft->getCursorX() - 3, 
+                        tft->getCursorY() - 3, 
+                        tft->currentCharacterWidth() + 4, 
+                        tft->getRowHeight() - 4,
+                        shufcolour
+                    );
+                }
 
                 //tft->printf("%-1i", shufflewrapper->get_step(i));
                 tft->printf("%1X", abs(shufflewrapper->get_step(i)));
+
                 //if (i+1 == shufflewrapper->size / 2)
                 //    tft->println();
                 this->colours(false);
-                tft->print(" ");
+                //tft->print(" ");
+                tft->setCursor(tft->getCursorX() + tft->currentCharacterWidth(), tft->getCursorY());
             }
 
             tft->println();
