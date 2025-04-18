@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef FLASHMEM
+    #define FLASHMEM
+#endif
+
 //#include "Config.h"
 
 // todo: move this to build flags or something...

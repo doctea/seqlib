@@ -31,7 +31,9 @@
 void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
     if (index >= (int)this->number_patterns) {
         String message = String("Attempted to configure pattern with invalid index ") + String(index);
-        messages_log_add(message);
+        #ifdef ENABLE_SCREEN
+            messages_log_add(message);
+        #endif
         return;
     }
     SimplePattern *p = this->get_pattern(index);
