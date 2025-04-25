@@ -345,6 +345,9 @@ class EuclidianSequencer : public BaseSequencer {
             add_phrase_to_seed = true;
     //float global_density = 0.6666f;
 
+    bool seed_locked = false;
+    uint32_t last_locked_seed = 0;
+
     public:
     EuclidianSequencer(LinkedList<BaseOutput*> *available_outputs) : BaseSequencer() {
         EuclidianPattern *p = nullptr;
@@ -419,8 +422,19 @@ class EuclidianSequencer : public BaseSequencer {
     void set_add_phrase_enabled(bool v = true) {
         this->add_phrase_to_seed = v;
     }
+
+    bool is_euclidian_seed_lock() {
+        return this->seed_locked;
+    }
+    void set_euclidian_seed_lock(bool v = true) {
+        if (!is_euclidian_seed_lock() && v)
+            this->last_locked_seed = get_euclidian_seed();
+        this->seed_locked = v;
+    }
     
     int get_euclidian_seed() {
+        if (is_euclidian_seed_lock())
+            return this->last_locked_seed;
         return seed + (is_add_phrase_enabled() ? BPM_CURRENT_PHRASE : 0);
     }
     void set_euclidian_seed(int seed) {
