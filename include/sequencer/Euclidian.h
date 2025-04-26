@@ -10,13 +10,12 @@
 #define SEQLIB_MUTATE_EVERY_TICK
 
 #include "debug.h"
-
 #include <LinkedList.h>
-
 #include "Patterns.h"
-
 #include "Sequencer.h"
 #include <bpm.h>
+
+extern const int num_initial_arguments;
 
 class FloatParameter;
 class Menu;
@@ -350,6 +349,7 @@ class EuclidianSequencer : public BaseSequencer {
     uint32_t last_locked_seed = 0;
 
     public:
+    
     EuclidianSequencer(LinkedList<BaseOutput*> *available_outputs) : BaseSequencer() {
         EuclidianPattern *p = nullptr;
         this->patterns = (EuclidianPattern**) CALLOC_FUNC(number_patterns, sizeof(p));

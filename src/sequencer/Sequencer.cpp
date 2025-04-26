@@ -34,6 +34,8 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
         #ifdef ENABLE_SCREEN
             messages_log_add(message);
         #endif
+        Serial.printf("BaseSequencer::configure_pattern_output(%i, %p) gives %s\n", index, output, message.c_str()); 
+        Serial.flush();
         return;
     }
     SimplePattern *p = this->get_pattern(index);
