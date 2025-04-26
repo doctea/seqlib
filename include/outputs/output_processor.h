@@ -122,7 +122,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
 class FullDrumKitMIDIOutputProcessor : public MIDIOutputProcessor {
     public:
         FullDrumKitMIDIOutputProcessor(IMIDINoteAndCCTarget *output_target) : MIDIOutputProcessor(output_target) {
-            this->addDrumNode("Kick",          GM_NOTE_ELECTRIC_BASS_DRUM);
+            this->addDrumNode("Bass",          GM_NOTE_ELECTRIC_BASS_DRUM);
             this->addDrumNode("Stick",         GM_NOTE_SIDE_STICK);
             this->addDrumNode("Clap",          GM_NOTE_HAND_CLAP);
             this->addDrumNode("Snare",         GM_NOTE_ELECTRIC_SNARE);

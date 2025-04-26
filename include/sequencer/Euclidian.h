@@ -44,6 +44,7 @@ class Menu;
 const int LEN = SEQUENCE_LENGTH_STEPS;
     
 struct arguments_t {
+    const char *associated_label = nullptr;
     int_fast8_t steps = SEQUENCE_LENGTH_STEPS;
     int_fast8_t pulses = steps/2;
     int_fast8_t rotation = 1;
@@ -92,7 +93,7 @@ class EuclidianPattern : public SimplePattern {
             //make_euclid();
             // todo: this cause usb_teensy_clocker to crash on initialisation?  because of uninitialised global_density!!
 
-            this->global_density_channel = global_density_channel;
+            this->set_global_density_channel(global_density_channel);
             set_arguments(&default_arguments);
             make_euclid();
         }
@@ -448,11 +449,8 @@ class EuclidianSequencer : public BaseSequencer {
     }
 
     // tell all patterns what their default arguments are
-    void initialise_patterns() {
-        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-            this->patterns[i]->set_default_arguments(&initial_arguments[i]);
-        }
-    }
+    void initialise_patterns();
+
     // reset all patterns to their default parameters, with optional force param to ignore locked status
     void reset_patterns(bool force = false) {
         //if (Serial) Serial.println("reset_patterns!");

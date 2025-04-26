@@ -55,7 +55,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
             this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Duration", pattern, &EuclidianPattern::set_duration,   &EuclidianPattern::get_duration, nullptr, MINIMUM_DURATION, PPQN*BEATS_PER_BAR, true, true));  // minimum duration needs to be 2 , otherwise can end up with note on's getting missed by usb_teensy_clocker!
 
             // choose global density channel to use
-            this->add(new LambdaNumberControl<int8_t> ("Density channel", [=](int8_t v) -> int8_t { pattern->global_density_channel = v; return v; }, [=]() -> int8_t { return pattern->global_density_channel; }, nullptr, 0, NUM_GLOBAL_DENSITY_CHANNELS-1, true, true));
+            this->add(new LambdaNumberControl<int8_t> ("Density channel", [=](int8_t v) -> int8_t { pattern->set_global_density_channel(v); return pattern->get_global_density_channel(); }, [=]() -> int8_t { return pattern->get_global_density_channel(); }, nullptr, 0, NUM_GLOBAL_DENSITY_CHANNELS-1, true, true));
 
             #ifdef ENABLE_SHUFFLE
                 this->add(new LambdaNumberControl<int8_t> (
