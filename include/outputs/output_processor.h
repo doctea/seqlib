@@ -89,6 +89,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
     }
 
     // configure target sequencer to use the output nodes held by this OutputProcessor
+    // requires patterns and nodes to have already been created?
     FLASHMEM
     virtual void configure_sequencer(BaseSequencer *sequencer) {
         #ifdef DEBUG_ENVELOPES

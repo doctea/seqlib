@@ -38,7 +38,12 @@
 
             bool found_assignment = false;
             for (int args = 0 ; i < num_initial_arguments ; args++) {
-                if (this->patterns[i]->get_output()->matches_label(initial_arguments[i].associated_label)) {
+                BaseOutput *output = this->patterns[i]->get_output();
+                if (output == nullptr) {
+                    Serial.printf("initialise_patterns for pattern[% 2i]: no output assigned\n", i);
+                    continue;
+                }
+                if (output->matches_label(initial_arguments[i].associated_label)) {
                     Serial.printf("initialise_patterns for pattern[% 2i]: found initial_arguments[% 2i] with matching label %s\n", i, args, initial_arguments[i].associated_label);
                     this->patterns[i]->set_default_arguments(&initial_arguments[i]);
                     found_assignment = true;

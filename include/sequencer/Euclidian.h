@@ -349,6 +349,7 @@ class EuclidianSequencer : public BaseSequencer {
     uint32_t last_locked_seed = 0;
 
     public:
+    
     EuclidianSequencer(LinkedList<BaseOutput*> *available_outputs) : BaseSequencer() {
         EuclidianPattern *p = nullptr;
         this->patterns = (EuclidianPattern**) CALLOC_FUNC(number_patterns, sizeof(p));
