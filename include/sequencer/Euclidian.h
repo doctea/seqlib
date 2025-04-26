@@ -10,13 +10,12 @@
 #define SEQLIB_MUTATE_EVERY_TICK
 
 #include "debug.h"
-
 #include <LinkedList.h>
-
 #include "Patterns.h"
-
 #include "Sequencer.h"
 #include <bpm.h>
+
+extern const int num_initial_arguments;
 
 class FloatParameter;
 class Menu;
@@ -44,6 +43,7 @@ class Menu;
 const int LEN = SEQUENCE_LENGTH_STEPS;
     
 struct arguments_t {
+    const char *associated_label = nullptr;
     int_fast8_t steps = SEQUENCE_LENGTH_STEPS;
     int_fast8_t pulses = steps/2;
     int_fast8_t rotation = 1;
@@ -448,11 +448,7 @@ class EuclidianSequencer : public BaseSequencer {
     }
 
     // tell all patterns what their default arguments are
-    void initialise_patterns() {
-        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-            this->patterns[i]->set_default_arguments(&initial_arguments[i]);
-        }
-    }
+    void initialise_patterns();
     // reset all patterns to their default parameters, with optional force param to ignore locked status
     void reset_patterns(bool force = false) {
         //if (Serial) Serial.println("reset_patterns!");
