@@ -8,27 +8,78 @@
 
 #ifdef ENABLE_EUCLIDIAN
     arguments_t initial_arguments[] = {
-        { LEN,    4, 1,   DEFAULT_DURATION }, //, TRIGGER_KICK },// get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM) },    // kick
-        { LEN,    5, 1,   DEFAULT_DURATION }, //, TRIGGER_SIDESTICK }, //get_trigger_for_pitch(GM_NOTE_SIDE_STICK) },    // stick
-        { LEN,    2, 5,   DEFAULT_DURATION }, //, TRIGGER_CLAP }, //get_trigger_for_pitch(GM_NOTE_HAND_CLAP) },    // clap
-        { LEN,    3, 5,   DEFAULT_DURATION }, //, TRIGGER_SNARE }, //get_trigger_for_pitch(GM_NOTE_ELECTRIC_SNARE) },   // snare
-        { LEN,    3, 3,   DEFAULT_DURATION }, //, TRIGGER_CRASH_1 }, //get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_1) },    // crash 1
-        { LEN,    7, 1,   DEFAULT_DURATION }, //, TRIGGER_TAMB }, //get_trigger_for_pitch(GM_NOTE_TAMBOURINE) },    // tamb
-        { LEN,    9, 1,   DEFAULT_DURATION }, //, TRIGGER_HITOM }, //get_trigger_for_pitch(GM_NOTE_HIGH_TOM) },    // hi tom!
-        { LEN/4,  2, 3,   DEFAULT_DURATION }, //, TRIGGER_LOTOM }, //get_trigger_for_pitch(GM_NOTE_LOW_TOM) },    // low tom
-        { LEN/2,  2, 3,   DEFAULT_DURATION }, //, TRIGGER_PEDALHAT }, //get_trigger_for_pitch(GM_NOTE_PEDAL_HI_HAT) },    // pedal hat
-        { LEN,    4, 3,   DEFAULT_DURATION }, //, TRIGGER_OPENHAT }, //get_trigger_for_pitch(GM_NOTE_OPEN_HI_HAT) },    // open hat
-        { LEN,    16, 0,  DEFAULT_DURATION }, //, TRIGGER_CLOSEDHAT }, //get_trigger_for_pitch(GM_NOTE_CLOSED_HI_HAT) }, //DEFAULT_DURATION },   // closed hat
-        { LEN*2,  1, 1,   DEFAULT_DURATION_ENVELOPES }, //, TRIGGER_CRASH_2 }, //get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_2) },   // crash 2
-        { LEN*2,  1, 5,   DEFAULT_DURATION_ENVELOPES }, //, TRIGGER_SPLASH }, //get_trigger_for_pitch(GM_NOTE_SPLASH_CYMBAL) },   // splash
-        { LEN*2,  1, 9,   DEFAULT_DURATION_ENVELOPES }, //, TRIGGER_VIBRA }, //get_trigger_for_pitch(GM_NOTE_VIBRA_SLAP) },    // vibra
-        { LEN*2,  1, 13,  DEFAULT_DURATION_ENVELOPES }, //, TRIGGER_RIDE_BELL }, //get_trigger_for_pitch(GM_NOTE_RIDE_BELL) },   // bell
-        { LEN*2,  5, 13,  DEFAULT_DURATION_ENVELOPES }, //, TRIGGER_RIDE_CYM }, //get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1) },   // cymbal
-        { LEN,    4, 3,   2 }, //, PATTERN_BASS, 6 },  // bass (neutron) offbeat with 6ie of 6
-        { LEN,    4, 3,   1 }, //, PATTERN_MELODY }, //NUM_TRIGGERS+NUM_ENVELOPES },  // melody as above
-        { LEN,    4, 1,   4 }, //, PATTERN_PAD_ROOT }, // root pad
-        { LEN,    4, 5,   4 } //,   PATTERN_PAD_PITCH); // root pad
+        { "Kick",       LEN,    4, 1,   DEFAULT_DURATION }, //, TRIGGER_KICK },// get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM) },    // kick
+        { "Stick",      LEN,    5, 1,   DEFAULT_DURATION }, //, TRIGGER_SIDESTICK }, //get_trigger_for_pitch(GM_NOTE_SIDE_STICK) },    // stick
+        { "Clap",       LEN,    2, 5,   DEFAULT_DURATION }, //, TRIGGER_CLAP }, //get_trigger_for_pitch(GM_NOTE_HAND_CLAP) },    // clap
+        { "Snare",      LEN,    3, 5,   DEFAULT_DURATION }, //, TRIGGER_SNARE }, //get_trigger_for_pitch(GM_NOTE_ELECTRIC_SNARE) },   // snare
+        { "Cymbal 1",   LEN,    3, 3,   DEFAULT_DURATION }, //, TRIGGER_CRASH_1 }, //get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_1) },    // crash 1
+        { "Tamb",       LEN,    7, 1,   DEFAULT_DURATION }, //, TRIGGER_TAMB }, //get_trigger_for_pitch(GM_NOTE_TAMBOURINE) },    // tamb
+        { "HiTom",      LEN,    9, 1,   DEFAULT_DURATION }, //, TRIGGER_HITOM }, //get_trigger_for_pitch(GM_NOTE_HIGH_TOM) },    // hi tom!
+        { "LoTom",      LEN/4,  2, 3,   DEFAULT_DURATION }, //, TRIGGER_LOTOM }, //get_trigger_for_pitch(GM_NOTE_LOW_TOM) },    // low tom
+        { "PHH",        LEN/2,  2, 3,   DEFAULT_DURATION }, //, TRIGGER_PEDALHAT }, //get_trigger_for_pitch(GM_NOTE_PEDAL_HI_HAT) },    // pedal hat
+        { "OHH",        LEN,    4, 3,   DEFAULT_DURATION }, //, TRIGGER_OPENHAT }, //get_trigger_for_pitch(GM_NOTE_OPEN_HI_HAT) },    // open hat
+        { "CHH",        LEN,    16, 0,  DEFAULT_DURATION }, //, TRIGGER_CLOSEDHAT }, //get_trigger_for_pitch(GM_NOTE_CLOSED_HI_HAT) }, //DEFAULT_DURATION },   // closed hat
+        { "Cymbal 2",   LEN*2,  1, 1,   DEFAULT_DURATION_ENVELOPES }, //, TRIGGER_CRASH_2 }, //get_trigger_for_pitch(GM_NOTE_CRASH_CYMBAL_2) },   // crash 2
+        { "Splash",     LEN*2,  1, 5,   DEFAULT_DURATION_ENVELOPES }, //, TRIGGER_SPLASH }, //get_trigger_for_pitch(GM_NOTE_SPLASH_CYMBAL) },   // splash
+        { "Vibra",      LEN*2,  1, 9,   DEFAULT_DURATION_ENVELOPES }, //, TRIGGER_VIBRA }, //get_trigger_for_pitch(GM_NOTE_VIBRA_SLAP) },    // vibra
+        { "Ride Bell",  LEN*2,  1, 13,  DEFAULT_DURATION_ENVELOPES }, //, TRIGGER_RIDE_BELL }, //get_trigger_for_pitch(GM_NOTE_RIDE_BELL) },   // bell
+        { "Ride Cymbal",LEN*2,  5, 13,  DEFAULT_DURATION_ENVELOPES }, //, TRIGGER_RIDE_CYM }, //get_trigger_for_pitch(GM_NOTE_RIDE_CYMBAL_1) },   // cymbal
+        { "Bass",       LEN,    4, 3,   2 }, //, PATTERN_BASS, 6 },  // bass (neutron) offbeat with 6ie of 6
+        { "Misc8",      LEN,    4, 3,   1 }, //, PATTERN_MELODY }, //NUM_TRIGGERS+NUM_ENVELOPES },  // melody as above
+        { "Misc9",      LEN,    4, 1,   4 }, //, PATTERN_PAD_ROOT }, // root pad
+        { "Misc1",      LEN,    4, 5,   4 } //,   PATTERN_PAD_PITCH); // root pad
     };
+
+    const int num_initial_arguments = sizeof(initial_arguments)/sizeof(arguments_t);
+
+    void EuclidianSequencer::initialise_patterns() {
+        if (this->debug) Serial.printf("initialise_patterns() for %i patterns\n", this->number_patterns);
+        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+            // assign appropriate default arguments to each pattern based on their labels in the initial_arguments array
+
+            if (this->debug) Serial.printf("initialise_patterns for pattern[% 2i/% 2i]...\n", i+1, this->number_patterns);
+
+            bool found_assignment = false;
+            for (int args = 0 ; args < num_initial_arguments ; args++) {
+                if (this->patterns[i]==nullptr) {
+                    if (this->debug) {
+                        Serial.printf("\tWARNING: initialise_patterns for pattern[% 2i]: null pattern!\n", i);
+                        Serial.flush();
+                    }
+                    continue;
+                }
+                BaseOutput *output = this->patterns[i]->get_output();
+                if (output == nullptr) {
+                    Serial.printf("\tWARNING: initialise_patterns for pattern[% 2i]: no output assigned to pattern\n", i);
+                    Serial.flush();
+                    continue;
+                }
+                if (output->matches_label(initial_arguments[args].associated_label)) {
+                    if (this->debug) {
+                        Serial.printf("\tinitialise_patterns for pattern[% 2i]: found initial_arguments[% 2i] with label '%s' matched output label '%s'\n", i, args, initial_arguments[i].associated_label, output->label);
+                        Serial.flush();
+                    }
+                    this->patterns[i]->set_default_arguments(&initial_arguments[args]);
+                    found_assignment = true;
+                    break;
+                }
+            }
+
+            if (!found_assignment) {
+                Serial.printf("WARNING: initialise_patterns for pattern[% 2i]: no matching label found in initial_arguments[]\n", i);
+                // todo: maybe we should assign the corresponding default arguments to the pattern here?
+            }
+
+            if (this->debug) Serial.flush();
+            
+            //this->patterns[i]->set_default_arguments(&initial_arguments[i]);  // original straight 1-to-1 assignment
+        }
+
+        if (this->debug) { 
+            Serial.printf("Exiting initialise_patterns() for %i patterns\n", this->number_patterns);
+            Serial.flush();
+        }
+    }
 #endif
 
 float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
