@@ -354,9 +354,11 @@ class EuclidianSequencer : public BaseSequencer {
         EuclidianPattern *p = nullptr;
         if (number_patterns > 0) {
             this->number_patterns = number_patterns;
-        }
+        } else if (number_patterns == -1) {
+            number_patterns = this->number_patterns;
+        } 
         this->patterns = (EuclidianPattern**) CALLOC_FUNC(number_patterns, sizeof(p));
-        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+        for (int_fast8_t i = 0 ; i < number_patterns ; i++) {
             if (this->debug && Serial) {
                 Serial.printf("EuclidianSequencer constructor creating EuclidianPattern %i; available_outputs is @%p (size %i)\n", i, available_outputs, available_outputs->size()); 
                 Serial.flush();
