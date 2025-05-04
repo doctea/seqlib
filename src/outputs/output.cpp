@@ -82,7 +82,7 @@ MIDIOutputProcessor *output_processor = nullptr;
 //FLASHMEM
 void setup_output(IMIDINoteAndCCTarget *output_target) {
     if (Serial) { Serial.println("setup_output.."); Serial_flush(); }
-    output_processor = new MIDIOutputProcessor(output_target);     // todo: set this up dynamically, probably reading from a config file
+    output_processor = new FullDrumKitMIDIOutputProcessor(output_target);     // todo: set this up dynamically, probably reading from a config file
     if (Serial) { Serial.println("exiting setup_output"); Serial_flush(); }
 }
 
