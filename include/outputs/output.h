@@ -97,6 +97,8 @@ class MIDIBaseOutput : public BaseOutput {
         }
     }
     virtual void process() override {
+        BaseOutput::process();
+
         if (should_go_off()) {
             int8_t note_number = get_last_note_number();
             Debug_printf("\t\tgoes off note\t%i\t(%s), ", note_number, get_note_name_c(note_number));
@@ -116,7 +118,7 @@ class MIDIBaseOutput : public BaseOutput {
                 Debug_printf("\t\tMIDIBaseOutput#process: goes on note\t%i\t(%s) \n", note_number, get_note_name_c(note_number));
                 set_last_note_number(note_number);
                 output_wrapper->sendNoteOn(note_number, MIDI_MAX_VELOCITY, get_channel());
-                //this->went_on();
+                this->has_gone_on = true;
             }
             //count += i;
         }
@@ -195,7 +197,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 this->start_count_at = start_count_at;
                 this->finish_count_at = finish_count_at;
                 if (this->finish_count_at==-1)
-                    this->finish_count_at = this->nodes->size();
+                    this->finish_count_at = this->nodes->size()-1;
             }
 
             //int note_mode = 0;
@@ -209,17 +211,25 @@ class MIDIDrumOutput : public MIDIBaseOutput {
 
             // get the number of outputs that are also triggering this step
             virtual int_fast8_t get_note_number_count() {
-                // count all the triggering notes and add that value ot the root note
+                // count all the triggering notes and add that value to the root note
                 // then quantise according to selected scale to get final note number
                 int count = 0;
+                int number_of_active_nodes = 0;
                 int_fast16_t size = this->nodes->size();
+                //Serial.printf("get_note_number_count in MIDINoteTriggerCountOutput: size is %i, start_count_at is %i, finish_count_at is %i\n", size, start_count_at, finish_count_at);
                 for (int_fast16_t i = start_count_at ; i < finish_count_at+1 && i < size ; i++) {
                     BaseOutput *o = this->nodes->get(i);
                     if (o==nullptr) continue;
                     if (o==this) continue;
-                    count += o->should_go_on() ? (i%12) : 0;
+                    count += o->has_gone_on_this_time() ? (i%12) : 0;
+                    if (o->has_gone_on_this_time()) {
+                        //Serial.printf("get_note_number_count in MIDINoteTriggerCountOutput: %i\t%s\tis active\n", i, o->label);
+                        number_of_active_nodes++;
+                    } else {
+                        //Serial.printf("get_note_number_count in MIDINoteTriggerCountOutput: %i\t%s\tnot active\n", i, o->label);
+                    }
                 }
-                Debug_printf("get_note_number in MIDINoteTriggerCountOutput is %i\n", count);
+                Debug_printf("get_note_number_count in MIDINoteTriggerCountOutput is %i\n", count);
                 //return base_note + quantise_pitch_to_scale(count);
 
                 // test mode, increment over 2 octaves to test scale quantisation

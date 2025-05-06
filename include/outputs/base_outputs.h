@@ -18,6 +18,7 @@ class FloatParameter;
 class BaseOutput : public ISequencerEventReceiver {
     public:
     bool enabled = true;
+    bool has_gone_on = false;
 
     char label[MAX_LABEL];
     BaseOutput (const char *label) {
@@ -33,11 +34,16 @@ class BaseOutput : public ISequencerEventReceiver {
         return strcmp(compare, this->label)==0;
     }
 
+    virtual bool has_gone_on_this_time() {
+        return this->has_gone_on;
+    }
     virtual bool should_go_on() = 0;
     virtual bool should_go_off() = 0;
 
     virtual void stop() {};
-    virtual void process() {};
+    virtual void process() {
+        this->has_gone_on = false;
+    };
 
     virtual void loop() {};
 

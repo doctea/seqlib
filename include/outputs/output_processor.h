@@ -186,15 +186,26 @@ class FullDrumKitMIDIOutputProcessor : public MIDIOutputProcessor {
                 this->addDrumNode("Vibra",         GM_NOTE_VIBRA_SLAP);     // todo: turn these into something like an EnvelopeOutput?
                 this->addDrumNode("Ride Bell",     GM_NOTE_RIDE_BELL);      // todo: turn these into something like an EnvelopeOutput?
                 this->addDrumNode("Ride Cymbal",   GM_NOTE_RIDE_CYMBAL_1);  // todo: turn these into something like an EnvelopeOutput?
-            #endif
-    
-            #ifdef ENABLE_SCALES
-                this->addNode(new MIDINoteTriggerCountOutput("Bass", this->nodes, output_target));
-                //this->nodes->get(this->nodes->size()-1)->disabled = false;
-                //this->nodes->get(0)->is_ = false;
-            #endif
+            #endif 
         }
 };
+
+#ifdef ENABLE_SCALES
+    #include "scales.h"
+    class FullDrumKitAndBassMIDIOutputProcessor : public FullDrumKitMIDIOutputProcessor {
+        public:
+            FullDrumKitAndBassMIDIOutputProcessor(IMIDINoteAndCCTarget *output_target) : FullDrumKitMIDIOutputProcessor(output_target) {
+                this->addNode(
+                    new MIDINoteTriggerCountOutput(
+                        "Bass", 
+                        this->nodes, 
+                        output_target, 
+                        1
+                    )
+                );
+            }
+    };
+#endif
 
 
 void setup_output(IMIDINoteAndCCTarget *output_target);
