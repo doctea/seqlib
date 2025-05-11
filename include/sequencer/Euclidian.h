@@ -544,7 +544,7 @@ class EuclidianSequencer : public BaseSequencer {
 
             for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
                 if (this->patterns[i]->is_shuffled() && this->patterns[i]->get_shuffle_track()==track) {
-                    //Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
+                    if (Serial) Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
                     this->patterns[i]->process_step(step);
                 }
             }

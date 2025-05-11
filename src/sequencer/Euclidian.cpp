@@ -105,6 +105,21 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
             
         parameters = new LinkedList<FloatParameter*>();
 
+        #ifdef ENABLE_SHUFFLE
+            for (int i = 0 ; i < NUMBER_SHUFFLE_PATTERNS ; i++) {
+                parameters->add(new LDataParameter<float>(
+                    (String("Shuffle amount ") + String(i)).c_str(),
+                    [=] (float v) { 
+                        shuffle_pattern_wrapper[i]->set_amount(v); 
+                        shuffle_pattern_wrapper[i]->update_target();
+                    },
+                    [=] () -> float { return shuffle_pattern_wrapper[i]->get_amount(); },
+                    0.0f,
+                    1.0f
+                ));
+            }
+        #endif
+
         // todo: unsure what this comment originally meant?!.... store these in the object, create a page for the local-only ones
 
         // multiple global density parameters
