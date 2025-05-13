@@ -38,6 +38,7 @@
                 for (int i = 0 ; i < size ; i++) {
                     set_step(i, steps[i]);
                 }
+                this->size = size;
                 update_target();
             }
             void set_step(int8_t step_number, int8_t value) {
@@ -145,12 +146,17 @@
                 return amount;
             }
     
+            int8_t last_sent_size = -1;
             void update_target(bool force = false) {
-                uClock.setTrackShuffleSize(track_number, this->size);
+                if (force || last_sent_size != size) {
+                    uClock.setTrackShuffleSize(track_number, this->size);
+                    this->last_sent_size = size;
+                }
                 uClock.setTrackShuffle(track_number, this->amount < 0.01f || this->amount > 0.01f);
                 for (int i = 0 ; i < size ; i++) {
                     int t = (float)step[i] * this->amount;
                     if (force || t!=last_sent_step[i]) {
+                        //if (Serial) Serial.printf("setTrackShuffleData(%i, %i, %i)\n", track_number, i, t);
                         uClock.setTrackShuffleData(track_number, i, t);
                         last_sent_step[i] = t;
                     }                
