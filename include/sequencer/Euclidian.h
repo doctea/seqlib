@@ -517,7 +517,7 @@ class EuclidianSequencer : public BaseSequencer {
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
             #ifdef ENABLE_SHUFFLE
                 if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->patterns[i]->is_shuffled())) {
-                    //Serial.printf("at tick %i, received on_step(%i, %i) callback for non-shuffled pattern\n", ticks, step, i);
+                    //if (Serial) Serial.printf("at tick %i, received on_step(%i, %i) callback for non-shuffled pattern\n", ticks, step, i);
                     this->patterns[i]->process_step(step);
                 }
             #else
@@ -544,7 +544,7 @@ class EuclidianSequencer : public BaseSequencer {
 
             for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
                 if (this->patterns[i]->is_shuffled() && this->patterns[i]->get_shuffle_track()==track) {
-                    if (Serial) Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
+                    //if (Serial) Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
                     this->patterns[i]->process_step(step);
                 }
             }
