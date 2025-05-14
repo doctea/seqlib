@@ -504,9 +504,10 @@ class EuclidianSequencer : public BaseSequencer {
         if (is_bpm_on_sixteenth(tick)) {
             //this->on_step(this->get_step_for_tick(tick));
             this->on_step(tick / TICKS_PER_STEP);
-        } /*else if (is_bpm_on_sixteenth(tick,1)) {
-            this->on_step_end(tick / (PPQN/STEPS_PER_BEAT));
-        }*/
+        } else if (is_bpm_on_sixteenth(tick,1)) {
+            // this re-enabled 2025-05-14 for Compulidean -- if usb_teensy_clocker/Microlidian start playing up then this might be the reason?
+            this->on_step_end(tick / TICKS_PER_STEP); //(PPQN/STEPS_PER_BEAT));
+        }
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
             this->patterns[i]->process_tick(tick);
         }

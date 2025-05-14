@@ -103,13 +103,14 @@
             }
     
             void set_active(bool active) {
-                uClock.setTrackShuffle(track_number, active);
+                uClock.setShuffle(active);
             }
             bool is_active() {
-                return uClock.isTrackShuffled(track_number);
+                return uClock.isShuffled();
             }
     
             void set_steps(int8_t *steps, int8_t size) {
+                this->size = size;
                 for (int i = 0 ; i < size ; i++) {
                     set_step(i, steps[i]);
                 }
@@ -137,7 +138,7 @@
     
             void set_amount(float amount) {
                 this->amount = amount;
-                if (this->amount > 0.0f)
+                if (this->amount < 0.0f || this->amount > 0.0f)
                     this->set_active(true);
                 else
                     this->set_active(false);
@@ -149,15 +150,15 @@
             int8_t last_sent_size = -1;
             void update_target(bool force = false) {
                 if (force || last_sent_size != size) {
-                    uClock.setTrackShuffleSize(track_number, this->size);
+                    uClock.setShuffleSize(this->size);
                     this->last_sent_size = size;
                 }
-                uClock.setTrackShuffle(track_number, this->amount < 0.01f || this->amount > 0.01f);
+                uClock.setShuffle(this->amount < 0.01f || this->amount > 0.01f);
                 for (int i = 0 ; i < size ; i++) {
                     int t = (float)step[i] * this->amount;
                     if (force || t!=last_sent_step[i]) {
                         //if (Serial) Serial.printf("setTrackShuffleData(%i, %i, %i)\n", track_number, i, t);
-                        uClock.setTrackShuffleData(track_number, i, t);
+                        uClock.setShuffleData(i, t);
                         last_sent_step[i] = t;
                     }                
                 }

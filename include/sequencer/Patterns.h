@@ -128,16 +128,14 @@ class BasePattern {
             return this->shuffle_track;
         }
         virtual int8_t get_shuffle_length() {
-            #ifdef ENABLE_SHUFFLE
-                if (this->is_shuffled())
-                    #ifdef SHUFFLE_MULTIPLE_TRACKS
-                        return uClock.getTrackShuffleLength(this->get_shuffle_track());
-                    #else
-                        return uClock.getShuffleLength();
-                    #endif
-                else
-            #endif
-            return 0;
+            if (this->is_shuffled())
+                #ifdef SHUFFLE_MULTIPLE_TRACKS
+                    return uClock.getTrackShuffleLength(this->get_shuffle_track());
+                #else
+                    return uClock.getShuffleLength();
+                #endif
+            else
+                return 0;
         }
     #endif
 

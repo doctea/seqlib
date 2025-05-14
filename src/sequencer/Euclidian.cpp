@@ -110,11 +110,14 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
                 parameters->add(new LDataParameter<float>(
                     (String("Shuffle amount ") + String(i)).c_str(),
                     [=] (float v) { 
-                        shuffle_pattern_wrapper[i]->set_amount(v); 
-                        shuffle_pattern_wrapper[i]->update_target();
+                        //if (Serial) Serial.printf("Shuffle amount %i set to %f\n", i, v);
+                        //ATOMIC() {
+                            shuffle_pattern_wrapper[i]->set_amount(v); 
+                            shuffle_pattern_wrapper[i]->update_target();
+                        //}
                     },
                     [=] () -> float { return shuffle_pattern_wrapper[i]->get_amount(); },
-                    0.0f,
+                    -1.0f,
                     1.0f
                 ));
             }
@@ -171,49 +174,51 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
 
         BasePattern::getParameters(i);
 
-        char label[MENU_C_MAX];
-        snprintf(label, MENU_C_MAX, "Pattern %i steps", i);
-        parameters->add(
-            new ProxyParameter<int>(
-                label, 
-                &this->arguments.steps,
-                &this->used_arguments.steps,
-                1, 
-                this->maximum_steps
-            ));
+        #ifndef SEQLIB_DISABLE_PATTERN_EUCLIDIAN_PARAMETERS
+            char label[MENU_C_MAX];
+            snprintf(label, MENU_C_MAX, "Pattern %i steps", i);
+            parameters->add(
+                new ProxyParameter<int>(
+                    label, 
+                    &this->arguments.steps,
+                    &this->used_arguments.steps,
+                    1, 
+                    this->maximum_steps
+                ));
 
-        snprintf(label, MENU_C_MAX, "Pattern %i pulses", i);
-        parameters->add(
-            new ProxyParameter<int>(
-                label,
-                &this->arguments.pulses,
-                &this->used_arguments.pulses,
-                0,
-                this->maximum_steps
-            )
-        );
+            snprintf(label, MENU_C_MAX, "Pattern %i pulses", i);
+            parameters->add(
+                new ProxyParameter<int>(
+                    label,
+                    &this->arguments.pulses,
+                    &this->used_arguments.pulses,
+                    0,
+                    this->maximum_steps
+                )
+            );
 
-        snprintf(label, MENU_C_MAX, "Pattern %i rotation", i);
-        parameters->add(
-            new ProxyParameter<int>(
-                label,
-                &this->arguments.rotation,
-                &this->used_arguments.rotation,
-                1,
-                this->maximum_steps
-            )
-        );
+            snprintf(label, MENU_C_MAX, "Pattern %i rotation", i);
+            parameters->add(
+                new ProxyParameter<int>(
+                    label,
+                    &this->arguments.rotation,
+                    &this->used_arguments.rotation,
+                    1,
+                    this->maximum_steps
+                )
+            );
 
-        snprintf(label, MENU_C_MAX, "Pattern %i duration", i);
-        parameters->add(
-            new ProxyParameter<int>(
-                label,
-                &this->arguments.duration,
-                &this->used_arguments.duration,
-                1,
-                PPQN * 4
-            )
-        );
+            snprintf(label, MENU_C_MAX, "Pattern %i duration", i);
+            parameters->add(
+                new ProxyParameter<int>(
+                    label,
+                    &this->arguments.duration,
+                    &this->used_arguments.duration,
+                    1,
+                    PPQN * 4
+                )
+            );
+        #endif
 
         parameter_manager->addParameters(parameters);
 
