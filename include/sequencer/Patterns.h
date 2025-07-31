@@ -118,22 +118,14 @@ class BasePattern {
             this->shuffle_track = v;
         }
         virtual bool is_shuffled() {
-            #ifdef SHUFFLE_MULTIPLE_TRACKS
-                return uClock.isTrackShuffled(this->shuffle_track);
-            #else
-                return uClock.isShuffled();
-            #endif
+            return uClock.isShuffled(this->get_shuffle_track());
         }
         virtual uint8_t get_shuffle_track() {
             return this->shuffle_track;
         }
         virtual int8_t get_shuffle_length() {
             if (this->is_shuffled())
-                #ifdef SHUFFLE_MULTIPLE_TRACKS
-                    return uClock.getTrackShuffleLength(this->get_shuffle_track());
-                #else
-                    return uClock.getShuffleLength();
-                #endif
+                return uClock.getShuffleLength(this->get_shuffle_track());
             else
                 return 0;
         }
