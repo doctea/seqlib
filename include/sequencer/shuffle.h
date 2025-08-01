@@ -3,8 +3,9 @@
 #ifdef ENABLE_SHUFFLE
     #include "uClock.h"
 
-    #define NUMBER_SHUFFLE_PATTERNS 16
-
+    #ifndef NUMBER_SHUFFLE_PATTERNS
+        #define NUMBER_SHUFFLE_PATTERNS 1
+    #endif
     class ShufflePatternWrapper {
         public:
             int8_t track_number = 0;
@@ -30,10 +31,10 @@
             }
     
             void set_steps(int8_t *steps, int8_t size) {
+                this->size = size;
                 for (int i = 0 ; i < size ; i++) {
                     set_step(i, steps[i]);
                 }
-                this->size = size;
                 update_target();
             }
             void set_step(int8_t step_number, int8_t value) {
@@ -58,7 +59,7 @@
     
             void set_amount(float amount) {
                 this->amount = amount;
-                if (this->amount > 0.0f)
+                if (this->amount < 0.0f || this->amount > 0.0f)
                     this->set_active(true);
                 else
                     this->set_active(false);
@@ -67,12 +68,17 @@
                 return amount;
             }
     
+            int8_t last_sent_size = -1;
             void update_target(bool force = false) {
-                uClock.setShuffleSize(this->size, this->track_number);
-                uClock.setShuffle(this->amount > 0.0f, this->track_number);
+                if (force || last_sent_size != size) {
+                    uClock.setShuffleSize(this->size, this->track_number);
+                    this->last_sent_size = size;
+                }
+                uClock.setShuffle(this->amount < 0.01f || this->amount > 0.01f, this->track_number);
                 for (int i = 0 ; i < size ; i++) {
                     int t = (float)step[i] * this->amount;
                     if (force || t!=last_sent_step[i]) {
+                        //if (Serial) Serial.printf("setTrackShuffleData(%i, %i, %i)\n", track_number, i, t);
                         uClock.setShuffleData(i, t, this->track_number);
                         last_sent_step[i] = t;
                     }                
@@ -80,6 +86,38 @@
             }
     };
     
-    extern ShufflePatternWrapper *shuffle_pattern_wrapper[NUMBER_SHUFFLE_PATTERNS];
+    class ShufflePatternWrapperManager {
+        public:
+            typedef ShufflePatternWrapper* ShufflePatternWrapperPtr;
+            ShufflePatternWrapperPtr *shuffle_patterns = nullptr;
+
+            size_t number_shuffle_wrappers = 0;
+            size_t getCount() {
+                return number_shuffle_wrappers;
+            }
+
+            ShufflePatternWrapperManager(int number_shuffle_wrappers) {
+                this->number_shuffle_wrappers = number_shuffle_wrappers;
+
+                this->shuffle_patterns = new ShufflePatternWrapperPtr[number_shuffle_wrappers];
+                for (int i = 0 ; i < number_shuffle_wrappers ; i++) {
+                    shuffle_patterns[i] = new ShufflePatternWrapper(i);
+                }
+            }
+
+            ~ShufflePatternWrapperManager() {
+                for (int i = 0 ; i < number_shuffle_wrappers ; i++) {
+                    delete shuffle_patterns[i];
+                }
+            }
+
+            ShufflePatternWrapper* operator[](size_t index) {
+                if (index < 0 || index >= number_shuffle_wrappers) {
+                    return nullptr;
+                }
+                return shuffle_patterns[index];
+            }
+    };
+    extern ShufflePatternWrapperManager shuffle_pattern_wrapper;
     
 #endif

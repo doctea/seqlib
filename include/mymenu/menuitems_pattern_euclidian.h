@@ -2,6 +2,8 @@
 #define ENABLE_STEP_DISPLAYS
 #define ENABLE_OTHER_CONTROLS
 
+#ifdef ENABLE_SCREEN
+
 #include "submenuitem_bar.h"
 
 #include "mymenu/menuitems_sequencer.h"
@@ -62,7 +64,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
                     "Shuffle #", 
                     [=](int8_t track) -> void { pattern->set_shuffle_track(track); }, 
                     [=]() -> int8_t { return pattern->get_shuffle_track(); },
-                    nullptr, 0, NUMBER_SHUFFLE_PATTERNS-1, true, true
+                    nullptr, 0, shuffle_pattern_wrapper.getCount()-1, true, true
                 ));
             #endif
             
@@ -184,3 +186,5 @@ class EuclidianPatternControl : public SubMenuItemBar {
             return this->tft->width() / 4;
     }
 };
+
+#endif

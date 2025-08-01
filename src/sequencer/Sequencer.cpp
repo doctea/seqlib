@@ -5,24 +5,7 @@
 
 #ifdef ENABLE_SHUFFLE
     #include "sequencer/shuffle.h"
-    ShufflePatternWrapper *shuffle_pattern_wrapper[NUMBER_SHUFFLE_PATTERNS] = {
-        new ShufflePatternWrapper(0),
-        new ShufflePatternWrapper(1),
-        new ShufflePatternWrapper(2),
-        new ShufflePatternWrapper(3),
-        new ShufflePatternWrapper(4),
-        new ShufflePatternWrapper(5),
-        new ShufflePatternWrapper(6),
-        new ShufflePatternWrapper(7),
-        new ShufflePatternWrapper(8),
-        new ShufflePatternWrapper(9),
-        new ShufflePatternWrapper(10),
-        new ShufflePatternWrapper(11),
-        new ShufflePatternWrapper(12),
-        new ShufflePatternWrapper(13),
-        new ShufflePatternWrapper(14),
-        new ShufflePatternWrapper(15)
-    };
+    ShufflePatternWrapperManager shuffle_pattern_wrapper(NUMBER_SHUFFLE_PATTERNS);
 #endif
 
 void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
@@ -31,8 +14,10 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
         #ifdef ENABLE_SCREEN
             messages_log_add(message);
         #endif
-        Serial.printf("BaseSequencer::configure_pattern_output(%i, %p) gives %s\n", index, output, message.c_str()); 
-        Serial.flush();
+        if (Serial) {
+            Serial.printf("BaseSequencer::configure_pattern_output(%i, %p) gives %s\n", index, output, message.c_str()); 
+            Serial.flush();
+        }
         return;
     }
     SimplePattern *p = this->get_pattern(index);
