@@ -106,7 +106,7 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
         parameters = new LinkedList<FloatParameter*>();
 
         #ifdef ENABLE_SHUFFLE
-            for (int i = 0 ; i < NUMBER_SHUFFLE_PATTERNS ; i++) {
+            for (int i = 0 ; i < shuffle_pattern_wrapper.getCount() ; i++) {
                 parameters->add(new LDataParameter<float>(
                     (String("Shuffle amount ") + String(i)).c_str(),
                     [=] (float v) { 
@@ -352,7 +352,7 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
 
             #ifdef ENABLE_SHUFFLE
                 menu->add_page("Shuffle patterns");
-                for (int i = 0 ; i < NUMBER_SHUFFLE_PATTERNS ; i++) {
+                for (int i = 0 ; i < shuffle_pattern_wrapper.getCount() ; i++) {
                     char label[MENU_C_MAX];
                     snprintf(label, MENU_C_MAX, "Shuffle %i", i);
                     //SubMenuItemBar *submenu = new SubMenuItemColumns(label, 2, true, true);

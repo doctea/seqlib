@@ -3,9 +3,7 @@
 #ifdef ENABLE_SHUFFLE
     #include "uClock.h"
 
-    #ifdef SHUFFLE_MULTIPLE_TRACKS
-        #define NUMBER_SHUFFLE_PATTERNS 16
-    #else
+    #ifndef NUMBER_SHUFFLE_PATTERNS
         #define NUMBER_SHUFFLE_PATTERNS 1
     #endif
 
@@ -167,6 +165,38 @@
 
     #endif
     
-    extern ShufflePatternWrapper *shuffle_pattern_wrapper[NUMBER_SHUFFLE_PATTERNS];
-    
+    class ShufflePatternWrapperManager {
+        public:
+            typedef ShufflePatternWrapper* ShufflePatternWrapperPtr;
+            ShufflePatternWrapperPtr *shuffle_patterns = nullptr;
+
+            size_t number_shuffle_wrappers = 0;
+            size_t getCount() {
+                return number_shuffle_wrappers;
+            }
+
+            ShufflePatternWrapperManager(int number_shuffle_wrappers) {
+                this->number_shuffle_wrappers = number_shuffle_wrappers;
+
+                this->shuffle_patterns = new ShufflePatternWrapperPtr[number_shuffle_wrappers];
+                for (int i = 0 ; i < number_shuffle_wrappers ; i++) {
+                    shuffle_patterns[i] = new ShufflePatternWrapper(i);
+                }
+            }
+
+            ~ShufflePatternWrapperManager() {
+                for (int i = 0 ; i < number_shuffle_wrappers ; i++) {
+                    delete shuffle_patterns[i];
+                }
+            }
+
+            ShufflePatternWrapper* operator[](size_t index) {
+                if (index < 0 || index >= number_shuffle_wrappers) {
+                    return nullptr;
+                }
+                return shuffle_patterns[index];
+            }
+    };
+    extern ShufflePatternWrapperManager shuffle_pattern_wrapper;
+
 #endif
