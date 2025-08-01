@@ -179,13 +179,13 @@
                 this->number_shuffle_wrappers = number_shuffle_wrappers;
 
                 this->shuffle_patterns = new ShufflePatternWrapperPtr[number_shuffle_wrappers];
-                for (int i = 0 ; i < number_shuffle_wrappers ; i++) {
+                for (size_t i = 0 ; i < number_shuffle_wrappers ; i++) {
                     shuffle_patterns[i] = new ShufflePatternWrapper(i);
                 }
             }
 
             ~ShufflePatternWrapperManager() {
-                for (int i = 0 ; i < number_shuffle_wrappers ; i++) {
+                for (size_t i = 0 ; i < number_shuffle_wrappers ; i++) {
                     delete shuffle_patterns[i];
                 }
             }
