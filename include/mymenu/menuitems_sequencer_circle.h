@@ -77,7 +77,7 @@ class CircleDisplay : public MenuItem {
             static const uint_fast8_t circle_center_offset = tft->width()/4;
             const uint_fast8_t circle_center_y = pos.y + circle_center_offset;*/
             static const uint_fast16_t tft_width_quartered = tft->width()/4;
-            static const uint_fast16_t tft_height_quartered = tft->height()/4;
+            //static const uint_fast16_t tft_height_quartered = tft->height()/4;
             const uint_fast16_t circle_center_x = tft_width_quartered;
             const uint_fast16_t circle_center_y = 6 + pos.y + coordinates_y[STEPS_PER_BAR/2];
 
