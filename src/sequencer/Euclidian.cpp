@@ -280,7 +280,7 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
 
         // todo: this should really be called create_menu_items, since it directly adds to menu
         // todo: do we really need to pass in menu here for some reason?
-        void EuclidianSequencer::make_menu_items(Menu *menu, bool combine_pages) {
+        void EuclidianSequencer::make_menu_items(Menu *menu, int combine_pages = 0) {
             // add a page for the 'boxed' sequence display of all tracks
             menu->add_page("Euclidian", TFT_CYAN);
             for (unsigned int i = 0 ; i < this->number_patterns ; i++) {
@@ -296,16 +296,19 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
             #endif*/
 
             // add a page for the circle display that shows all tracks simultaneously
-            if (combine_pages) {
+            if (!combine_pages) {
                 menu->add_page("Circle & locks");
             } else {          
+                combine_pages--;
                 menu->add_page("Circle");
             }
             menu->add(new CircleDisplay("Circle", this));
 
             // multitoggle to lock patterns
-            if (!combine_pages)
+            if (!combine_pages) {
                 menu->add_page("Pattern locks", C_WHITE, false);
+                combine_pages--;
+            }
             ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Allow changes", true);
             for (unsigned int i = 0 ; i < this->number_patterns ; i++) {
                 BasePattern *p = (BasePattern *)this->get_pattern(i);
@@ -322,9 +325,9 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
             }
             menu->add(toggle);
 
-            if (!combine_pages)
-                create_menu_euclidian_mutation(2);
-            else
+            if (combine_pages) {
+                create_menu_euclidian_mutation(combine_pages);
+            } else
                 create_menu_euclidian_mutation(0);
 
             /*
@@ -402,9 +405,11 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
 
             #ifdef ENABLE_PARAMETERS
                 if (number_pages_to_create>0) {
+                    Serial.printf("EuclidianSequencer::create_menu_euclidian_mutation(): adding page 'Mutation modulation', %i pages left to create\n", number_pages_to_create-1);
                     menu->add_page("Mutation modulation", C_WHITE, false);
                     number_pages_to_create--;
                 } else {
+                    Serial.printf("EuclidianSequencer::create_menu_euclidian_mutation(): adding separator for 'Modulation', %i pages left to create\n", number_pages_to_create-1);
                     menu->add(new SeparatorMenuItem("Modulation"));
                 }
                 //menu->add(new SeparatorMenuItem("Mappable parameters"));

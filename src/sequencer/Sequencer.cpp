@@ -32,7 +32,18 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
 #endif
 
 #ifdef ENABLE_PARAMETERS
-    LinkedList<FloatParameter*> *BaseSequencer::getParameters() {
+    LinkedList<FloatParameter*>* BaseSequencer::getParameters() {
+        return nullptr;
+    }
+    FloatParameter* BaseSequencer::getParameterByName(const char *name) {
+        LinkedList<FloatParameter*> *params = this->getParameters();
+        if (params==nullptr)
+            return nullptr;
+        for (int i = 0 ; i < params->size() ; i++) {
+            FloatParameter *p = params->get(i);
+            if (p!=nullptr && strcmp(p->label, name)==0)
+                return p;
+        }
         return nullptr;
     }
 #endif
@@ -44,14 +55,14 @@ void BaseSequencer::setup_saveable_parameters() {
         // todo: setup saveable parameters for the shuffle patterns
 
         for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-            Serial.printf("BaseSequencer::setup_saveable_parameters() for pattern [%i/%i]...\n", i+1, number_patterns); Serial.flush();
+            if (Serial) Serial.printf("BaseSequencer::setup_saveable_parameters() for pattern [%i/%i]...\n", i+1, number_patterns); Serial.flush();
             BasePattern *p = this->get_pattern(i);
             if (p==nullptr) {
-                Serial.printf("\tWARN: pattern %i is nullptr!\n", i); Serial.flush();
+                if (Serial) Serial.printf("\tWARN: pattern %i is nullptr!\n", i); Serial.flush();
                 continue;
             }
             p->add_saveable_parameters(i, this->saveable_parameters);
         }
-        Serial.printf("Finished BaseSequencer::setup_saveable_parameters.");
+        if (Serial) Serial.printf("Finished BaseSequencer::setup_saveable_parameters.");
     }
 }

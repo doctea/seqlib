@@ -618,7 +618,7 @@ class EuclidianSequencer : public BaseSequencer {
             this->make_menu_items(menu, false);
         }
         //FLASHMEM
-        virtual void make_menu_items(Menu *menu, bool combine_pages);
+        virtual void make_menu_items(Menu *menu, int combine_pages);
         //FLASHMEM
         virtual void create_menu_euclidian_mutation(int number_pages_to_create = 2);
     #endif

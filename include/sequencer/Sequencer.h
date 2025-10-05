@@ -65,6 +65,7 @@ class BaseSequencer : virtual public ISaveableParameterHost {
     
     #if defined(ENABLE_PARAMETERS)
         virtual LinkedList<FloatParameter*> *getParameters();
+        virtual FloatParameter* getParameterByName(const char *name);   // UNTESTED!!
     #endif
 
     #if defined(ENABLE_SCREEN)
