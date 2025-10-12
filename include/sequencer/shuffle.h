@@ -96,7 +96,7 @@
                 return number_shuffle_wrappers;
             }
 
-            ShufflePatternWrapperManager(int number_shuffle_wrappers) {
+            ShufflePatternWrapperManager(size_t number_shuffle_wrappers) {
                 this->number_shuffle_wrappers = number_shuffle_wrappers;
 
                 this->shuffle_patterns = new ShufflePatternWrapperPtr[number_shuffle_wrappers];

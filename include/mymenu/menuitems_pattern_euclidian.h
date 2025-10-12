@@ -118,9 +118,9 @@ class EuclidianPatternControl : public SubMenuItemBar {
             ) column = 0;
 
             #ifdef ENABLE_SHUFFLE
-                static const int last_item_index = items_size-2;
+                static const unsigned int last_item_index = items_size-2;
             #else
-                static const int last_item_index = items_size-1;
+                static const unsigned int last_item_index = items_size-1;
             #endif
             if (item_index >= last_item_index) {
                 column = -1;   // last item forced to first column
