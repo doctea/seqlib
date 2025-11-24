@@ -56,7 +56,7 @@ class SingleCircleDisplay : public MenuItem {
         virtual int display(Coord pos, bool selected, bool opened) override {
             //return pos.y;
             pos.y = header(label, pos, selected, opened);
-            uint_fast16_t initial_y = pos.y;
+            //uint_fast16_t initial_y = pos.y;
             //tft->printf("ticks:%4i step:%i\n", ticks, BPM_CURRENT_STEP_OF_BAR);
             
             /*static int last_rendered_step = -1;
@@ -76,7 +76,7 @@ class SingleCircleDisplay : public MenuItem {
             //static const uint_fast8_t circle_center_x = tft->width()/4;
             //static const uint_fast8_t circle_center_y = pos.y + tft->width()/4; //pos.y + ((tft->height() - pos.y) / 2);
             static const uint_fast16_t tft_width_quartered = tft->width()/4;
-            static const uint_fast16_t tft_height_quartered = tft->height()/4;
+            //static const uint_fast16_t tft_height_quartered = tft->height()/4;
             const uint_fast16_t circle_center_x = tft_width_quartered;
             const uint_fast16_t circle_center_y = 6 + pos.y + coordinates_y[STEPS_PER_BAR/2];
 
