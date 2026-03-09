@@ -218,9 +218,9 @@ class SimplePattern : public BasePattern {
     };
     virtual void process_step_end(int step) override {
         if (this->query_note_off_for_step((step+1) % this->get_effective_steps()) && this->note_held) {
-        //if (this->note_held) {
-            //Serial.printf("%i: note off for step %i!", step);
+            // only turn off if the duration has passed, otherwise we might cut off a note early
             if ((ticks >= triggered_on_tick + this->current_duration || ticks < triggered_on_tick)) {
+                //Serial.printf("%i: note off for step %i!", step);
                 this->trigger_off_for_step(step);
             }
         }
