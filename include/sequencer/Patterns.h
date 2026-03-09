@@ -220,7 +220,9 @@ class SimplePattern : public BasePattern {
         if (this->query_note_off_for_step((step+1) % this->get_effective_steps()) && this->note_held) {
         //if (this->note_held) {
             //Serial.printf("%i: note off for step %i!", step);
-            this->trigger_off_for_step(step);
+            if ((ticks >= triggered_on_tick + this->current_duration || ticks < triggered_on_tick)) {
+                this->trigger_off_for_step(step);
+            }
         }
     }
     virtual void process_tick(int ticks) override { 
@@ -230,7 +232,7 @@ class SimplePattern : public BasePattern {
 
         if (
             this->note_held && 
-            (ticks >= triggered_on_tick + this->current_duration  || ticks < triggered_on_tick)
+            (ticks >= triggered_on_tick + this->current_duration || ticks < triggered_on_tick)
         ) {
             this->trigger_off_for_step(step);
         }

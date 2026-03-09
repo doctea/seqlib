@@ -39,7 +39,7 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
         LinkedList<FloatParameter*> *params = this->getParameters();
         if (params==nullptr)
             return nullptr;
-        for (int i = 0 ; i < params->size() ; i++) {
+        for (unsigned int i = 0 ; i < params->size() ; i++) {
             FloatParameter *p = params->get(i);
             if (p!=nullptr && strcmp(p->label, name)==0)
                 return p;
