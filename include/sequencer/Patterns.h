@@ -137,7 +137,7 @@ class BasePattern {
     #endif
 
     #ifdef ENABLE_SCREEN
-        virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, bool combine_pages = false);
+        virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, int combine_pages = 0);
     #endif
 
     virtual void add_saveable_parameters(int pattern_index, LinkedList<SaveableParameterBase*> *target) {

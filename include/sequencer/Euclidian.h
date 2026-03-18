@@ -55,6 +55,19 @@ struct arguments_t {
 extern arguments_t initial_arguments[];
 extern float all_global_density[];
 
+#ifdef ENABLE_SCREEN
+    enum CombinePageOption {
+        COMBINE_NONE = 0,
+        COMBINE_LOCKS_WITH_CIRCLE = 1,
+        COMBINE_MUTATION_WITH_LOCKS = 2,
+        COMBINE_MODULATION_WITH_MUTATION = 4,
+        COMBINE_PATTERN_MODULATION_WITH_PATTERN = 8,
+        COMBINE_ALL = 15
+    };
+
+    void decode_combine_page_option(CombinePageOption option);
+#endif
+
 class EuclidianPattern : public SimplePattern {
     public:
 
@@ -297,7 +310,7 @@ class EuclidianPattern : public SimplePattern {
 
     #ifdef ENABLE_SCREEN
         //FLASHMEM
-        virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, bool combine_pages = false) override;
+        virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, int combine_settings = (CombinePageOption)COMBINE_NONE) override;
     #endif
     
     #if defined(ENABLE_PARAMETERS)
@@ -620,7 +633,7 @@ class EuclidianSequencer : public BaseSequencer {
         //FLASHMEM
         virtual void make_menu_items(Menu *menu, int combine_pages);
         //FLASHMEM
-        virtual void create_menu_euclidian_mutation(int number_pages_to_create = 2);
+        virtual void create_menu_euclidian_mutation(CombinePageOption combine_setting);
     #endif
 
 
