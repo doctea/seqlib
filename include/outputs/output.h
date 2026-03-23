@@ -18,7 +18,7 @@
 #include "Drums.h"
 #include "bpm.h"
 
-#include "sequencer/Sequencer.h"
+#include "sequencer/Base/Sequencer.h"
 #include "outputs/base_outputs.h"
 
 #include "midi_helpers.h"

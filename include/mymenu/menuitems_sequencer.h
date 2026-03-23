@@ -1,13 +1,8 @@
-#ifndef MENUITEMS_SEQUENCER__H
-#define MENUITEMS_SEQUENCER__H
+#pragma once
 
-#include "sequencer/Patterns.h"
+#include "sequencer/Base/Patterns.h"
 #include "menuitems.h"
-//#include "submenuitem_bar.h"
-//#include "menuitems_object_selector.h"
-//#define NUM_STEPS 16
-
-#include "sequencer/Euclidian.h"
+//#include "sequencer/Euclidian.h"
 
 #include <bpm.h>
 #include <clock.h>
@@ -121,5 +116,3 @@ class PatternDisplay : public MenuItem {
             */
         }
 };
-
-#endif

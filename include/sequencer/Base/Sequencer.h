@@ -12,6 +12,8 @@
     #include "shuffle.h"
 #endif
 
+#include <bpm.h>
+
 class BasePattern;
 class SimplePattern;
 class BaseOutput;
@@ -38,10 +40,27 @@ class BaseSequencer : virtual public ISaveableParameterHost {
         this->running = state;
     }
 
-    //virtual void process_tick_internal(int tick) = 0;
+    // called every tick, call the appropriate callbacks for the current tick, step, beat, bar, and phrase
+    //virtual void on_tick(int tick) = 0;
+    virtual void on_tick(int tick) {
+        if (is_bpm_on_phrase(tick)) {
+            this->on_phrase(BPM_CURRENT_PHRASE);
+        }
+        if (is_bpm_on_bar(tick)) {
+            this->on_bar(BPM_CURRENT_BAR_OF_PHRASE);
+        }
+        if (is_bpm_on_beat(tick)) {
+            this->on_beat(BPM_CURRENT_BEAT_OF_BAR);
+        }
+        if (is_bpm_on_sixteenth(tick)) {
+            this->on_step(tick / TICKS_PER_STEP);
+        } else if (is_bpm_on_sixteenth(tick,1)) {
+            // this re-enabled 2025-05-14 for Compulidean -- if usb_teensy_clocker/Microlidian start playing up then this might be the reason?
+            this->on_step_end(tick / TICKS_PER_STEP); //(PPQN/STEPS_PER_BEAT));
+        }
+    }
 
     virtual void on_loop(int tick) = 0;
-    virtual void on_tick(int tick) = 0;
     virtual void on_beat(int beat) = 0;
     virtual void on_bar(int bar) = 0;
     virtual void on_phrase(int phrase) = 0;

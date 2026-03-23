@@ -1,5 +1,5 @@
-#include "sequencer/Sequencer.h"
-#include "sequencer/Patterns.h"
+#include "sequencer/Base/Sequencer.h"
+#include "sequencer/Base/Patterns.h"
 #include "debug.h"
 #include "menu_messages.h"
 

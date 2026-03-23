@@ -2,7 +2,7 @@
 #define ENABLE_STEP_DISPLAYS
 #define ENABLE_OTHER_CONTROLS
 
-#ifdef ENABLE_SCREEN
+#if defined(ENABLE_SCREEN) && defined(ENABLE_EUCLIDIAN)
 
 #include "submenuitem_bar.h"
 

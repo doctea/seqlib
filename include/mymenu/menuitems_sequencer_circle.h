@@ -1,7 +1,6 @@
 #pragma once
 
-#include "sequencer/Sequencer.h"
-#include "sequencer/Patterns.h"
+#include "sequencer/Base/Sequencer.h"
 
 #include "menuitems.h"
 

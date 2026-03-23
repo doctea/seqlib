@@ -1,13 +1,7 @@
 #pragma once
 
-#include "sequencer/Euclidian.h"
-#include "sequencer/Patterns.h"
-
+#include "sequencer/Base/Patterns.h"
 #include "menuitems.h"
-
-//#include "submenuitem_bar.h"
-//#include "menuitems_object_selector.h"
-//#define NUM_STEPS 16
 
 #include <bpm.h>
 #include <clock.h>
@@ -16,10 +10,10 @@ class SingleCircleDisplay : public MenuItem {
     public:
         //DeviceBehaviour_Beatstep *behaviour_beatstep = nullptr;
         //BaseSequencer *target_sequencer = nullptr;
-        EuclidianPattern *target_pattern = nullptr;
+        BasePattern *target_pattern = nullptr;
         int_fast8_t coordinates_x[STEPS_PER_BAR];
         int_fast8_t coordinates_y[STEPS_PER_BAR];
-        SingleCircleDisplay(const char *label, EuclidianPattern *target_pattern, bool show_header = false) : MenuItem(label, false, show_header) {
+        SingleCircleDisplay(const char *label, BasePattern *target_pattern, bool show_header = false) : MenuItem(label, false, show_header) {
             this->set_target(target_pattern);
         }
 
@@ -28,7 +22,7 @@ class SingleCircleDisplay : public MenuItem {
             setup_coordinates();
         }
 
-        void set_target(EuclidianPattern *target_pattern) {
+        void set_target(BasePattern *target_pattern) {
             this->target_pattern = target_pattern;
         }
 

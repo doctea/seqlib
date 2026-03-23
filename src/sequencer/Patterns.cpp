@@ -1,6 +1,6 @@
 //#include "Config.h"
 
-#include "sequencer/Patterns.h"
+#include "sequencer/Base/Patterns.h"
 #include "outputs/base_outputs.h"
 
 const char *BasePattern::get_output_label() {        
