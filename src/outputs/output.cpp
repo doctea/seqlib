@@ -80,9 +80,12 @@ note_message_t convert_note_for_muso_drum(int8_t pitch, int8_t velocity, int8_t 
 MIDIOutputProcessor *output_processor = nullptr;
 
 //FLASHMEM
-void setup_output(IMIDINoteAndCCTarget *output_target) {
+void setup_output(IMIDINoteAndCCTarget *output_target, MIDIOutputProcessor *processor) {
     if (Serial) { Serial.println("setup_output.."); Serial_flush(); }
-    output_processor = new FullDrumKitMIDIOutputProcessor(output_target);     // todo: set this up dynamically, probably reading from a config file
+    if (processor==nullptr) {
+        processor = new FullDrumKitMIDIOutputProcessor(output_target);
+    }
+    output_processor = processor;     // todo: set this up dynamically, probably reading from a config file
     if (Serial) { Serial.println("exiting setup_output"); Serial_flush(); }
 }
 

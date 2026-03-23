@@ -208,7 +208,7 @@ class FullDrumKitMIDIOutputProcessor : public MIDIOutputProcessor {
 #endif
 
 
-void setup_output(IMIDINoteAndCCTarget *output_target);
+void setup_output(IMIDINoteAndCCTarget *output_target, MIDIOutputProcessor *processor = nullptr);
 
 //extern MIDIOutputWrapper *output_wrapper;
 extern MIDIOutputProcessor *output_processor;
