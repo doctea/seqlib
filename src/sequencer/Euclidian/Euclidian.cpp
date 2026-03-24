@@ -33,11 +33,11 @@
     const int num_initial_arguments = sizeof(initial_arguments)/sizeof(arguments_t);
 
     void EuclidianSequencer::initialise_patterns() {
-        if (this->debug) Serial.printf("initialise_patterns() for %i patterns\n", this->number_patterns);
-        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+        if (this->debug) Serial.printf("initialise_patterns() for %i patterns\n", this->get_number_patterns());
+        for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
             // assign appropriate default arguments to each pattern based on their labels in the initial_arguments array
 
-            if (this->debug) Serial.printf("initialise_patterns for pattern[% 2i/% 2i]...\n", i+1, this->number_patterns);
+            if (this->debug) Serial.printf("initialise_patterns for pattern[% 2i/% 2i]...\n", i+1, this->get_number_patterns());
 
             bool found_assignment = false;
             for (int args = 0 ; args < num_initial_arguments ; args++) {
@@ -56,7 +56,7 @@
                 }
                 if (output->matches_label(initial_arguments[args].associated_label)) {
                     if (this->debug) {
-                        Serial.printf("\tinitialise_patterns for pattern[% 2i]: found initial_arguments[% 2i] with label '%s' matched output label '%s'\n", i, args, initial_arguments[i].associated_label, output->label);
+                        Serial.printf("\tinitialise_patterns for pattern[% 2i]: found initial_arguments[% 2i] with label '%s' matched output label '%s'\n", i, args, initial_arguments[args].associated_label, output->label);
                         Serial.flush();
                     }
                     this->patterns[i]->set_default_arguments(&initial_arguments[args]);
@@ -76,7 +76,7 @@
         }
 
         if (this->debug) { 
-            Serial.printf("Exiting initialise_patterns() for %i patterns\n", this->number_patterns);
+            Serial.printf("Exiting initialise_patterns() for %i patterns\n", this->get_number_patterns());
             Serial.flush();
         }
     }
@@ -144,7 +144,7 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
             MAXIMUM_MUTATION_COUNT
         ));
 
-        for (unsigned int i = 0 ; i < this->number_patterns ; i++) {
+        for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
             EuclidianPattern *pattern = (EuclidianPattern *)this->get_pattern(i);
             //LinkedList<FloatParameter*> *pattern_parameters = 
             pattern->getParameters(i);
@@ -289,7 +289,7 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
         void EuclidianSequencer::make_menu_items(Menu *menu, int combine_setting = (COMBINE_LOCKS_WITH_CIRCLE | COMBINE_MODULATION_WITH_MUTATION | COMBINE_PATTERN_MODULATION_WITH_PATTERN)) {
             // add a page for the 'boxed' sequence display of all tracks
             menu->add_page("Euclidian", TFT_CYAN);
-            for (unsigned int i = 0 ; i < this->number_patterns ; i++) {
+            for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
                 char label[MENU_C_MAX];
                 snprintf(label, MENU_C_MAX, "Pattern %i", i);
                 menu->add(new PatternDisplay(label, this->get_pattern(i)));
@@ -314,7 +314,7 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
                 menu->add_page("Pattern locks", C_WHITE, false);
             }
             ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Allow changes", true);
-            for (unsigned int i = 0 ; i < this->number_patterns ; i++) {
+            for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
                 BasePattern *p = (BasePattern *)this->get_pattern(i);
 
                 PatternMultiToggleItem *option = new PatternMultiToggleItem(
@@ -348,7 +348,7 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
             }*/
 
             // ask each pattern to add their menu pages
-            for (unsigned int i = 0 ; i < this->number_patterns ; i++) {
+            for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
                 //Serial.printf("adding controls for pattern %i..\n", i);
                 BasePattern *p = (BasePattern *)this->get_pattern(i);
 

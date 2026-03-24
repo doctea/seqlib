@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Euclidian.h"
+#include "Pattern.h"
 
 class EuclidianSequencer : public BaseSequencer {
     // todo: list of EuclidianPatterns...
@@ -266,10 +267,10 @@ class EuclidianSequencer : public BaseSequencer {
     #endif
 
     #if defined(ENABLE_SCREEN)
-        FLASHMEM
-        virtual void make_menu_items(Menu *menu) override {
-            this->make_menu_items(menu, false);
-        }
+        // FLASHMEM
+        // virtual void make_menu_items(Menu *menu) override {
+        //     this->make_menu_items(menu, 0);
+        // }
         //FLASHMEM
         virtual void make_menu_items(Menu *menu, int combine_pages);
         //FLASHMEM

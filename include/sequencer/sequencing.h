@@ -1,5 +1,5 @@
-#include "Euclidian.h"
+#include "Base/Sequencer.h"
 
-extern EuclidianSequencer *sequencer;
+extern BaseSequencer *sequencer;
 
 void setup_sequencer();

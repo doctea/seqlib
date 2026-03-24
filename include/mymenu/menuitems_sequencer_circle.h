@@ -81,7 +81,7 @@ class CircleDisplay : public MenuItem {
             const uint_fast16_t circle_center_y = 6 + pos.y + coordinates_y[STEPS_PER_BAR/2];
 
             // draw circle
-            for (uint_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++) {
+            for (uint_fast8_t seq = 0 ; seq < target_sequencer->get_number_patterns() ; seq++) {
                 uint_fast8_t first_x, first_y;
                 uint_fast8_t last_x, last_y;
                 uint_fast8_t count = 0;
@@ -132,7 +132,7 @@ class CircleDisplay : public MenuItem {
             tft->setCursor((tft->width()/2)-8, pos.y);
             static const uint_fast16_t middle_x = ((tft->width()/2)-8);
             static const uint_fast8_t column_width = (8*8)+1;
-            for (uint_fast8_t seq = 0 ; seq < target_sequencer->number_patterns ; seq++) {
+            for (uint_fast8_t seq = 0 ; seq < target_sequencer->get_number_patterns() ; seq++) {
                 uint_fast8_t column = seq / 10;
                 uint_fast8_t row = 1+(seq % 10);
                 tft->setCursor(middle_x + (column*column_width), initial_y + (row*8)); //tft->getCursorY());

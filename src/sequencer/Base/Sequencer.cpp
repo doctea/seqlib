@@ -1,0 +1,120 @@
+#include "sequencer/Base/Sequencer.h"
+#include "sequencer/Base/Patterns.h"
+#include "debug.h"
+#include "menu_messages.h"
+
+#ifdef ENABLE_SHUFFLE
+    #include "sequencer/shuffle.h"
+    ShufflePatternWrapperManager shuffle_pattern_wrapper(NUMBER_SHUFFLE_PATTERNS);
+#endif
+
+void SimpleSequencer::on_tick(int tick) {
+    BaseSequencer::on_tick(tick);
+
+    for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
+        this->get_pattern(i)->process_tick(tick);
+    }
+};
+
+void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
+    if (index >= (int)this->get_number_patterns()) {
+        String message = String("Attempted to configure pattern with invalid index ") + String(index);
+        #ifdef ENABLE_SCREEN
+            messages_log_add(message);
+        #endif
+        if (Serial) {
+            Serial.printf("BaseSequencer::configure_pattern_output(%i, %p) gives %s\n", index, output, message.c_str()); 
+            Serial.flush();
+        }
+        return;
+    }
+    SimplePattern *p = this->get_pattern(index);
+    if (p!=nullptr)
+        p->set_output(output);
+}
+
+#ifdef ENABLE_SCREEN
+    #include "mymenu/menuitems_sequencer.h"
+    void BaseSequencer::make_menu_items(Menu *menu, int combine_pages) {
+        while (!Serial) {
+            
+        }
+        menu->add_page("BaseSequencer");
+        for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
+            char label[MENU_C_MAX];
+            snprintf(label, MENU_C_MAX, "Pattern %i", i);
+            Serial.printf("BaseSequencer#make_menu_items for %i = %p\n", i, this->get_pattern(i));
+            menu->add(new PatternDisplay(label, this->get_pattern(i)));
+        }
+    }
+#endif
+
+#ifdef ENABLE_PARAMETERS
+    LinkedList<FloatParameter*>* BaseSequencer::getParameters() {
+        return nullptr;
+    }
+    // todo: is this necessary?
+    FloatParameter* BaseSequencer::getParameterByName(const char *name) {
+        LinkedList<FloatParameter*> *params = this->getParameters();
+        if (params==nullptr)
+            return nullptr;
+        for (unsigned int i = 0 ; i < params->size() ; i++) {
+            FloatParameter *p = params->get(i);
+            if (p!=nullptr && strcmp(p->label, name)==0)
+                return p;
+        }
+        return nullptr;
+    }
+#endif
+
+void BaseSequencer::setup_saveable_parameters() {
+    if (this->saveable_parameters==nullptr) {
+        ISaveableParameterHost::setup_saveable_parameters();
+
+        // todo: setup saveable parameters for the shuffle patterns
+
+        for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
+            if (Serial) Serial.printf("BaseSequencer::setup_saveable_parameters() for pattern [%i/%i]...\n", i+1, this->get_number_patterns()); Serial.flush();
+            BasePattern *p = this->get_pattern(i);
+            if (p==nullptr) {
+                if (Serial) Serial.printf("\tWARN: pattern %i is nullptr!\n", i); Serial.flush();
+                continue;
+            }
+            p->add_saveable_parameters(i, this->saveable_parameters);
+        }
+        if (Serial) Serial.printf("Finished BaseSequencer::setup_saveable_parameters.");
+    }
+}
+
+void SimpleSequencer::on_step(int step) {
+    //Serial.printf("EuclidianSequencer::on_step(%i), is_shuffle_enabled()=%i\n", step, is_shuffle_enabled());
+    for (uint_fast8_t i = 0 ; i < get_number_patterns() ; i++) {
+        #ifdef ENABLE_SHUFFLE
+            if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->patterns[i]->is_shuffled())) {
+                //if (Serial) Serial.printf("at tick %i, received on_step(%i, %i) callback for non-shuffled pattern\n", ticks, step, i);
+                this->patterns[i]->process_step(step);
+            }
+        #else
+            SimplePattern *p = this->get_pattern(i);
+            if (p!=nullptr)
+                p->process_step(step);
+        #endif
+    }
+};
+
+void SimpleSequencer::on_step_end(int step) {
+    //Serial.printf("at tick %i, on_step_end(%i)\n", ticks, step);
+    for (uint_fast8_t i = 0 ; i < get_number_patterns() ; i++) {
+        #ifdef ENABLE_SHUFFLE
+            if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->patterns[i]->is_shuffled())) {
+                SimplePattern *p = this->get_pattern(i);
+                if (p!=nullptr)
+                    p->process_step_end(step);
+            }
+        #else
+            SimplePattern *p = this->get_pattern(i);
+            if (p!=nullptr)
+                p->process_step_end(step);
+        #endif
+    }
+}

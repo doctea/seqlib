@@ -40,6 +40,10 @@ class BaseSequencer : virtual public ISaveableParameterHost {
         this->running = state;
     }
 
+    virtual int get_number_patterns() {
+        return this->number_patterns;
+    }
+
     // called every tick, call the appropriate callbacks for the current tick, step, beat, bar, and phrase
     //virtual void on_tick(int tick) = 0;
     virtual void on_tick(int tick) {
@@ -88,7 +92,7 @@ class BaseSequencer : virtual public ISaveableParameterHost {
     #endif
 
     #if defined(ENABLE_SCREEN)
-        virtual void make_menu_items(Menu *menu);
+        virtual void make_menu_items(Menu *menu, int combine_pages);
     #endif
 
     // save/load stuff
@@ -104,4 +108,66 @@ class BaseSequencer : virtual public ISaveableParameterHost {
     }
 
     virtual void setup_saveable_parameters() override;
+};
+
+class SimpleSequencer : public BaseSequencer {
+    LinkedList<BaseOutput*> *available_outputs = nullptr;
+
+    LinkedList<BasePattern*> *patterns = new LinkedList<BasePattern*>();
+
+    public:
+    SimpleSequencer(LinkedList<BaseOutput*> *available_outputs) : BaseSequencer() {
+        this->available_outputs = available_outputs;
+    }
+
+    virtual int get_number_patterns() override {
+        return this->patterns->size();
+    }
+
+    virtual SimplePattern *get_pattern(unsigned int pattern) override {
+        if (pattern >= this->patterns->size()) {
+            Serial.printf("SimpleSequencer#get_pattern(%i) out of bounds (size=%i)\n", pattern, this->patterns->size());
+            return nullptr;
+        }
+        return (SimplePattern*)this->patterns->get(pattern);
+    }
+
+    virtual void add_pattern(BasePattern *pattern) {
+        this->patterns->add(pattern);
+    };
+
+    virtual void on_tick(int tick) override;
+
+    virtual void on_loop(int tick) override {};
+    virtual void on_beat(int beat) override {};
+    virtual void on_bar(int bar) override {};
+    virtual void on_phrase(int phrase) override {};
+
+    // todo: this on_step stuff copied from EuclidianSequencer, but maybe we want to move it back up to BaseSequencer at some point?
+    virtual void on_step(int step) override;
+    virtual void on_step_end(int step) override;
+
+    #ifdef ENABLE_SHUFFLE
+        virtual void on_step_shuffled(int8_t track, int step) override {
+            if (!is_shuffle_enabled()) return;
+
+            for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+                if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
+                    //if (Serial) Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
+                    this->get_pattern(i)->process_step(step);
+                }
+            }
+        };
+
+        virtual void on_step_end_shuffled(int8_t track, int step) override {
+            if (!is_shuffle_enabled()) return;
+
+            for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+                if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
+                    this->get_pattern(i)->process_step_end(step);
+                }
+            }
+        }
+    #endif
+    
 };
