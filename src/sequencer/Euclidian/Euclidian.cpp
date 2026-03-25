@@ -7,6 +7,9 @@
 #include "outputs/base_outputs.h"
 
 #ifdef ENABLE_EUCLIDIAN
+
+    using namespace Euclidian;
+
     arguments_t initial_arguments[] = {
         { "Kick",       LEN,    4, 1,   DEFAULT_DURATION }, //, TRIGGER_KICK },// get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM) },    // kick
         { "Stick",      LEN,    5, 1,   DEFAULT_DURATION }, //, TRIGGER_SIDESTICK }, //get_trigger_for_pitch(GM_NOTE_SIDE_STICK) },    // stick
@@ -161,12 +164,14 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
 #endif
 
 #ifdef ENABLE_SCREEN
-    void decode_combine_page_option(CombinePageOption option) {
-        Serial.printf("combine page option bitmask: %i\n", option);
-        if (option & COMBINE_LOCKS_WITH_CIRCLE) Serial.println("- combining locks with circle");
-        if (option & COMBINE_MUTATION_WITH_LOCKS) Serial.println("- combining mutation with locks");
-        if (option & COMBINE_MODULATION_WITH_MUTATION) Serial.println("- combining modulation with mutation");
-        if (option & COMBINE_PATTERN_MODULATION_WITH_PATTERN) Serial.println("- combining pattern modulation with pattern");
+    namespace Euclidian {
+        void decode_combine_page_option(CombinePageOption option) {
+            Serial.printf("combine page option bitmask: %i\n", option);
+            if (option & COMBINE_LOCKS_WITH_CIRCLE) Serial.println("- combining locks with circle");
+            if (option & COMBINE_MUTATION_WITH_LOCKS) Serial.println("- combining mutation with locks");
+            if (option & COMBINE_MODULATION_WITH_MUTATION) Serial.println("- combining modulation with mutation");
+            if (option & COMBINE_PATTERN_MODULATION_WITH_PATTERN) Serial.println("- combining pattern modulation with pattern");
+        }
     }
 #endif
 
@@ -293,7 +298,7 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
                 char label[MENU_C_MAX];
                 snprintf(label, MENU_C_MAX, "Pattern %i", i);
                 menu->add(new PatternDisplay(label, this->get_pattern(i)));
-                this->get_pattern(i)->colour = menu->get_next_colour();
+                this->get_pattern(i)->set_colour(menu->get_next_colour());
             }
 
             /*#ifdef ENABLE_SHUFFLE

@@ -36,15 +36,20 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
 #ifdef ENABLE_SCREEN
     #include "mymenu/menuitems_sequencer.h"
     void BaseSequencer::make_menu_items(Menu *menu, int combine_pages) {
-        while (!Serial) {
-            
-        }
         menu->add_page("BaseSequencer");
         for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
             char label[MENU_C_MAX];
             snprintf(label, MENU_C_MAX, "Pattern %i", i);
             Serial.printf("BaseSequencer#make_menu_items for %i = %p\n", i, this->get_pattern(i));
             menu->add(new PatternDisplay(label, this->get_pattern(i)));
+            this->get_pattern(i)->set_colour(menu->get_next_colour());
+        }
+
+        for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
+            //Serial.printf("adding controls for pattern %i..\n", i);
+            BasePattern *p = (BasePattern *)this->get_pattern(i);
+
+            p->create_menu_items(menu, i, this, combine_pages);
         }
     }
 #endif

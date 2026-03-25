@@ -1,4 +1,4 @@
-// Ant Trail Probability Grid (Evolving Rhythm
+// Ant Trail Probability Grid (Evolving Rhythm)
 
 #pragma once
 
@@ -11,7 +11,6 @@
 #include "../Base/Patterns.h"
 #include "../Base/Sequencer.h"
 #include <bpm.h>
-
 
 #define SEQUENCE_LENGTH_STEPS 16
 //const int LEN = SEQUENCE_LENGTH_STEPS;

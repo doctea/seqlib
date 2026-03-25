@@ -207,12 +207,13 @@ class OutputSelectorControl : public SelectorControl<int_least16_t> {
 
     virtual void set_available_values(LinkedList<BaseOutput*> *available_values) {
         this->available_objects = available_values;
-        this->num_values = this->available_objects->size();
+        //this->available_objects->add(nullptr); // add an option for 'none'
+        this->num_values = this->available_objects->size(); // + 1;
     }
 
     virtual int get_num_values() {
         if (this->available_objects!=nullptr)
-            return this->available_objects->size();;
+            return this->available_objects->size();
         return 0;
     }
 

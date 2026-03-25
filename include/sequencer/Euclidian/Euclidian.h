@@ -55,16 +55,18 @@ extern arguments_t initial_arguments[];
 extern float all_global_density[];
 
 #ifdef ENABLE_SCREEN
-    enum CombinePageOption {
-        COMBINE_NONE = 0,
-        COMBINE_LOCKS_WITH_CIRCLE = 1,
-        COMBINE_MUTATION_WITH_LOCKS = 2,
-        COMBINE_MODULATION_WITH_MUTATION = 4,
-        COMBINE_PATTERN_MODULATION_WITH_PATTERN = 8,
-        COMBINE_ALL = 15
-    };
+    namespace Euclidian {
+        enum CombinePageOption {
+            COMBINE_NONE = 0,
+            COMBINE_LOCKS_WITH_CIRCLE = 1,
+            COMBINE_MUTATION_WITH_LOCKS = 2,
+            COMBINE_MODULATION_WITH_MUTATION = 4,
+            COMBINE_PATTERN_MODULATION_WITH_PATTERN = 8,
+            COMBINE_ALL = 15
+        };
 
-    void decode_combine_page_option(CombinePageOption option);
+        void decode_combine_page_option(CombinePageOption option);
+    }
 #endif
 
 

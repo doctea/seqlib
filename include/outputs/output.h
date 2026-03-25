@@ -172,6 +172,9 @@ class MIDIDrumOutput : public MIDIBaseOutput {
     #include "scales.h"
     
     // class that counts up all active triggers from passed-in nodes, and calculates a note from that, for eg monophonic basslines
+    // todo: make it so that it can also take into account the actual note values of the other nodes, not just count them, for more interesting melodic possibilities
+    // todo: make a base class for melodic outputs, and then have this and a more advanced version that takes into account the note values of other nodes both inherit from it
+    // todo: make it output chords, not just single notes
     class MIDINoteTriggerCountOutput : public MIDIBaseOutput {
         public:
             LinkedList<BaseOutput*> *nodes = nullptr;   // output nodes that will count towards the note calculation
@@ -277,14 +280,27 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 //return this->note_mode==1;
                 return this->quantise;
             }
-            
 
             #ifdef ENABLE_SCREEN
                 //FLASHMEM
                 virtual void make_menu_items(Menu *menu, int index) override;
             #endif
-
     };
+
+    // class that outputs full notes based on what's passed in
+    class MIDINoteOutput : public MIDIBaseOutput {
+        public:
+            MIDINoteOutput(const char *label, int_fast8_t channel, IMIDINoteAndCCTarget *output_wrapper) 
+                : MIDIBaseOutput(label, -1, output_wrapper) {
+                this->channel = channel;
+            }
+
+            virtual int_fast8_t get_note_number() override {
+                return this->event_value_3;
+            }
+    };
+
+    // todo: class that can output scale degrees
 #endif
 
 void setup_output_processor_parameters();

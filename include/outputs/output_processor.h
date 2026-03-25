@@ -205,6 +205,19 @@ class FullDrumKitMIDIOutputProcessor : public MIDIOutputProcessor {
                 );
             }
     };
+
+    class FullDrumKitAndBassAndChordsMIDIOutputProcessor : public FullDrumKitAndBassMIDIOutputProcessor {
+        public:
+            FullDrumKitAndBassAndChordsMIDIOutputProcessor(IMIDINoteAndCCTarget *output_target) : FullDrumKitAndBassMIDIOutputProcessor(output_target) {
+                this->addNode(
+                    new MIDINoteOutput(
+                        "Melody",
+                        1,
+                        output_target
+                    )
+                );
+            }
+    };
 #endif
 
 

@@ -274,7 +274,7 @@ class EuclidianSequencer : public BaseSequencer {
         //FLASHMEM
         virtual void make_menu_items(Menu *menu, int combine_pages);
         //FLASHMEM
-        virtual void create_menu_euclidian_mutation(CombinePageOption combine_setting);
+        virtual void create_menu_euclidian_mutation(Euclidian::CombinePageOption combine_setting);
     #endif
 
 
