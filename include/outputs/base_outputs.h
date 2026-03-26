@@ -71,3 +71,21 @@ class BaseOutput : public ISequencerEventReceiver {
     #endif
 };
 
+// dummy output for using as a placeholder for 'None' or 'no output' when selecting outputs in the menu
+class NullOutput : public BaseOutput {
+    public:
+    NullOutput(const char *label) : BaseOutput(label) {}
+
+    virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3) override {
+        // do nothing
+    }
+    virtual void reset() override {
+        // do nothing
+    }
+    virtual bool should_go_on() override {
+        return false;
+    }
+    virtual bool should_go_off() override {
+        return false;
+    }
+};

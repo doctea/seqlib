@@ -288,6 +288,8 @@ class MIDIDrumOutput : public MIDIBaseOutput {
     };
 
     // class that outputs full notes based on what's passed in
+    // todo: make this and MIDINoteTriggerCountOutput inherit from each other so that they can share the same
+    // quantisation and scale settings
     class MIDINoteOutput : public MIDIBaseOutput {
         public:
             MIDINoteOutput(const char *label, int_fast8_t channel, IMIDINoteAndCCTarget *output_wrapper) 

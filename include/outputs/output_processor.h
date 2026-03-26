@@ -37,12 +37,23 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_OPEN_HI_HAT));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_PEDAL_HI_HAT));
         this->nodes.add(new MIDIDrumOutput(GM_NOTE_CLOSED_HI_HAT));*/
+        //this->nodes->add(new NullOutput("None"));
     }
     virtual void addNode(BaseOutput* node) {
         this->nodes->add(node);
     }
     virtual void addDrumNode(const char *label, byte note_number) {
         this->addNode(new MIDIDrumOutput(label, note_number, this->output_target));
+    }
+
+    virtual BaseOutput *get_output_for_label(const char *label) {
+        const uint_fast8_t size = this->nodes->size();
+        for (uint_fast8_t i = 0 ; i < size ; i++) {
+            BaseOutput *o = this->nodes->get(i);
+            if (o->matches_label(label))
+                return o;
+        }
+        return nullptr;
     }
 
     //virtual void on_tick(uint32_t ticks) {
@@ -83,7 +94,8 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         for (uint_fast8_t i = 0 ; i < size ; i++) {
             BaseOutput *o = this->nodes->get(i);
             Debug_printf("\tnode %i\n", i);
-            o->loop();
+            if (o!=nullptr)
+                o->loop();
             Debug_println();
         }
     }

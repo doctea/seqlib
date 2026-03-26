@@ -48,6 +48,8 @@ class OutputSelectorControl : public SelectorControl<int_least16_t> {
     virtual int find_index_for_label(const char *name)  {
         if (this->available_objects==nullptr)
             return -1;
+        if (strcmp(name, "None")==0)
+            return -1;
         unsigned const int size = this->available_objects->size();
         for (unsigned int i = 0 ; i < size ; i++) {
             if (available_objects->get(i)->matches_label(name))
@@ -57,7 +59,9 @@ class OutputSelectorControl : public SelectorControl<int_least16_t> {
         //return parameter_manager->getInputIndexForName(name);
     }
 
-    virtual int find_index_for_object(BaseOutput *input)  {
+    virtual int find_index_for_object(BaseOutput *input) {
+        if (input==nullptr)
+            return -1;
         return this->find_index_for_label(input->label);
     }
 
@@ -115,6 +119,8 @@ class OutputSelectorControl : public SelectorControl<int_least16_t> {
         selected_value_index = actual_value_index = new_value;
         if(new_value>=0 && new_value<(int_least16_t)this->available_objects->size() && this->target_object!=nullptr && this->setter_func!=nullptr) {
             (this->target_object->*this->setter_func)(this->available_objects->get(new_value));
+        } else {
+            (this->target_object->*this->setter_func)(nullptr);
         }
     }
     virtual int_least16_t getter() override {
@@ -208,7 +214,7 @@ class OutputSelectorControl : public SelectorControl<int_least16_t> {
     virtual void set_available_values(LinkedList<BaseOutput*> *available_values) {
         this->available_objects = available_values;
         //this->available_objects->add(nullptr); // add an option for 'none'
-        this->num_values = this->available_objects->size(); // + 1;
+        this->num_values = this->available_objects->size();
     }
 
     virtual int get_num_values() {

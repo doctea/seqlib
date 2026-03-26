@@ -1,5 +1,7 @@
 // Emulate the Music Thing Turing Machine as a sequencer pattern. 
 
+// todo: also have this act as a ParameterInput, so that it can be used as a sort of random modulation source for other patterns/parameters?
+
 #pragma once
 
 #ifndef FLASHMEM
@@ -30,20 +32,23 @@ using namespace TuringMachine;
 
 class TuringMachinePattern : public SimplePattern {
     uint8_t effective_steps = MAX_STEPS;
-    int default_duration = PPQN/3;
-    int effective_duration = PPQN/2;
+    int default_duration = PPQN/6;
+    int effective_duration = default_duration;
     int8_t current_note_number = NOTE_OFF;
+
     float probability = 0.1f;
+    float effective_probability = probability;
 
     // for random note generation, we can specify a range of notes to choose from
-    // todo: crib the way this wotks from Nexus6
+    // todo: crib the way this works from Nexus6
     int8_t lowest_note = MIDI_MIN_NOTE;
     int8_t highest_note = MIDI_MAX_NOTE;
+    int8_t effective_lowest_note = MIDI_MIN_NOTE;
+    int8_t effective_highest_note = MIDI_MAX_NOTE;
 
     public:
 
     TuringMachinePattern(LinkedList<BaseOutput*> *available_outputs) : SimplePattern(available_outputs) {
-        current_duration = PPQN/2;
     }
 
     virtual const char *get_summary() override {
@@ -54,8 +59,17 @@ class TuringMachinePattern : public SimplePattern {
     virtual void trigger_off_for_step(int step) override;
 
     // duration of the note about to be played
-    virtual int8_t get_tick_duration() {
+    virtual int8_t get_tick_duration() override {
         return effective_duration;
+    }
+
+    virtual int8_t get_effective_steps() {
+        return this->effective_steps;
+    }
+
+    virtual bool flipacoin() {
+        float r = random(10000) / 10000.0f;
+        return r < effective_probability;
     }
 
     virtual void process_step(int step) override {
@@ -67,17 +81,15 @@ class TuringMachinePattern : public SimplePattern {
         // each time a step has played, flip its state (or not), according to our probability value
         // and potentially change its note value
 
-        float r = random(10000) / 10000.0f;
-        if (r < probability) {
+        if (!locked && flipacoin()) {
             // flip the state
             if (current_state) {
                 this->unset_event_for_tick(step * ticks_per_step);
             } else {
-                int8_t new_note = random(lowest_note, highest_note);
+                int8_t new_note = random(effective_lowest_note, effective_highest_note);
                 this->set_event_for_tick(step * ticks_per_step, new_note, MIDI_MAX_VELOCITY, 1);
             }
         }
-
     }
 
     #if defined(ENABLE_SCREEN) 
@@ -91,21 +103,12 @@ class TuringMachinePattern : public SimplePattern {
     virtual void add_saveable_parameters(int pattern_index, LinkedList<SaveableParameterBase*> *target) override {
         SimplePattern::add_saveable_parameters(pattern_index, target);
         char prefix[40];
-        snprintf(prefix, 40, "track_%i_", pattern_index);
+        snprintf(prefix, 40, "tm_track_%i_", pattern_index);
 
-        // need to remove the parent's 'steps' parameter and replace it with the one for this pattern 
-        // which uses arguments.steps instead of BasePattern::steps
-        for (unsigned int i = 0 ; i < target->size() ; i++) {
-            if (strcmp(target->get(i)->label, "steps")==0) {
-                delete target->get(i);
-                target->remove(i);
-                break;
-            }
-        }
-
-        target->add(new LSaveableParameter<uint8_t>((String(prefix) + String("steps")).c_str(), "TuringMachinePattern", &this->steps));
         target->add(new LSaveableParameter<int>((String(prefix) + String("duration")).c_str(), "TuringMachinePattern", &this->current_duration));
         target->add(new LSaveableParameter<float>((String(prefix) + String("probability")).c_str(), "TuringMachinePattern", &this->probability));
+        target->add(new LSaveableParameter<int8_t>((String(prefix) + String("lowest_note")).c_str(), "TuringMachinePattern", &this->lowest_note));
+        target->add(new LSaveableParameter<int8_t>((String(prefix) + String("highest_note")).c_str(), "TuringMachinePattern", &this->highest_note));
     }
 
     virtual void setLowestNote(int8_t note) {

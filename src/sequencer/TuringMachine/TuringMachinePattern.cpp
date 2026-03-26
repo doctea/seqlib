@@ -7,15 +7,26 @@ void TuringMachinePattern::trigger_on_for_step(int step) {
     this->triggered_on_tick = ticks;
     this->current_duration = this->get_tick_duration();
 
-    this->current_note_number = this->events[step%get_effective_steps()].note;
+    // if the note is outside our specified range, transpose it by octaves until it's within the range -- this is a bit of a hack, but it seems to produce more musical results than just silencing notes outside the range, and it's not too hard to implement
+    int8_t note_to_play = this->events[step%get_effective_steps()].note;
+    while (is_valid_note(note_to_play) && note_to_play < getLowestNote()) {
+        note_to_play += 12;
+    }
+    while (is_valid_note(note_to_play) && note_to_play > getHighestNote()) {
+        note_to_play -= 12;
+    }
 
-    if (this->output!=nullptr) {
-        Serial.printf("TuringMachinePattern: triggering on for step %i\twith note %i\t (%s)\n", step % get_effective_steps(), this->events[step%get_effective_steps()].note, get_note_name_c(this->events[step%get_effective_steps()].note));
-        this->output->receive_event(1,0,current_note_number);
-        this->output->process();
-        note_held = true;
+    if (is_valid_note(note_to_play)) {
+        this->current_note_number = this->events[step%get_effective_steps()].note;
 
-        //this->last_note_number = this->events[step%get_effective_steps()].note;
+        if (this->output!=nullptr) {
+            Serial.printf("TuringMachinePattern: triggering on for step %i\twith note %i\t (%s)\n", step % get_effective_steps(), this->events[step%get_effective_steps()].note, get_note_name_c(this->events[step%get_effective_steps()].note));
+            this->output->receive_event(1,0,current_note_number);
+            this->output->process();
+            note_held = true;
+
+            //this->last_note_number = this->events[step%get_effective_steps()].note;
+        }
     }
 }
 void TuringMachinePattern::trigger_off_for_step(int step) {
@@ -42,7 +53,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
 
     void TuringMachinePattern::create_menu_items(Menu *menu, int pattern_index, BaseSequencer *target_sequencer, int combine_setting) {
         char label[MENU_C_MAX];
-        snprintf(label, MENU_C_MAX, "Turing Machine %i", pattern_index);
+        snprintf(label, MENU_C_MAX, "TM %i", pattern_index);
         menu->add_page(label, this->get_colour(), false);
 
         menu->add(new PatternDisplay(label, this, false, false));
@@ -110,21 +121,21 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
         if (parameters!=nullptr)
             return parameters;
 
-        BasePattern::getParameters(i);
+        SimplePattern::getParameters(i);
 
         char label[MENU_C_MAX];
 
-        snprintf(label, MENU_C_MAX, "Turing Machine %i probability", i);
+        snprintf(label, MENU_C_MAX, "TM %i probability", i);
         parameters->add(
             new ProxyParameter<float>(
                 label, 
                 &this->probability,
-                &this->probability,
+                &this->effective_probability,
                 0.0f, 
                 1.0f
             ));
 
-        snprintf(label, MENU_C_MAX, "Turing Machine %i steps", i);
+        snprintf(label, MENU_C_MAX, "TM %i steps", i);
         parameters->add(
             new ProxyParameter<uint8_t>(
                 label, 
@@ -134,7 +145,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 16
             ));
 
-        snprintf(label, MENU_C_MAX, "Turing Machine %i duration", i);
+        snprintf(label, MENU_C_MAX, "TM %i duration", i);
         parameters->add(
             new ProxyParameter<int>(
                 label, 
@@ -143,6 +154,29 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 1, 
                 PPQN/4
             ));
+
+        snprintf(label, MENU_C_MAX, "TM %i lowest note", i);
+        parameters->add(
+            new ProxyParameter<int8_t>(
+                label, 
+                &this->lowest_note,
+                &this->effective_lowest_note,
+                MIDI_MIN_NOTE, 
+                MIDI_MAX_NOTE
+            ));
+
+        snprintf(label, MENU_C_MAX, "TM %i highest note", i);
+        parameters->add(
+            new ProxyParameter<int8_t>(
+                label, 
+                &this->highest_note,
+                &this->effective_highest_note,
+                MIDI_MIN_NOTE, 
+                MIDI_MAX_NOTE
+            ));
+
+
+        parameter_manager->addParameters(parameters);
 
         return parameters;
     }

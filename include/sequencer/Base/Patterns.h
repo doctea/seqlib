@@ -136,6 +136,7 @@ class BasePattern {
 
     #ifdef ENABLE_PARAMETERS
         LinkedList<FloatParameter*> *parameters = nullptr;
+        // instantiate parameters list if it doesn't exist, add it to parameter_manager, and return it
         virtual LinkedList<FloatParameter*> *getParameters(unsigned int i);
     #endif
 
