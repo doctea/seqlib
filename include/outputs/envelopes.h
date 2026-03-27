@@ -29,9 +29,8 @@ class EnvelopeOutput : public MIDIDrumOutput {
 
     EnvelopeBase *envelope;
 
-    EnvelopeOutput(const char *label, byte note_number, byte cc_number, byte channel, IMIDINoteAndCCTarget *output_wrapper) : 
-        MIDIDrumOutput(label, note_number, channel, output_wrapper)
-        ,midi_cc(cc_number)
+    EnvelopeOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, byte note_number, byte channel, byte cc_number) : 
+        MIDIDrumOutput(label, output_wrapper, note_number, channel), midi_cc(cc_number)
         {
             // todo: allow to switch to different types of envelope..?
             this->envelope = new DEFAULT_ENVELOPE_CLASS(

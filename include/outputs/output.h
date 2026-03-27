@@ -68,14 +68,14 @@ const output_type_t available_output_types[] = {
 class MIDIBaseOutput : public BaseOutput {
     public:
     
-    int_fast8_t note_number = -1, last_note_number = -1;
-    int_fast8_t channel = GM_CHANNEL_DRUMS;
+    int_fast8_t note_number = NOTE_OFF, last_note_number = NOTE_OFF;
+    int_fast8_t channel = 1;
     int_fast8_t event_value_1, event_value_2, event_value_3;
 
     IMIDINoteAndCCTarget *output_wrapper = nullptr;
 
-    MIDIBaseOutput(const char *label, int_fast8_t note_number, IMIDINoteAndCCTarget *output_wrapper) 
-        : BaseOutput(label), note_number(note_number), output_wrapper(output_wrapper) {}
+    MIDIBaseOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t note_number, int_fast8_t channel = 1) 
+        : BaseOutput(label), output_wrapper(output_wrapper), note_number(note_number), channel(channel) {}
 
     virtual int_fast8_t get_note_number() {
         return this->note_number;
@@ -158,95 +158,49 @@ class MIDIBaseOutput : public BaseOutput {
 // an output that tracks MIDI drum triggers
 class MIDIDrumOutput : public MIDIBaseOutput {
     public:
-    MIDIDrumOutput(const char *label, int_fast8_t note_number, IMIDINoteAndCCTarget *output_wrapper) 
-        : MIDIBaseOutput(label, note_number, output_wrapper) {
-        this->channel = GM_CHANNEL_DRUMS;
-    }
-    MIDIDrumOutput(const char *label, int_fast8_t note_number, int_fast8_t channel, IMIDINoteAndCCTarget *output_wrapper) 
-        : MIDIBaseOutput(label, note_number, output_wrapper) {
-        this->channel = channel;
+    MIDIDrumOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t note_number, int_fast8_t channel = GM_CHANNEL_DRUMS) 
+        : MIDIBaseOutput(label, output_wrapper, note_number, channel) {
     }
 };
 
 #ifdef ENABLE_SCALES
     #include "scales.h"
     
-    // class that counts up all active triggers from passed-in nodes, and calculates a note from that, for eg monophonic basslines
-    // todo: make it so that it can also take into account the actual note values of the other nodes, not just count them, for more interesting melodic possibilities
-    // todo: make a base class for melodic outputs, and then have this and a more advanced version that takes into account the note values of other nodes both inherit from it
-    // todo: make it output chords, not just single notes
-    class MIDINoteTriggerCountOutput : public MIDIBaseOutput {
+    // class that outputs full notes based on what's passed in
+    // todo: make this and MIDINoteTriggerCountOutput inherit from each other so that they can share the same
+    // quantisation and scale settings
+    class MIDINoteOutput : public MIDIBaseOutput {
+
+        protected:
+
+        int_fast8_t octave = 3;
+        int_fast8_t scale_root = SCALE_ROOT_A;
+        scale_index_t scale_number = SCALE_FIRST;
+
         public:
-            LinkedList<BaseOutput*> *nodes = nullptr;   // output nodes that will count towards the note calculation
-
-            int_fast8_t octave = 3;
-            int_fast8_t scale_root = SCALE_ROOT_A;
-            scale_index_t scale_number = SCALE_FIRST;
-            //int base_note = scale_root * octave;
-
-            uint8_t start_count_at = 0;
-            int finish_count_at = -1;
-
-            MIDINoteTriggerCountOutput(const char *label, LinkedList<BaseOutput*> *nodes, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t channel = 1, int start_count_at = 0, int finish_count_at = -1, int_fast8_t scale_root = SCALE_ROOT_A, scale_index_t scale_number = SCALE_MAJOR, int_fast8_t octave = 3) 
-                : MIDIBaseOutput(label, 0, output_wrapper) {
-                this->channel = channel;
-                this->nodes = nodes;
-
-                this->octave = octave;
+            MIDINoteOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t channel = 1, int_fast8_t scale_root = SCALE_ROOT_A, scale_index_t scale_number = SCALE_MAJOR, int_fast8_t octave = 3) 
+                : MIDIBaseOutput(label, output_wrapper, NOTE_OFF, channel) {
                 this->scale_root = scale_root;
                 this->scale_number = scale_number;
-                //this->base_note = scale_root * octave;
-
-                this->start_count_at = start_count_at;
-                this->finish_count_at = finish_count_at;
-                if (this->finish_count_at==-1)
-                    this->finish_count_at = this->nodes->size()-1;
+                this->octave = octave;
             }
 
-            //int note_mode = 0;
+            virtual int8_t get_note_to_play() {
+                return this->event_value_3;
+            }
+
             bool quantise = false;
             virtual int_fast8_t get_note_number() override {
+
+                int8_t note_to_play = this->get_note_to_play();
+
+                if (!is_valid_note(note_to_play))
+                    return NOTE_OFF;
+
                 if (!this->is_quantise())
-                    return get_base_note() + get_note_number_count();
+                    return note_to_play;
                 else
-                    return quantise_pitch_to_scale(get_base_note() + get_note_number_count()/*+ BPM_CURRENT_BEAT_OF_PHRASE*/, scale_root, scale_number);
-            }
-
-            // get the number of outputs that are also triggering this step
-            virtual int_fast8_t get_note_number_count() {
-                // count all the triggering notes and add that value to the root note
-                // then quantise according to selected scale to get final note number
-                int count = 0;
-                int number_of_active_nodes = 0;
-                int_fast16_t size = this->nodes->size();
-                //Serial.printf("get_note_number_count in MIDINoteTriggerCountOutput: size is %i, start_count_at is %i, finish_count_at is %i\n", size, start_count_at, finish_count_at);
-                for (int_fast16_t i = start_count_at ; i < finish_count_at+1 && i < size ; i++) {
-                    BaseOutput *o = this->nodes->get(i);
-                    if (o==nullptr) continue;
-                    if (o==this) continue;
-                    count += o->has_gone_on_this_time() ? (i%12) : 0;
-                    if (o->has_gone_on_this_time()) {
-                        //Serial.printf("get_note_number_count in MIDINoteTriggerCountOutput: %i\t%s\tis active\n", i, o->label);
-                        number_of_active_nodes++;
-                    } else {
-                        //Serial.printf("get_note_number_count in MIDINoteTriggerCountOutput: %i\t%s\tnot active\n", i, o->label);
-                    }
-                }
-                Debug_printf("get_note_number_count in MIDINoteTriggerCountOutput is %i\n", count);
-                //return base_note + quantise_pitch_to_scale(count);
-
-                // test mode, increment over 2 octaves to test scale quantisation
-                // best used with pulses = 6 so that it loops round
-                /*static int count = 0;
-                count++;
-                count %= 24;*/
-
-                return count;
-            }
-
-            virtual int_fast8_t get_base_note() {
-                //return this->scale_root * octave;
-                return (octave * 12) + scale_root;
+                    return quantise_pitch_to_scale(note_to_play/*+ BPM_CURRENT_BEAT_OF_PHRASE*/, scale_root, scale_number);
             }
 
             scale_index_t get_scale_number() {
@@ -287,20 +241,74 @@ class MIDIDrumOutput : public MIDIBaseOutput {
             #endif
     };
 
-    // class that outputs full notes based on what's passed in
-    // todo: make this and MIDINoteTriggerCountOutput inherit from each other so that they can share the same
-    // quantisation and scale settings
-    class MIDINoteOutput : public MIDIBaseOutput {
+    // class that counts up all active triggers from passed-in nodes, and calculates a note from that, for eg monophonic basslines
+    // todo: make it so that it can also take into account the actual note values of the other nodes, not just count them, for more interesting melodic possibilities
+    // todo: make a base class for melodic outputs, and then have this and a more advanced version that takes into account the note values of other nodes both inherit from it
+    // todo: make it output chords, not just single notes
+    class MIDINoteTriggerCountOutput : public MIDINoteOutput {
         public:
-            MIDINoteOutput(const char *label, int_fast8_t channel, IMIDINoteAndCCTarget *output_wrapper) 
-                : MIDIBaseOutput(label, -1, output_wrapper) {
-                this->channel = channel;
+            LinkedList<BaseOutput*> *nodes = nullptr;   // output nodes that will count towards the note calculation
+
+            uint8_t start_count_at = 0;
+            int finish_count_at = -1;
+
+            MIDINoteTriggerCountOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, LinkedList<BaseOutput*> *nodes, int_fast8_t channel = 1, int start_count_at = 0, int finish_count_at = -1) 
+                : MIDINoteOutput(label, output_wrapper, channel) {
+                this->nodes = nodes;
+
+                this->start_count_at = start_count_at;
+                this->finish_count_at = finish_count_at;
+                if (this->finish_count_at<0)
+                    this->finish_count_at = this->nodes->size() + finish_count_at;  // if finish_count_at is negative, count backwards from the end of the list
             }
 
-            virtual int_fast8_t get_note_number() override {
-                return this->event_value_3;
+            virtual int8_t get_note_to_play() override {
+                int8_t note_number = get_base_note() + get_note_number_count();
+                if (is_valid_note(note_number))
+                    return note_number;
+                else
+                    return NOTE_OFF;
             }
+
+            virtual int_fast8_t get_base_note() {
+                //return this->scale_root * octave;
+                return (octave * 12) + scale_root;
+            }
+
+            // get the number of outputs that are also triggering this step
+            virtual int_fast8_t get_note_number_count() {
+                // count all the triggering notes and add that value to the root note
+                // then quantise according to selected scale to get final note number
+                int count = 0;
+                int number_of_active_nodes = 0;
+                int_fast16_t size = this->nodes->size();
+                //Serial.printf("get_note_number_count in MIDINoteTriggerCountOutput: size is %i, start_count_at is %i, finish_count_at is %i\n", size, start_count_at, finish_count_at);
+                for (int_fast16_t i = start_count_at ; i < finish_count_at+1 && i < size ; i++) {
+                    BaseOutput *o = this->nodes->get(i);
+                    if (o==nullptr) continue;
+                    if (o==this) continue;
+                    count += o->has_gone_on_this_time() ? (i%12) : 0;
+                    if (o->has_gone_on_this_time()) {
+                        //Serial.printf("get_note_number_count in MIDINoteTriggerCountOutput: %i\t%s\tis active\n", i, o->label);
+                        number_of_active_nodes++;
+                    } else {
+                        //Serial.printf("get_note_number_count in MIDINoteTriggerCountOutput: %i\t%s\tnot active\n", i, o->label);
+                    }
+                }
+                Debug_printf("get_note_number_count in MIDINoteTriggerCountOutput is %i\n", count);
+                //return base_note + quantise_pitch_to_scale(count);
+
+                // test mode, increment over 2 octaves to test scale quantisation
+                // best used with pulses = 6 so that it loops round
+                /*static int count = 0;
+                count++;
+                count %= 24;*/
+
+                return count;
+            }
+
     };
+
 
     // todo: class that can output scale degrees
 #endif

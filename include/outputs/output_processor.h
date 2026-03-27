@@ -43,7 +43,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         this->nodes->add(node);
     }
     virtual void addDrumNode(const char *label, byte note_number) {
-        this->addNode(new MIDIDrumOutput(label, note_number, this->output_target));
+        this->addNode(new MIDIDrumOutput(label, this->output_target, note_number));
     }
 
     virtual BaseOutput *get_output_for_label(const char *label) {
@@ -150,11 +150,11 @@ class HalfDrumKitMIDIOutputProcessor : public MIDIOutputProcessor {
             this->addDrumNode("OHH",           GM_NOTE_OPEN_HI_HAT);
             this->addDrumNode("CHH",           GM_NOTE_CLOSED_HI_HAT);
             #ifdef ENABLE_ENVELOPES
-                this->addNode(new EnvelopeOutput("Cymbal 2",    GM_NOTE_CRASH_CYMBAL_2, MUSO_CC_CV_1, MUSO_CV_CHANNEL, output_target));
-                //this->addNode(new EnvelopeOutput("Splash",      GM_NOTE_SPLASH_CYMBAL,  MUSO_CC_CV_2, MUSO_CV_CHANNEL, output_target));
-                //this->addNode(new EnvelopeOutput("Vibra",       GM_NOTE_VIBRA_SLAP,     MUSO_CC_CV_3, MUSO_CV_CHANNEL, output_target));
-                //this->addNode(new EnvelopeOutput("Ride Bell",   GM_NOTE_RIDE_BELL,      MUSO_CC_CV_4, MUSO_CV_CHANNEL, output_target));
-                //this->addNode(new EnvelopeOutput("Ride Cymbal", GM_NOTE_RIDE_CYMBAL_1,  MUSO_CC_CV_5, MUSO_CV_CHANNEL, output_target));*/
+                this->addNode(new EnvelopeOutput("Cymbal 2", output_target,    GM_NOTE_CRASH_CYMBAL_2, MUSO_CV_CHANNEL, MUSO_CC_CV_1));
+                //this->addNode(new EnvelopeOutput("Splash", output_target,    GM_NOTE_SPLASH_CYMBAL,  MUSO_CV_CHANNEL, MUSO_CC_CV_2));
+                //this->addNode(new EnvelopeOutput("Vibra", output_target,     GM_NOTE_VIBRA_SLAP,     MUSO_CV_CHANNEL, MUSO_CC_CV_3));
+                //this->addNode(new EnvelopeOutput("Ride Bell", output_target, GM_NOTE_RIDE_BELL,      MUSO_CV_CHANNEL, MUSO_CC_CV_4));
+                //this->addNode(new EnvelopeOutput("Ride Cymbal", output_target, GM_NOTE_RIDE_CYMBAL_1,MUSO_CV_CHANNEL, MUSO_CC_CV_5));*/
             #else
                 this->addDrumNode("Cymbal 2",      GM_NOTE_CRASH_CYMBAL_2); // todo: turn these into something like an EnvelopeOutput?
                 //this->addDrumNode("Splash",        GM_NOTE_SPLASH_CYMBAL);  // todo: turn these into something like an EnvelopeOutput?
@@ -187,11 +187,11 @@ class FullDrumKitMIDIOutputProcessor : public MIDIOutputProcessor {
             this->addDrumNode("OHH",           GM_NOTE_OPEN_HI_HAT);
             this->addDrumNode("CHH",           GM_NOTE_CLOSED_HI_HAT);
             #ifdef ENABLE_ENVELOPES
-                this->addNode(new EnvelopeOutput("Cymbal 2",    GM_NOTE_CRASH_CYMBAL_2, MUSO_CC_CV_1, MUSO_CV_CHANNEL, output_target));
-                this->addNode(new EnvelopeOutput("Splash",      GM_NOTE_SPLASH_CYMBAL,  MUSO_CC_CV_2, MUSO_CV_CHANNEL, output_target));
-                this->addNode(new EnvelopeOutput("Vibra",       GM_NOTE_VIBRA_SLAP,     MUSO_CC_CV_3, MUSO_CV_CHANNEL, output_target));
-                this->addNode(new EnvelopeOutput("Ride Bell",   GM_NOTE_RIDE_BELL,      MUSO_CC_CV_4, MUSO_CV_CHANNEL, output_target));
-                this->addNode(new EnvelopeOutput("Ride Cymbal", GM_NOTE_RIDE_CYMBAL_1,  MUSO_CC_CV_5, MUSO_CV_CHANNEL, output_target));
+                this->addNode(new EnvelopeOutput("Cymbal 2",    output_target, GM_NOTE_CRASH_CYMBAL_2, MUSO_CV_CHANNEL, MUSO_CC_CV_1));
+                this->addNode(new EnvelopeOutput("Splash",      output_target, GM_NOTE_SPLASH_CYMBAL,  MUSO_CV_CHANNEL, MUSO_CC_CV_2));
+                this->addNode(new EnvelopeOutput("Vibra",       output_target, GM_NOTE_VIBRA_SLAP,     MUSO_CV_CHANNEL, MUSO_CC_CV_3));
+                this->addNode(new EnvelopeOutput("Ride Bell",   output_target, GM_NOTE_RIDE_BELL,      MUSO_CV_CHANNEL, MUSO_CC_CV_4));
+                this->addNode(new EnvelopeOutput("Ride Cymbal", output_target, GM_NOTE_RIDE_CYMBAL_1,  MUSO_CV_CHANNEL, MUSO_CC_CV_5));
             #else
                 this->addDrumNode("Cymbal 2",      GM_NOTE_CRASH_CYMBAL_2); // todo: turn these into something like an EnvelopeOutput?
                 this->addDrumNode("Splash",        GM_NOTE_SPLASH_CYMBAL);  // todo: turn these into something like an EnvelopeOutput?
@@ -210,9 +210,9 @@ class FullDrumKitMIDIOutputProcessor : public MIDIOutputProcessor {
                 this->addNode(
                     new MIDINoteTriggerCountOutput(
                         "Bass", 
-                        this->nodes, 
                         output_target, 
-                        1
+                        this->nodes,
+                        3
                     )
                 );
             }
@@ -224,8 +224,8 @@ class FullDrumKitMIDIOutputProcessor : public MIDIOutputProcessor {
                 this->addNode(
                     new MIDINoteOutput(
                         "Melody",
-                        1,
-                        output_target
+                        output_target,
+                        1
                     )
                 );
             }

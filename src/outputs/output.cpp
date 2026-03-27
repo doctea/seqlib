@@ -136,16 +136,20 @@ void setup_output(IMIDINoteAndCCTarget *output_target, MIDIOutputProcessor *proc
     #include "mymenu/menuitems_harmony.h"
 
     //FLASHMEM
-    void MIDINoteTriggerCountOutput::make_menu_items(Menu *menu, int index) {
+    void MIDINoteOutput::make_menu_items(Menu *menu, int index) {
         //#ifdef ENABLE_ENVELOPE_MENUS
             char label[40];
             snprintf(label, 40, "MIDINoteOutput %i: %s", index, this->label);
             menu->add_page(label);
 
-            SubMenuItemColumns *sub_menu_item_columns = new SubMenuItemColumns("Options", 2);
+            SubMenuItemColumns *sub_menu_item_columns = new SubMenuItemColumns("Options", 3);
             // todo: convert all these ObjectNumberControls and ObjectToggleControls into LambdaNumberControls and LambdaToggleControls
-            sub_menu_item_columns->add(new ObjectToggleControl<MIDINoteTriggerCountOutput>("Quantise", this, &MIDINoteTriggerCountOutput::set_quantise, &MIDINoteTriggerCountOutput::is_quantise));
+            // todo: probably turn this Quantise toggle into a feature of LambdaScaleMenuItemBar to avoid having to make a custom menu item for it
+            sub_menu_item_columns->add(new ObjectToggleControl<MIDINoteOutput>("Quantise", this, &MIDINoteOutput::set_quantise, &MIDINoteOutput::is_quantise));
+            // todo: turn this into a lambda-based control, kill off any playing notes when the octave is changed to avoid stuck notes
             sub_menu_item_columns->add(new DirectNumberControl<int_fast8_t>("Octave", &this->octave, this->octave, (int_fast8_t)0, (int_fast8_t)10));
+            // todo: turn this into a lambda-based control, kill off any playing notes when the channel is changed to avoid stuck notes
+            sub_menu_item_columns->add(new DirectNumberControl<int_fast8_t>("Channel", &this->channel, this->channel, (int_fast8_t)1, (int_fast8_t)16));
 
             menu->add(sub_menu_item_columns);
 
