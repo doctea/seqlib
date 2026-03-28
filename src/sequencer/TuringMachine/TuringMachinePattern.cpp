@@ -10,18 +10,20 @@ void TuringMachinePattern::trigger_on_for_step(int step) {
     // if the note is outside our specified range, transpose it by octaves until it's within the range -- this is a bit of a hack, but it seems to produce more musical results than just silencing notes outside the range, and it's not too hard to implement
     int8_t note_to_play = this->events[step%get_effective_steps()].note;
     while (is_valid_note(note_to_play) && note_to_play < getLowestNote()) {
+        //Serial.printf("TuringMachinePattern: note %i is below lowest note %i, transposing up an octave\n", note_to_play, getLowestNote());
         note_to_play += 12;
     }
     while (is_valid_note(note_to_play) && note_to_play > getHighestNote()) {
+        //Serial.printf("TuringMachinePattern: note %i is above highest note %i, transposing down an octave\n", note_to_play, getHighestNote());
         note_to_play -= 12;
     }
 
     if (is_valid_note(note_to_play)) {
-        this->current_note_number = this->events[step%get_effective_steps()].note;
+        this->current_note_number = note_to_play;
 
         if (this->output!=nullptr) {
-            Serial.printf("TuringMachinePattern: triggering on for step %i\twith note %i\t (%s)\n", step % get_effective_steps(), this->events[step%get_effective_steps()].note, get_note_name_c(this->events[step%get_effective_steps()].note));
-            this->output->receive_event(1,0,current_note_number);
+            //Serial.printf("TuringMachinePattern: triggering on for step %i\twith note %i\t (%s)\n", step % get_effective_steps(), this->events[step%get_effective_steps()].note, get_note_name_c(this->events[step%get_effective_steps()].note));
+            this->output->receive_event(1,0,note_to_play);
             this->output->process();
             note_held = true;
 
@@ -33,7 +35,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
     this->triggered_on_step = -1;
     this->triggered_on_tick = -1;
     if (this->output!=nullptr) {
-        Serial.printf("TuringMachinePattern: triggering off for step %i\twith note %i\t (%s)\n", step % get_effective_steps(), this->current_note_number, get_note_name_c(this->current_note_number));
+        //Serial.printf("TuringMachinePattern: triggering off for step %i\twith note %i\t (%s)\n", step % get_effective_steps(), this->current_note_number, get_note_name_c(this->current_note_number));
         this->output->receive_event(0,1,this->current_note_number);
         this->output->process();
         note_held = false;

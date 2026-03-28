@@ -86,7 +86,8 @@ class TuringMachinePattern : public SimplePattern {
             if (current_state) {
                 this->unset_event_for_tick(step * ticks_per_step);
             } else {
-                int8_t new_note = random(effective_lowest_note, effective_highest_note);
+                //int8_t new_note = random(effective_lowest_note, effective_highest_note);
+                int8_t new_note = random(128); // choose from the full range of MIDI notes, then transpose into getLowestNote/getHighestNote range if necessary -- this seems to produce more interesting results than just choosing from within the range to begin with
                 this->set_event_for_tick(step * ticks_per_step, new_note, MIDI_MAX_VELOCITY, 1);
             }
         }

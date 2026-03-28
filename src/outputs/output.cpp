@@ -70,13 +70,12 @@ int8_t get_muso_note_for_drum(int8_t drum_note) {
 
 note_message_t convert_note_for_muso_drum(int8_t pitch, int8_t velocity, int8_t channel) {
     return {
-        get_muso_note_for_drum(pitch),
+        channel==GM_CHANNEL_DRUMS ? get_muso_note_for_drum(pitch) : pitch,
         velocity,
         channel==(int8_t)GM_CHANNEL_DRUMS ? (int8_t)MUSO_TRIGGER_CHANNEL : channel
     };
 }
 
-//IMIDINoteAndCCTarget *output_wrapper = nullptr;
 MIDIOutputProcessor *output_processor = nullptr;
 
 //FLASHMEM
