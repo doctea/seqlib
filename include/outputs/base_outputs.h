@@ -15,7 +15,7 @@ class ISequencerEventReceiver {
 class FloatParameter;
 
 // class to receive triggers from a sequencer and return values to the owner Processor
-class BaseOutput : public ISequencerEventReceiver {
+class BaseOutput : public ISequencerEventReceiver, public ISaveableParameterHost {
     public:
     bool enabled = true;
     bool has_gone_on = false;
@@ -69,6 +69,28 @@ class BaseOutput : public ISequencerEventReceiver {
             return nullptr;
         }
     #endif
+
+    virtual void setup_saveable_parameters() override {
+        if (this->saveable_parameters==nullptr) {
+            ISaveableParameterHost::setup_saveable_parameters();
+
+            this->saveable_parameters->add(
+                new LSaveableParameter<bool>(
+                    "Enabled",
+                    "BaseOutput",                    
+                    &this->enabled,
+                    [=](bool value) -> void {
+                        this->set_enabled(value);
+                    }, 
+                    [=](void) -> bool {
+                        return this->is_enabled();
+                    }
+                )
+            );
+
+        }
+    }
+
 };
 
 // dummy output for using as a placeholder for 'None' or 'no output' when selecting outputs in the menu

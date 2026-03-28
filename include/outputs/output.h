@@ -153,6 +153,26 @@ class MIDIBaseOutput : public BaseOutput {
     virtual void reset() {
         this->event_value_1 = this->event_value_2 = this->event_value_3 = 0;
     }
+
+    virtual void setup_saveable_parameters() override {
+        if (this->saveable_parameters==nullptr) {
+            BaseOutput::setup_saveable_parameters();
+
+            this->saveable_parameters->add(
+                new LSaveableParameter<int_fast8_t>(
+                    "MIDI Channel",
+                    "MIDIBaseOutput",                    
+                    &this->channel,
+                    [=](int_fast8_t value) -> void {
+                        this->channel = value;
+                    }, 
+                    [=](void) -> int_fast8_t {
+                        return this->channel;
+                    }
+                )
+            );
+        }
+    }
 };
 
 // an output that tracks MIDI drum triggers
@@ -239,6 +259,69 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 //FLASHMEM
                 virtual void make_menu_items(Menu *menu, int index) override;
             #endif
+
+            virtual void setup_saveable_parameters() override {
+                if (this->saveable_parameters==nullptr) {
+                    MIDIBaseOutput::setup_saveable_parameters();
+
+                    this->saveable_parameters->add(
+                        new LSaveableParameter<bool>(
+                            "Quantise",
+                            "MIDINoteOutput",                    
+                            &this->quantise,
+                            [=](bool value) -> void {
+                                this->set_quantise(value);
+                            }, 
+                            [=](void) -> bool {
+                                return this->is_quantise();
+                            }
+                        )
+                    );
+
+                    this->saveable_parameters->add(
+                        new LSaveableParameter<int_fast8_t>(
+                            "Octave",
+                            "MIDINoteOutput",                    
+                            &this->octave,
+                            [=](int_fast8_t value) -> void {
+                                this->octave = value;
+                            }, 
+                            [=](void) -> int_fast8_t {
+                                return this->octave;
+                            }
+                        )
+                    );
+
+                    this->saveable_parameters->add(
+                        new LSaveableParameter<int_fast8_t>(
+                            "Scale Root",
+                            "MIDINoteOutput",                    
+                            &this->scale_root,
+                            [=](int_fast8_t value) -> void {
+                                this->set_scale_root(value);
+                            }, 
+                            [=](void) -> int_fast8_t {
+                                return this->get_scale_root();
+                            }
+                        )
+                    );
+
+                    this->saveable_parameters->add(
+                        new LSaveableParameter<scale_index_t>(
+                            "Scale",
+                            "MIDINoteOutput",                    
+                            &this->scale_number,
+                            [=](scale_index_t value) -> void {
+                                this->set_scale_number(value);
+                            }, 
+                            [=](void) -> scale_index_t {
+                                return this->get_scale_number();
+                            }
+                        )
+                    );
+
+                }
+            }
     };
 
     // class that counts up all active triggers from passed-in nodes, and calculates a note from that, for eg monophonic basslines

@@ -6,7 +6,7 @@
 #include "envelopes.h"
 
 // holds individual output nodes and processes them (eg queries them for the pitch and sends note on/offs)
-class BaseOutputProcessor {
+class BaseOutputProcessor : public ISaveableParameterHost {
 
     bool enabled = true;
 
@@ -18,6 +18,18 @@ class BaseOutputProcessor {
         }
         virtual void set_enabled(bool v = true) {
             this->enabled = v;
+        }
+
+        // todo: probably should move these into something else that can be shared amongst other places that might need it?
+        // eg so we can unify all of the different save types (parameters, sequencer patterns, output processor nodes, etc) under a single save/load system that can be easily extended to new things without needing to write new save/load code for each thing?
+        virtual LinkedList<String> *save_pattern_add_lines(LinkedList<String> *lines) {
+            ISaveableParameterHost::add_save_lines_saveable_parameters(lines);
+            return lines;
+        }
+        virtual bool load_parse_key_value(String key, String value) {
+            if (ISaveableParameterHost::load_parse_key_value_saveable_parameters(key, value))
+                return true;
+            return false;
         }
 };
 
@@ -129,6 +141,23 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         //FLASHMEM
         virtual void create_menu_items(bool combine_pages = false);
     #endif
+
+    virtual void setup_saveable_parameters() override {
+        if (this->saveable_parameters==nullptr) {
+            // TODO: we actually need to ensure that when we save or load, we also save/load the parameters of all the nodes in this output processor, 
+            // otherwise we'll end up with saved values that don't get applied to anything when we load them back in!
+            // (ai suggestion) maybe we can achieve this by having BaseOutputProcessor inherit from ISaveableParameterHost, and then in the save/load functions of BaseOutputProcessor we loop through all the nodes and call their save/load functions?
+            // or maybe we can just call setup_saveable_parameters() on all the nodes here, AND add their parameters to the saveable_parameters list of this output processor, and then when we save or load the output processor, it will automatically save/load all the parameters of the nodes as well?
+            // maybe ISaveableParameterHost should have a list of sub-ISaveableParameterHosts that it knows about and can ask to load/save... 
+            BaseOutputProcessor::setup_saveable_parameters();
+            const uint_fast8_t size = this->nodes->size();
+            for (uint_fast8_t i = 0 ; i < size ; i++) {
+                BaseOutput *o = this->nodes->get(i);
+                if (o!=nullptr)
+                    o->setup_saveable_parameters();
+            }
+        }
+    }
 };
 
 
