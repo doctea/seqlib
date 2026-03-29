@@ -24,20 +24,6 @@ OUTPUT_TYPE operator --( OUTPUT_TYPE &id, int )
    return ( currentID );
 }
 
-
-uint32_t external_cv_ticks_per_pulse_values[] = { 1, 2, 3, 4, 6, 8, 12, 16, 24 };
-#define NUM_EXTERNAL_CV_TICKS_VALUES (sizeof(external_cv_ticks_per_pulse_values)/sizeof(uint32_t))
-#ifdef ENABLE_CLOCK_INPUT_CV
-    void set_external_cv_ticks_per_pulse_values(uint32_t new_value) {
-        external_cv_ticks_per_pulse = new_value;
-        //reset_clock();
-        ticks = 0;
-    }
-    uint32_t get_external_cv_ticks_per_pulse_values() {
-        return external_cv_ticks_per_pulse;
-    }
-#endif
-
 // todo: different modes to correlate with the midimuso mode + output availability..
 int8_t get_muso_note_for_drum(int8_t drum_note) {
     int8_t retval = 60;

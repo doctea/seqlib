@@ -223,10 +223,10 @@ class SimplePattern : public BasePattern {
         if (this->query_note_off_for_step((step+1) % this->get_effective_steps()) && this->note_held) {
             // only turn off if the duration has passed, otherwise we might cut off a note early
             if ((ticks >= triggered_on_tick + this->current_duration || ticks < triggered_on_tick)) {
-                Serial.printf("%i: actually doing note off for step %i!\n", step % get_effective_steps(), step);
+                //Serial.printf("%i: actually doing note off for step %i!\n", step % get_effective_steps(), step);
                 this->trigger_off_for_step(step);
             } else {
-                Serial.printf("%i: would turn off for step %i, but duration hasn't passed yet (ticks=%6u, triggered_on_tick=%6u, current_duration=%u)\n", step % get_effective_steps(), step, ticks, triggered_on_tick, current_duration);
+                //Serial.printf("%i: would turn off for step %i, but duration hasn't passed yet (ticks=%6u, triggered_on_tick=%6u, current_duration=%u)\n", step % get_effective_steps(), step, ticks, triggered_on_tick, current_duration);
             }
         }
     }

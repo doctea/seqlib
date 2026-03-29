@@ -23,7 +23,6 @@
 
 #include "midi_helpers.h"
 
-
 #include "ParameterManager.h"
 #include "parameters/MIDICCParameter.h"
 
