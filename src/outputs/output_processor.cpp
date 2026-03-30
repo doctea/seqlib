@@ -1,4 +1,6 @@
 #ifdef ENABLE_SCREEN
+    #include "outputs/output_processor.h"
+
     #include "mymenu.h"
     #include "menuitems_object_multitoggle.h"
 
