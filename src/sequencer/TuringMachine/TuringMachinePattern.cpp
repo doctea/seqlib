@@ -117,6 +117,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
 
 #if defined(ENABLE_PARAMETERS)
 
+    #include "ParameterManager.h"
     #include "parameters/ProxyParameter.h"
 
     LinkedList<FloatParameter*> *TuringMachinePattern::getParameters(unsigned int i) {
@@ -125,9 +126,8 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
 
         SimplePattern::getParameters(i);
 
-        char label[MENU_C_MAX];
-
-        snprintf(label, MENU_C_MAX, "TM %i probability", i);
+        char label[MAX_LABEL];
+        snprintf(label, MAX_LABEL, "TM %i probability", i);
         parameters->add(
             new ProxyParameter<float>(
                 label, 
@@ -137,7 +137,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 1.0f
             ));
 
-        snprintf(label, MENU_C_MAX, "TM %i steps", i);
+        snprintf(label, MAX_LABEL, "TM %i steps", i);
         parameters->add(
             new ProxyParameter<uint8_t>(
                 label, 
@@ -147,7 +147,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 16
             ));
 
-        snprintf(label, MENU_C_MAX, "TM %i duration", i);
+        snprintf(label, MAX_LABEL, "TM %i duration", i);
         parameters->add(
             new ProxyParameter<int>(
                 label, 
@@ -157,7 +157,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 PPQN/4
             ));
 
-        snprintf(label, MENU_C_MAX, "TM %i lowest note", i);
+        snprintf(label, MAX_LABEL, "TM %i lowest note", i);
         parameters->add(
             new ProxyParameter<int8_t>(
                 label, 
@@ -167,7 +167,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 MIDI_MAX_NOTE
             ));
 
-        snprintf(label, MENU_C_MAX, "TM %i highest note", i);
+        snprintf(label, MAX_LABEL, "TM %i highest note", i);
         parameters->add(
             new ProxyParameter<int8_t>(
                 label, 

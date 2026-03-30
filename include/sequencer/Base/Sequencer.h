@@ -9,7 +9,7 @@
 #include "SaveableParameters.h"
 
 #ifdef ENABLE_SHUFFLE
-    #include "shuffle.h"
+    #include "../shuffle.h"
 #endif
 
 #include <bpm.h>
@@ -148,26 +148,8 @@ class SimpleSequencer : public BaseSequencer {
     virtual void on_step_end(int step) override;
 
     #ifdef ENABLE_SHUFFLE
-        virtual void on_step_shuffled(int8_t track, int step) override {
-            if (!is_shuffle_enabled()) return;
-
-            for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-                if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
-                    //if (Serial) Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
-                    this->get_pattern(i)->process_step(step);
-                }
-            }
-        };
-
-        virtual void on_step_end_shuffled(int8_t track, int step) override {
-            if (!is_shuffle_enabled()) return;
-
-            for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-                if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
-                    this->get_pattern(i)->process_step_end(step);
-                }
-            }
-        }
+        virtual void on_step_shuffled(int8_t track, int step) override;
+        virtual void on_step_end_shuffled(int8_t track, int step) override;
     #endif
-    
+   
 };

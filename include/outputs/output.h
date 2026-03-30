@@ -67,7 +67,7 @@ const output_type_t available_output_types[] = {
 class MIDIBaseOutput : public BaseOutput {
     public:
     
-    int_fast8_t note_number = NOTE_OFF, last_note_number = NOTE_OFF;
+    int8_t note_number = NOTE_OFF, last_note_number = NOTE_OFF;
     int_fast8_t channel = 1;
     int_fast8_t event_value_1, event_value_2, event_value_3;
 

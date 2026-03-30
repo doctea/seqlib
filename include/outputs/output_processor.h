@@ -43,13 +43,17 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
     LinkedList<BaseOutput*> *nodes = new LinkedList<BaseOutput*>();
     IMIDINoteAndCCTarget *output_target = nullptr;
 
+    #ifdef ENABLE_SCALES
+        bool    global_quantise_on = false, global_quantise_chord_on = false;
+        scale_identity_t global_scale_identity = {SCALE_MAJOR, SCALE_ROOT_C};
+        chord_identity_t global_chord_identity = {CHORD::TRIAD, -1, 0};
+    #endif
+
     MIDIOutputProcessor(IMIDINoteAndCCTarget *output_target) : BaseOutputProcessor(), output_target(output_target) {
-        /*this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_BASS_DRUM));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_ELECTRIC_SNARE));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_OPEN_HI_HAT));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_PEDAL_HI_HAT));
-        this->nodes.add(new MIDIDrumOutput(GM_NOTE_CLOSED_HI_HAT));*/
-        //this->nodes->add(new NullOutput("None"));
+        #ifdef ENABLE_SCALES
+            set_global_scale_identity_target(&this->global_scale_identity);
+            set_global_chord_identity_target(&this->global_chord_identity);
+        #endif
     }
     virtual void addNode(BaseOutput* node) {
         this->nodes->add(node);

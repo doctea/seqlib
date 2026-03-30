@@ -98,9 +98,9 @@ void SimpleSequencer::on_step(int step) {
     //Serial.printf("EuclidianSequencer::on_step(%i), is_shuffle_enabled()=%i\n", step, is_shuffle_enabled());
     for (uint_fast8_t i = 0 ; i < get_number_patterns() ; i++) {
         #ifdef ENABLE_SHUFFLE
-            if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->patterns[i]->is_shuffled())) {
+            if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->patterns->get(i)->is_shuffled())) {
                 //if (Serial) Serial.printf("at tick %i, received on_step(%i, %i) callback for non-shuffled pattern\n", ticks, step, i);
-                this->patterns[i]->process_step(step);
+                this->patterns->get(i)->process_step(step);
             }
         #else
             SimplePattern *p = this->get_pattern(i);
@@ -114,7 +114,7 @@ void SimpleSequencer::on_step_end(int step) {
     //Serial.printf("at tick %i, on_step_end(%i)\n", ticks, step);
     for (uint_fast8_t i = 0 ; i < get_number_patterns() ; i++) {
         #ifdef ENABLE_SHUFFLE
-            if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->patterns[i]->is_shuffled())) {
+            if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->patterns->get(i)->is_shuffled())) {
                 SimplePattern *p = this->get_pattern(i);
                 if (p!=nullptr)
                     p->process_step_end(step);
@@ -126,3 +126,26 @@ void SimpleSequencer::on_step_end(int step) {
         #endif
     }
 }
+
+#ifdef ENABLE_SHUFFLE
+    void SimpleSequencer::on_step_shuffled(int8_t track, int step) {
+        if (!is_shuffle_enabled()) return;
+
+        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+            if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
+                //if (Serial) Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
+                this->get_pattern(i)->process_step(step);
+            }
+        }
+    };
+
+    void SimpleSequencer::on_step_end_shuffled(int8_t track, int step) {
+        if (!is_shuffle_enabled()) return;
+
+        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+            if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
+                this->get_pattern(i)->process_step_end(step);
+            }
+        }
+    }
+#endif

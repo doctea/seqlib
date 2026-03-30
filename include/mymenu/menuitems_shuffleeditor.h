@@ -2,7 +2,7 @@
 
 #include "mymenu.h"
 
-#include "sequencer/Sequencer.h"
+#include "sequencer/base/sequencer.h"
 
 #ifdef ENABLE_SHUFFLE
 

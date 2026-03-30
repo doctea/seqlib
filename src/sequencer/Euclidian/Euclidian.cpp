@@ -8,7 +8,21 @@
 
 #ifdef ENABLE_EUCLIDIAN
 
-    using namespace Euclidian;
+    #ifdef ENABLE_SCREEN
+        // need to be able to use CombinePageOption mask 
+        using namespace Euclidian;
+
+        namespace Euclidian {
+            // helpful debug function to decode the combine page option bitmask into human-readable form
+            void decode_combine_page_option(CombinePageOption option) {
+                Serial.printf("combine page option bitmask: %i\n", option);
+                if (option & COMBINE_LOCKS_WITH_CIRCLE) Serial.println("- combining locks with circle");
+                if (option & COMBINE_MUTATION_WITH_LOCKS) Serial.println("- combining mutation with locks");
+                if (option & COMBINE_MODULATION_WITH_MUTATION) Serial.println("- combining modulation with mutation");
+                if (option & COMBINE_PATTERN_MODULATION_WITH_PATTERN) Serial.println("- combining pattern modulation with pattern");
+            }
+        }
+    #endif
 
     arguments_t initial_arguments[] = {
         { "Kick",       LEN,    4, 1,   DEFAULT_DURATION }, //, TRIGGER_KICK },// get_trigger_for_pitch(GM_NOTE_ELECTRIC_BASS_DRUM) },    // kick
@@ -163,17 +177,6 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
     }
 #endif
 
-#ifdef ENABLE_SCREEN
-    namespace Euclidian {
-        void decode_combine_page_option(CombinePageOption option) {
-            Serial.printf("combine page option bitmask: %i\n", option);
-            if (option & COMBINE_LOCKS_WITH_CIRCLE) Serial.println("- combining locks with circle");
-            if (option & COMBINE_MUTATION_WITH_LOCKS) Serial.println("- combining mutation with locks");
-            if (option & COMBINE_MODULATION_WITH_MUTATION) Serial.println("- combining modulation with mutation");
-            if (option & COMBINE_PATTERN_MODULATION_WITH_PATTERN) Serial.println("- combining pattern modulation with pattern");
-        }
-    }
-#endif
 
 #ifndef MENU_C_MAX
     #define MENU_C_MAX 32
@@ -396,12 +399,12 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
             menu->add(new SeparatorMenuItem("Euclidian Mutations"));
 
             // add controls for the 4 density channels
-            SubMenuItemColumns *submenu_densities = new SubMenuItemColumns("Global densities", 4, true, false);
+            SubMenuItemColumns *submenu_densities = new SubMenuItemColumns("Global densities", 4, true, true);
             //submenu->add(new ObjectNumberControl<EuclidianSequencer,float>("Density", this, &EuclidianSequencer::set_density,        &EuclidianSequencer::get_density, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
-            submenu_densities->add(new LambdaNumberControl<float>("0", [=](float v) -> void { all_global_density[0] = v; }, [=]() -> float { return all_global_density[0]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
-            submenu_densities->add(new LambdaNumberControl<float>("1", [=](float v) -> void { all_global_density[1] = v; }, [=]() -> float { return all_global_density[1]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
-            submenu_densities->add(new LambdaNumberControl<float>("2", [=](float v) -> void { all_global_density[2] = v; }, [=]() -> float { return all_global_density[2]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
-            submenu_densities->add(new LambdaNumberControl<float>("3", [=](float v) -> void { all_global_density[3] = v; }, [=]() -> float { return all_global_density[3]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+            submenu_densities->add(new LambdaNumberControl<float>("Group 0", [=](float v) -> void { all_global_density[0] = v; }, [=]() -> float { return all_global_density[0]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+            submenu_densities->add(new LambdaNumberControl<float>("Group 1", [=](float v) -> void { all_global_density[1] = v; }, [=]() -> float { return all_global_density[1]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+            submenu_densities->add(new LambdaNumberControl<float>("Group 2", [=](float v) -> void { all_global_density[2] = v; }, [=]() -> float { return all_global_density[2]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+            submenu_densities->add(new LambdaNumberControl<float>("Group 3", [=](float v) -> void { all_global_density[3] = v; }, [=]() -> float { return all_global_density[3]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
             menu->add(submenu_densities);
 
             // add controls for the global euclidian mutation settings

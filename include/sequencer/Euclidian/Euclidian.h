@@ -69,6 +69,3 @@ extern float all_global_density[];
     }
 #endif
 
-
-
-
