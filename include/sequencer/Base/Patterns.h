@@ -167,9 +167,9 @@ class SimplePattern : public BasePattern {
         byte channel = 0;
     };
 
-    int triggered_on_step = -1;
-    int32_t triggered_on_tick = -1;
-    int current_duration = PPQN;
+    uint32_t triggered_on_step = -1;
+    uint32_t triggered_on_tick = -1;
+    int16_t current_duration = PPQN;
 
     event *events = nullptr;
 

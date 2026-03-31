@@ -40,7 +40,7 @@ class BaseSequencer : virtual public ISaveableParameterHost {
         this->running = state;
     }
 
-    virtual int get_number_patterns() {
+    virtual uint16_t get_number_patterns() {
         return this->number_patterns;
     }
 
@@ -120,7 +120,7 @@ class SimpleSequencer : public BaseSequencer {
         this->available_outputs = available_outputs;
     }
 
-    virtual int get_number_patterns() override {
+    virtual uint16_t get_number_patterns() override {
         return this->patterns->size();
     }
 

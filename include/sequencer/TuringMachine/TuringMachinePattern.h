@@ -106,7 +106,7 @@ class TuringMachinePattern : public SimplePattern {
         char prefix[40];
         snprintf(prefix, 40, "tm_track_%i_", pattern_index);
 
-        target->add(new LSaveableParameter<int>((String(prefix) + String("duration")).c_str(), "TuringMachinePattern", &this->current_duration));
+        target->add(new LSaveableParameter<int16_t>((String(prefix) + String("duration")).c_str(), "TuringMachinePattern", &this->current_duration));
         target->add(new LSaveableParameter<float>((String(prefix) + String("probability")).c_str(), "TuringMachinePattern", &this->probability));
         target->add(new LSaveableParameter<int8_t>((String(prefix) + String("lowest_note")).c_str(), "TuringMachinePattern", &this->lowest_note));
         target->add(new LSaveableParameter<int8_t>((String(prefix) + String("highest_note")).c_str(), "TuringMachinePattern", &this->highest_note));
