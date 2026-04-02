@@ -13,13 +13,14 @@
 
 class CircleDisplay : public MenuItem {
     public:
-        //DeviceBehaviour_Beatstep *behaviour_beatstep = nullptr;
-        BaseSequencer *target_sequencer = nullptr;
-        int coordinates_x[STEPS_PER_BAR];
-        int coordinates_y[STEPS_PER_BAR];
 
+        bool recalculate_needed = true; // indicate whether we need to recalculate the coordinates for the steps; this is set to true when we change the pattern or its settings, and we recalculate in display() if it's true, then set it back to false
+        int_fast8_t last_steps = -1; // used to track whether the number of steps has changed since the last time we calculated coordinates, so we know whether we need to recalculate
         float dia = 20.0;
 
+        BaseSequencer *target_sequencer = nullptr;
+        int16_t coordinates_x[64];      // @@TODO: temporary size
+        int16_t coordinates_y[64];      // @@TODO: temporary
         CircleDisplay(const char *label, BaseSequencer *sequencer, bool show_header = false) : MenuItem(label, false, show_header) {
             this->set_sequencer(sequencer);
         }
@@ -31,6 +32,7 @@ class CircleDisplay : public MenuItem {
 
         void set_sequencer(BaseSequencer *sequencer) {
             this->target_sequencer = sequencer;
+            recalculate_needed = true;
         }
 
         void setup_coordinates() {
@@ -49,6 +51,7 @@ class CircleDisplay : public MenuItem {
                 position++;
                 position = position % divisions;
             }
+            recalculate_needed = false;
             //this->set_sequencer(sequencer);
             Debug_println("CircleDisplay() finished setup_coordinates"); Serial.flush();
         }
@@ -57,13 +60,13 @@ class CircleDisplay : public MenuItem {
             //return pos.y;
             int initial_y = pos.y;
             pos.y = header(label, pos, selected, opened);
-
             //tft->printf("ticks:%4i step:%2i\n", ticks, BPM_CURRENT_STEP_OF_BAR);
-            
-            /*static int last_rendered_step = -1;
-            if (BPM_CURRENT_STEP_OF_BAR==last_rendered_step)
-                return tft->height();
-            last_rendered_step = BPM_CURRENT_STEP_OF_BAR;*/
+
+            if (recalculate_needed || this->last_steps != STEPS_PER_BAR) {
+                Debug_printf("CircleDisplay() detected change in steps from %i to %i, recalculating coordinates\n", this->last_steps, STEPS_PER_BAR); Serial.flush();
+                setup_coordinates();
+                this->last_steps = STEPS_PER_BAR;
+            }
 
             if (this->target_sequencer==nullptr) {
                 tft->println("No sequencer selected"); Serial.flush();

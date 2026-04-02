@@ -8,11 +8,13 @@
 
 class SingleCircleDisplay : public MenuItem {
     public:
-        //DeviceBehaviour_Beatstep *behaviour_beatstep = nullptr;
-        //BaseSequencer *target_sequencer = nullptr;
+
+        bool recalculate_needed = true; // indicate whether we need to recalculate the coordinates for the steps; this is set to true when we change the pattern or its settings, and we recalculate in display() if it's true, then set it back to false
+        int_fast8_t last_steps = -1; // used to track whether the number of steps has changed since the last time we calculated coordinates, so we know whether we need to recalculate
+
         BasePattern *target_pattern = nullptr;
-        int_fast8_t coordinates_x[STEPS_PER_BAR];
-        int_fast8_t coordinates_y[STEPS_PER_BAR];
+        int_fast8_t coordinates_x[64];  // we generate these in setup_coordinates() and then reuse them in display() to save time on trig calculations
+        int_fast8_t coordinates_y[64];  // TODO: these arrays are currently sized to hold coordinates for 32 steps, just as a hack while we figure out the best way to handle changing denominator stuff
         SingleCircleDisplay(const char *label, BasePattern *target_pattern, bool show_header = false) : MenuItem(label, false, show_header) {
             this->set_target(target_pattern);
         }
@@ -24,6 +26,7 @@ class SingleCircleDisplay : public MenuItem {
 
         void set_target(BasePattern *target_pattern) {
             this->target_pattern = target_pattern;
+            this->recalculate_needed = true;
         }
 
         float circle_size = 20.0;
@@ -43,6 +46,7 @@ class SingleCircleDisplay : public MenuItem {
                 position++;
                 position = position % divisions;
             }
+            recalculate_needed = false;
             //this->set_sequencer(sequencer);
             Debug_println("SingleCircleDisplay() finished setup_coordinates"); Serial.flush();
         }
@@ -52,11 +56,12 @@ class SingleCircleDisplay : public MenuItem {
             pos.y = header(label, pos, selected, opened);
             //uint_fast16_t initial_y = pos.y;
             //tft->printf("ticks:%4i step:%i\n", ticks, BPM_CURRENT_STEP_OF_BAR);
-            
-            /*static int last_rendered_step = -1;
-            if (BPM_CURRENT_STEP_OF_BAR==last_rendered_step)
-                return tft->height();
-            last_rendered_step = BPM_CURRENT_STEP_OF_BAR;*/
+
+            if (recalculate_needed || this->last_steps != STEPS_PER_BAR) {
+                Debug_printf("SingleCircleDisplay() detected change in steps from %i to %i, recalculating coordinates\n", this->last_steps, STEPS_PER_BAR); Serial.flush();
+                setup_coordinates();
+                this->last_steps = STEPS_PER_BAR;
+            }
 
             if (this->target_pattern==nullptr) {
                 tft->println("No pattern selected"); Serial.flush();
@@ -72,7 +77,7 @@ class SingleCircleDisplay : public MenuItem {
             static const uint_fast16_t tft_width_quartered = tft->width()/4;
             //static const uint_fast16_t tft_height_quartered = tft->height()/4;
             const uint_fast16_t circle_center_x = tft_width_quartered;
-            const uint_fast16_t circle_center_y = 6 + pos.y + coordinates_y[STEPS_PER_BAR/2];
+            /*const*/ uint_fast16_t circle_center_y = 6 + pos.y + coordinates_y[STEPS_PER_BAR/2];
 
             // draw circle
             int_fast8_t first_x, first_y;
