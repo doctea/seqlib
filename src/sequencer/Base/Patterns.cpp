@@ -10,7 +10,7 @@ const char *BasePattern::get_output_label() {
 }
 
 void SimplePattern::trigger_on_for_step(int step) {
-    this->triggered_on_step = step; // % (ticks_per_step*steps);
+    this->triggered_on_step = step;
     this->triggered_on_tick = ticks;
     this->current_duration = this->get_tick_duration();
 

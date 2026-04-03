@@ -12,9 +12,6 @@
 #include "mymenu/menuitems_outputselectorcontrol.h"
 #include "menuitems_lambda.h"
 
-//#include "outputs/output_processor.h"
-//extern MIDIOutputProcessor *output_processor;
-
 // compound control for Euclidian Patterns; shows step sequence view, animated circle sequence view, and controls 
 class EuclidianPatternControl : public SubMenuItemBar {
     BaseSequencer *target_sequencer = nullptr;
@@ -51,10 +48,10 @@ class EuclidianPatternControl : public SubMenuItemBar {
             //SubMenuItemBar *bar = new SubMenuItemBar("Arguments");
             //Menu *bar = menu;
             // todo: convert to LambdaNumberControl etc
-            this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Steps",    pattern, &EuclidianPattern::set_steps,      &EuclidianPattern::get_steps,    nullptr, 1, pattern->maximum_steps, true, true));
+            this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Steps",    pattern, &EuclidianPattern::set_steps,      &EuclidianPattern::get_steps,    nullptr, 1, TIME_SIG_MAX_STEPS_PER_BAR, true, true));
             this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Pulses",   pattern, &EuclidianPattern::set_pulses,     &EuclidianPattern::get_pulses,   nullptr, 1, STEPS_PER_BAR, true, true));
-            this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Rotation", pattern, &EuclidianPattern::set_rotation,   &EuclidianPattern::get_rotation, nullptr, 1, pattern->maximum_steps, true, true));
-            this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Duration", pattern, &EuclidianPattern::set_duration,   &EuclidianPattern::get_duration, nullptr, MINIMUM_DURATION, PPQN*BEATS_PER_BAR, true, true));  // minimum duration needs to be 2 , otherwise can end up with note on's getting missed by usb_teensy_clocker!
+            this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Rotation", pattern, &EuclidianPattern::set_rotation,   &EuclidianPattern::get_rotation, nullptr, 1, TIME_SIG_MAX_STEPS_PER_BAR, true, true));
+            this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Duration", pattern, &EuclidianPattern::set_duration,   &EuclidianPattern::get_duration, nullptr, MINIMUM_DURATION, TICKS_PER_BAR, true, true));  // minimum duration needs to be 2 , otherwise can end up with note on's getting missed by usb_teensy_clocker!
 
             // choose global density channel to use
             this->add(new LambdaNumberControl<int8_t> ("Density group", [=](int8_t v) -> int8_t { pattern->set_global_density_channel(v); return pattern->get_global_density_channel(); }, [=]() -> int8_t { return pattern->get_global_density_channel(); }, nullptr, 0, NUM_GLOBAL_DENSITY_CHANNELS-1, true, true));

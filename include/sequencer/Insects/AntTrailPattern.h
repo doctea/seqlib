@@ -40,11 +40,11 @@ class AntTrailPattern : public SimplePattern {
             if (r < probability_grid[i]) {
                 // trigger and reinforce
                 probability_grid[i] += reinforce_factor;
-                this->set_event_for_tick(i * ticks_per_step, 60, 127, 0);
+                this->set_event_for_tick(i * TICKS_PER_STEP, 60, 127, 0);
             } else {
                 // evaporate
                 probability_grid[i] -= evaporation_factor;
-                this->unset_event_for_tick(i * ticks_per_step);
+                this->unset_event_for_tick(i * TICKS_PER_STEP);
             }
             probability_grid[i] = constrain(probability_grid[i], evaporation_factor, 1.0f);
         }

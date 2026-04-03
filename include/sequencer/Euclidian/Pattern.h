@@ -99,9 +99,9 @@ class EuclidianPattern : public SimplePattern {
             bucket += temp_pulses;
             if (bucket >= this->used_arguments.steps) {
                 bucket -= this->used_arguments.steps;
-                this->set_event_for_tick(new_i * ticks_per_step);
+                this->set_event_for_tick(new_i * TICKS_PER_STEP);
             } else {
-                this->unset_event_for_tick(new_i * ticks_per_step);
+                this->unset_event_for_tick(new_i * TICKS_PER_STEP);
             }
         }
 

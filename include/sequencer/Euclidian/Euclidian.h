@@ -34,10 +34,6 @@ class Menu;
 #define MINIMUM_DURATION 2
 #define DEFAULT_DURATION_ENVELOPES 8
 
-#define BARS_PER_PHRASE 4
-
-//float effective_euclidian_density = 0.75f;
-
 #define SEQUENCE_LENGTH_STEPS 16
 const int LEN = SEQUENCE_LENGTH_STEPS;
     

@@ -27,7 +27,7 @@
 
 #define DEFAULT_VELOCITY    MIDI_MAX_VELOCITY
 
-#define MAX_STEPS 32
+#define MAX_STEPS TIME_SIG_MAX_STEPS_PER_BAR
 
 class BaseOutput;
 class BaseSequencer;
@@ -36,10 +36,8 @@ class BasePattern {
     public:
 
     uint8_t steps = MAX_STEPS;
-    uint8_t steps_per_beat = STEPS_PER_BEAT;
     bool note_held = false;
     bool locked = false;
-    uint32_t ticks_per_step = PPQN / steps_per_beat;            // todo: calculate this from desired pattern length in bars, PPQN and steps
 
     #ifdef ENABLE_SHUFFLE
         uint8_t shuffle_track = 0;
@@ -107,10 +105,10 @@ class BasePattern {
     //virtual bool query_note_off_for_step(int step) = 0;
 
     virtual bool query_note_on_for_step(int step) {
-        return this->query_note_on_for_tick(step * ticks_per_step);
+        return this->query_note_on_for_tick(step * TICKS_PER_STEP);
     }
     virtual bool query_note_off_for_step(int step) {
-        return this->query_note_off_for_tick(step * ticks_per_step);
+        return this->query_note_off_for_tick(step * TICKS_PER_STEP);
     }
 
     // duration of the note about to be played
@@ -200,8 +198,10 @@ class SimplePattern : public BasePattern {
         this->events = (event*)CALLOC_FUNC(sizeof(event), steps);
     }
 
+    // get the step number for this pattern for given tick number
     virtual unsigned int get_step_for_tick(unsigned int tick) {
-        return (tick / this->ticks_per_step) % this->get_effective_steps();
+        // get global step number for this tick, then mod by pattern length in steps to get the step number within this pattern
+        return (tick / TICKS_PER_STEP) % this->get_effective_steps();
     }
 
     virtual void set_event_for_tick(unsigned int tick, short note = 0, short velocity = DEFAULT_VELOCITY, short channel = 0) override {
@@ -248,8 +248,10 @@ class SimplePattern : public BasePattern {
     }
     virtual void process_tick(int ticks) override { 
         // check if note is held and duration has passed...
-        int step = (ticks / ticks_per_step); // % steps;
-        //ticks = ticks % (ticks_per_step * steps);
+        int step = BPM_GLOBAL_STEP_FROM_TICKS(ticks) % steps;
+
+        //Serial.printf("SimplePattern::process_tick: step_of_song=%i, step_of_pattern=%i, ticks=%6u, triggered_on_tick=%6u, current_duration=%u\n", BPM_CURRENT_STEP_OF_SONG, step, ticks, triggered_on_tick, current_duration); Serial.flush();
+        //Serial.printf("SimplePattern::process_tick: ticks=%i, step_of_song=%i, step_of_pattern=%i\n", ticks, BPM_GLOBAL_STEP_FROM_TICKS(ticks), step);
 
         if (
             this->note_held && 
