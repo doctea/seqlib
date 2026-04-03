@@ -13,8 +13,8 @@ class SingleCircleDisplay : public MenuItem {
         int_fast8_t last_steps = -1; // used to track whether the number of steps has changed since the last time we calculated coordinates, so we know whether we need to recalculate
 
         BasePattern *target_pattern = nullptr;
-        int_fast8_t coordinates_x[64];  // we generate these in setup_coordinates() and then reuse them in display() to save time on trig calculations
-        int_fast8_t coordinates_y[64];  // TODO: these arrays are currently sized to hold coordinates for 32 steps, just as a hack while we figure out the best way to handle changing denominator stuff
+        int_fast16_t coordinates_x[TIME_SIG_MAX_STEPS_PER_BAR];  // we generate these in setup_coordinates() and then reuse them in display() to save time on trig calculations
+        int_fast16_t coordinates_y[TIME_SIG_MAX_STEPS_PER_BAR];  // 
         SingleCircleDisplay(const char *label, BasePattern *target_pattern, bool show_header = false) : MenuItem(label, false, show_header) {
             this->set_target(target_pattern);
         }
@@ -51,16 +51,20 @@ class SingleCircleDisplay : public MenuItem {
             Debug_println("SingleCircleDisplay() finished setup_coordinates"); Serial.flush();
         }
 
+        uint_fast16_t circle_center_y;  // calculated during first run and when time signature changes
         virtual int display(Coord pos, bool selected, bool opened) override {
-            //return pos.y;
             pos.y = header(label, pos, selected, opened);
-            //uint_fast16_t initial_y = pos.y;
+
             //tft->printf("ticks:%4i step:%i\n", ticks, BPM_CURRENT_STEP_OF_BAR);
+
+            static const uint_fast16_t tft_width_quartered = tft->width()/4;
+            const uint_fast16_t circle_center_x = tft_width_quartered;
 
             if (recalculate_needed || this->last_steps != STEPS_PER_BAR) {
                 Debug_printf("SingleCircleDisplay() detected change in steps from %i to %i, recalculating coordinates\n", this->last_steps, STEPS_PER_BAR); Serial.flush();
                 setup_coordinates();
                 this->last_steps = STEPS_PER_BAR;
+                circle_center_y = 6 + pos.y + coordinates_y[STEPS_PER_BAR/2];
             }
 
             if (this->target_pattern==nullptr) {
@@ -71,13 +75,6 @@ class SingleCircleDisplay : public MenuItem {
             //tft->drawLine(0, pos.y, tft->width(), pos.y, random(0, 65535));
 
             tft->setCursor(pos.x, pos.y);
-
-            //static const uint_fast8_t circle_center_x = tft->width()/4;
-            //static const uint_fast8_t circle_center_y = pos.y + tft->width()/4; //pos.y + ((tft->height() - pos.y) / 2);
-            static const uint_fast16_t tft_width_quartered = tft->width()/4;
-            //static const uint_fast16_t tft_height_quartered = tft->height()/4;
-            const uint_fast16_t circle_center_x = tft_width_quartered;
-            /*const*/ uint_fast16_t circle_center_y = 6 + pos.y + coordinates_y[STEPS_PER_BAR/2];
 
             // draw circle
             int_fast8_t first_x, first_y;
@@ -90,8 +87,8 @@ class SingleCircleDisplay : public MenuItem {
             if (!is_step_on) pattern_colour = tft->halfbright_565(pattern_colour);
             // todo: if STEPS_PER_PHRASE is a multiple of get_steps, should be able to limit number of loops we do here?
             for (int i = 0 ; i < STEPS_PER_PHRASE/*max(target_pattern->get_steps(),16*/ ; i++) {
-                uint_fast8_t coord_x = circle_center_x + coordinates_x[i%STEPS_PER_BAR];
-                uint_fast8_t coord_y = circle_center_y + coordinates_y[i%STEPS_PER_BAR];
+                const uint_fast16_t coord_x = circle_center_x + coordinates_x[i%STEPS_PER_BAR];
+                const uint_fast16_t coord_y = circle_center_y + coordinates_y[i%STEPS_PER_BAR];
                 if (target_pattern->query_note_on_for_step(i)) {
                     if (count>0) {
                         tft->drawLine(

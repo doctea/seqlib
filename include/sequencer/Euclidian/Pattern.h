@@ -12,7 +12,7 @@ class EuclidianPattern : public SimplePattern {
     arguments_t last_arguments;
     arguments_t default_arguments;
     arguments_t used_arguments;
-    int maximum_steps = steps;
+    int maximum_steps = TIME_SIG_MAX_STEPS_PER_BAR;
 
     int8_t global_density_channel = 0;
 

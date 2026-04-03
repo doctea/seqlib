@@ -56,16 +56,20 @@ class CircleDisplay : public MenuItem {
             Debug_println("CircleDisplay() finished setup_coordinates"); Serial.flush();
         }
 
+        uint_fast16_t circle_center_y;      // calculated during first run and when time signature changes
         virtual int display(Coord pos, bool selected, bool opened) override {
-            //return pos.y;
             int initial_y = pos.y;
             pos.y = header(label, pos, selected, opened);
             //tft->printf("ticks:%4i step:%2i\n", ticks, BPM_CURRENT_STEP_OF_BAR);
+
+            static const uint_fast16_t tft_width_quartered = tft->width()/4;
+            const uint_fast16_t circle_center_x = tft_width_quartered;
 
             if (recalculate_needed || this->last_steps != STEPS_PER_BAR) {
                 Debug_printf("CircleDisplay() detected change in steps from %i to %i, recalculating coordinates\n", this->last_steps, STEPS_PER_BAR); Serial.flush();
                 setup_coordinates();
                 this->last_steps = STEPS_PER_BAR;
+                circle_center_y = 6 + pos.y + coordinates_y[STEPS_PER_BAR/2];
             }
 
             if (this->target_sequencer==nullptr) {
@@ -74,14 +78,6 @@ class CircleDisplay : public MenuItem {
             }
 
             tft->setCursor(pos.x, pos.y);
-
-            /*static const uint_fast8_t circle_center_x = tft->width()/4;
-            static const uint_fast8_t circle_center_offset = tft->width()/4;
-            const uint_fast8_t circle_center_y = pos.y + circle_center_offset;*/
-            static const uint_fast16_t tft_width_quartered = tft->width()/4;
-            //static const uint_fast16_t tft_height_quartered = tft->height()/4;
-            const uint_fast16_t circle_center_x = tft_width_quartered;
-            const uint_fast16_t circle_center_y = 6 + pos.y + coordinates_y[STEPS_PER_BAR/2];
 
             // draw circle
             for (uint_fast8_t seq = 0 ; seq < target_sequencer->get_number_patterns() ; seq++) {
