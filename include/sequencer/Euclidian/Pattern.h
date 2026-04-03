@@ -223,6 +223,7 @@ class EuclidianPattern : public SimplePattern {
         target->add(new LSaveableParameter<int_fast8_t>((String(prefix) + String("duration")).c_str(), "EuclidianPattern", &this->arguments.duration));
         //target->add(new LSaveableParameter<float>(String(prefix) + String("effective_euclidian_density"), "EuclidianPattern", &this->arguments.effective_euclidian_density));
         target->add(new LSaveableParameter<int_fast8_t>((String(prefix) + String("tie_on")).c_str(), "EuclidianPattern", &this->arguments.tie_on));
+
     }
 
 };

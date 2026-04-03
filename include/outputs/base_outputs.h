@@ -7,6 +7,8 @@
     #include "menu.h"
 #endif
 
+#include "SaveableParameters.h"
+
 class ISequencerEventReceiver {
     public:
     virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3) = 0;

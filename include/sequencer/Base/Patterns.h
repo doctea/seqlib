@@ -23,6 +23,7 @@
 #endif
 
 #include "SaveableParameters.h"
+#include "outputs/SeqlibSaveableParameters.h"
 
 #define DEFAULT_VELOCITY    MIDI_MAX_VELOCITY
 
@@ -55,6 +56,24 @@ class BasePattern {
 
     BasePattern(LinkedList<BaseOutput*> *available_outputs) {
         this->set_available_outputs(available_outputs);
+    }
+
+    virtual void set_output_by_name(const char *output_name) {
+        if (this->available_outputs!=nullptr) {
+            for (int i = 0 ; i < this->available_outputs->size() ; i++) {
+                BaseOutput *o = this->available_outputs->get(i);
+                if (o->matches_label(output_name)) {
+                    this->set_output(o);
+                    return;
+                }
+            }
+        }
+    }
+    virtual void set_output(BaseOutput *output) {
+        this->output = output;
+    }
+    virtual BaseOutput *get_output() {
+        return this->output;
     }
 
     #ifdef ENABLE_SCREEN
@@ -155,6 +174,10 @@ class BasePattern {
             target->add(new LSaveableParameter<uint8_t>((String(prefix) + String("shuffle_track")).c_str(), "EuclidianPattern", &this->shuffle_track));
         #endif
 
+        // add the output pattern..
+        // todo: move this up into BasePattern and make it virtual?
+        target->add(new PatternOutputSaveableParameter((String(prefix) + String("output")).c_str(), "EuclidianPattern", this));
+
         // todo: add the rest of the params...?
     }
 };
@@ -175,13 +198,6 @@ class SimplePattern : public BasePattern {
 
     SimplePattern(LinkedList<BaseOutput*> *available_outputs) : BasePattern(available_outputs) {
         this->events = (event*)CALLOC_FUNC(sizeof(event), steps);
-    }
-
-    virtual void set_output(BaseOutput *output) {
-        this->output = output;
-    }
-    virtual BaseOutput *get_output() {
-        return this->output;
     }
 
     virtual unsigned int get_step_for_tick(unsigned int tick) {
