@@ -173,7 +173,14 @@ class BasePattern : public ISaveableSettingHost {
         // add the output pattern..
         register_setting(new PatternOutputSaveableSetting("output", "BasePattern", this));
         
-        // todo: add the rest of the params...?
+        // register parameters for this pattern
+        LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
+        if (parameters!=nullptr) {
+            for (int i = 0 ; i < parameters->size() ; i++) {
+                FloatParameter *param = parameters->get(i);
+                register_child(param);
+            }
+        }
     }
 };
 

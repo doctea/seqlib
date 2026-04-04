@@ -153,7 +153,7 @@ class MultiSequencer : public BaseSequencer {
             if (s==nullptr) continue;
             register_child(s);
         }
-        if (Serial) Serial.printf("=== MultiSequencer::setup_saveable_settings() done for sequencer %p\n\n", this); 
+        if (Serial) Serial.printf("=== MultiSequencer::setup_saveable_settings() done for sequencer %p, free ram is %u\n\n", this, rp2040.getFreeHeap()); Serial.flush();
         if (Serial) Serial.flush();
     }
 };

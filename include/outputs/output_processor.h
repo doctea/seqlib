@@ -216,8 +216,8 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
                 [=](int8_t v) { this->global_chord_identity.inversion = v; },
                 [=]() -> int8_t { return this->global_chord_identity.inversion; }
             ));
-
         #endif
+
     }
 };
 

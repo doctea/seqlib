@@ -40,7 +40,6 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
         for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
             char label[MENU_C_MAX];
             snprintf(label, MENU_C_MAX, "Pattern %i", i);
-            Serial.printf("BaseSequencer#make_menu_items for %i = %p\n", i, this->get_pattern(i));
             menu->add(new PatternDisplay(label, this->get_pattern(i)));
             this->get_pattern(i)->set_colour(menu->get_next_colour());
         }
@@ -87,7 +86,19 @@ void BaseSequencer::setup_saveable_settings() {
         register_child(p);
         p->add_saveable_settings(i);   
     }
-    if (Serial) Serial.printf("=== BaseSequencer::setup_saveable_settings() done for sequencer %p\n\n", this); 
+    
+    if (Serial) Serial.printf("... BaseSequencer::setup_saveable_settings() after doing settings, free ram is %u\n\n", rp2040.getFreeHeap()); Serial.flush();
+
+    // register parameters for this output
+    LinkedList<FloatParameter*> *parameters = this->getParameters();
+    if (parameters!=nullptr) {
+        for (int i = 0 ; i < parameters->size() ; i++) {
+            FloatParameter *param = parameters->get(i);
+            register_child(param);
+        }
+    }
+    
+    if (Serial) Serial.printf("=== BaseSequencer::setup_saveable_settings() done for sequencer  %p, free ram is %u\n\n", this, rp2040.getFreeHeap()); Serial.flush();
     if (Serial) Serial.flush();
 }
 

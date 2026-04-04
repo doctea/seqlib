@@ -14,7 +14,7 @@ class ISequencerEventReceiver {
     virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3) = 0;
 };
 
-class FloatParameter;
+#include "parameters/Parameter.h"
 
 // class to receive triggers from a sequencer and return values to the owner Processor
 class BaseOutput : public ISequencerEventReceiver, public ISaveableSettingHost {
@@ -89,6 +89,15 @@ class BaseOutput : public ISequencerEventReceiver, public ISaveableSettingHost {
                 }
             )
         );
+
+        // save parameters for this output
+        LinkedList<FloatParameter*> *parameters = this->get_parameters();
+        if (parameters!=nullptr) {
+            for (int i = 0 ; i < parameters->size() ; i++) {
+                FloatParameter *param = parameters->get(i);
+                register_child(param);
+            }
+        }
     }
 
 };
