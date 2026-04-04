@@ -72,25 +72,18 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
     }
 #endif
 
-void BaseSequencer::setup_saveable_parameters() {
-    if (this->saveable_parameters==nullptr) {
-        ISaveableParameterHost::setup_saveable_parameters();
+void BaseSequencer::setup_saveable_settings() {
+    ISaveableSettingHost::setup_saveable_settings();
 
-        // todo: setup saveable parameters for the shuffle patterns
-
-        for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
-            if (Serial) Serial.printf("BaseSequencer::setup_saveable_parameters() for pattern [%i/%i]...\n", i+1, this->get_number_patterns()); Serial.flush();
-            BasePattern *p = this->get_pattern(i);
-            if (p==nullptr) {
-                if (Serial) Serial.printf("\tWARN: pattern %i is nullptr!\n", i); Serial.flush();
-                continue;
-            }
-            p->add_saveable_parameters(i, this->saveable_parameters);   
-            // TODO: think this might be backwards...?  shouldn't we be adding the pattern's parameters to the sequencer's saveable_parameters, rather than the other way around?
-            // or should we implement some other kind of ISaveableParameterHost thing that is aware of sub-ISaveableParameterHosts, and can pull parameters from them?
-            // or maybe we can just have the pattern add its parameters to the sequencer's saveable_parameters list, but then we need to make sure to namespace them with the pattern index or something like this, to avoid conflicts between patterns?
+    for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
+        if (Serial) Serial.printf("BaseSequencer::setup_saveable_settings() for pattern [%i/%i]...\n", i+1, this->get_number_patterns()); Serial.flush();
+        BasePattern *p = this->get_pattern(i);
+        if (p==nullptr) {
+            if (Serial) Serial.printf("\tWARN: pattern %i is nullptr!\n", i); Serial.flush();
+            continue;
         }
-        if (Serial) Serial.printf("Finished BaseSequencer::setup_saveable_parameters.");
+        register_child(p);
+        p->add_saveable_settings(i);   
     }
 }
 

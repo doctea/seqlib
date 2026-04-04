@@ -201,29 +201,18 @@ class EuclidianPattern : public SimplePattern {
         virtual LinkedList<FloatParameter*> *getParameters(unsigned int i) override;
     #endif
 
-    virtual void add_saveable_parameters(int pattern_index, LinkedList<SaveableParameterBase*> *target) override {
-        SimplePattern::add_saveable_parameters(pattern_index, target);
+    virtual void add_saveable_settings(int pattern_index) override {
+        SimplePattern::add_saveable_settings(pattern_index);
         char prefix[40];
         snprintf(prefix, 40, "track_%i_", pattern_index);
 
-        // need to remove the parent's 'steps' parameter and replace it with the one for this pattern 
-        // which uses arguments.steps instead of BasePattern::steps
-        for (unsigned int i = 0 ; i < target->size() ; i++) {
-            if (strcmp(target->get(i)->label, "steps")==0) {
-                delete target->get(i);
-                target->remove(i);
-                break;
-            }
-        }
-
-        target->add(new LSaveableParameter<int8_t>((String(prefix) + String("global_density_channel")).c_str(), "EuclidianPattern", &this->global_density_channel));
-        target->add(new LSaveableParameter<int_fast8_t>((String(prefix) + String("steps")).c_str(), "EuclidianPattern", &this->arguments.steps));
-        target->add(new LSaveableParameter<int_fast8_t>((String(prefix) + String("pulses")).c_str(), "EuclidianPattern", &this->arguments.pulses));
-        target->add(new LSaveableParameter<int_fast8_t>((String(prefix) + String("rotation")).c_str(), "EuclidianPattern", &this->arguments.rotation));
-        target->add(new LSaveableParameter<int_fast8_t>((String(prefix) + String("duration")).c_str(), "EuclidianPattern", &this->arguments.duration));
-        //target->add(new LSaveableParameter<float>(String(prefix) + String("effective_euclidian_density"), "EuclidianPattern", &this->arguments.effective_euclidian_density));
-        target->add(new LSaveableParameter<int_fast8_t>((String(prefix) + String("tie_on")).c_str(), "EuclidianPattern", &this->arguments.tie_on));
-
+        register_setting(new LSaveableSetting<int_fast8_t>((String(prefix) + String("steps")).c_str(), "EuclidianPattern", &this->arguments.steps), true);
+        register_setting(new LSaveableSetting<int8_t>((String(prefix) + String("global_density_channel")).c_str(), "EuclidianPattern", &this->global_density_channel));
+        register_setting(new LSaveableSetting<int_fast8_t>((String(prefix) + String("pulses")).c_str(), "EuclidianPattern", &this->arguments.pulses));
+        register_setting(new LSaveableSetting<int_fast8_t>((String(prefix) + String("rotation")).c_str(), "EuclidianPattern", &this->arguments.rotation));
+        register_setting(new LSaveableSetting<int_fast8_t>((String(prefix) + String("duration")).c_str(), "EuclidianPattern", &this->arguments.duration));
+        //register_setting(new LSaveableSetting<float>(String(prefix) + String("effective_euclidian_density"), "EuclidianPattern", &this->arguments.effective_euclidian_density));
+        register_setting(new LSaveableSetting<int_fast8_t>((String(prefix) + String("tie_on")).c_str(), "EuclidianPattern", &this->arguments.tie_on));
     }
 
 };

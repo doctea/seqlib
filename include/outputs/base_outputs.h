@@ -7,7 +7,7 @@
     #include "menu.h"
 #endif
 
-#include "SaveableParameters.h"
+#include "saveload_settings.h"
 
 class ISequencerEventReceiver {
     public:
@@ -17,7 +17,7 @@ class ISequencerEventReceiver {
 class FloatParameter;
 
 // class to receive triggers from a sequencer and return values to the owner Processor
-class BaseOutput : public ISequencerEventReceiver, public ISaveableParameterHost {
+class BaseOutput : public ISequencerEventReceiver, public ISaveableSettingHost {
     public:
     bool enabled = true;
     bool has_gone_on = false;
@@ -72,25 +72,23 @@ class BaseOutput : public ISequencerEventReceiver, public ISaveableParameterHost
         }
     #endif
 
-    virtual void setup_saveable_parameters() override {
-        if (this->saveable_parameters==nullptr) {
-            ISaveableParameterHost::setup_saveable_parameters();
+    virtual void setup_saveable_settings() override {
+        // inherit parent's settings
+        ISaveableSettingHost::setup_saveable_settings();
 
-            this->saveable_parameters->add(
-                new LSaveableParameter<bool>(
-                    "Enabled",
-                    "BaseOutput",                    
-                    &this->enabled,
-                    [=](bool value) -> void {
-                        this->set_enabled(value);
-                    }, 
-                    [=](void) -> bool {
-                        return this->is_enabled();
-                    }
-                )
-            );
-
-        }
+        register_setting(
+            new LSaveableSetting<bool>(
+                "Enabled",
+                "BaseOutput",
+                &this->enabled,
+                [=](bool value) -> void {
+                    this->set_enabled(value);
+                },
+                [=](void) -> bool {
+                    return this->is_enabled();
+                }
+            )
+        );
     }
 
 };

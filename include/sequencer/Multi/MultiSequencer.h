@@ -126,33 +126,15 @@ class MultiSequencer : public BaseSequencer {
     #endif
 
     // save/load stuff
-    // todo: this is pretty much untested, and might not work as intended -- need to check that the keys are unique across the sequencers, otherwise we might end up with some weird overwriting behaviour
-    virtual LinkedList<String> *save_pattern_add_lines(LinkedList<String> *lines) {
+    virtual void setup_saveable_settings() override {
+        // inherit parent's settings
+        BaseSequencer::setup_saveable_settings();
+
         for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
             BaseSequencer *s = this->sequencers->get(i);
-            if (s!=nullptr)
-                s->add_save_lines_saveable_parameters(lines);
-        }
-        return lines;
-    }
-    virtual bool load_parse_key_value(String key, String value) {
-        for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-            BaseSequencer *s = this->sequencers->get(i);
-            if (s!=nullptr)
-                s->load_parse_key_value_saveable_parameters(key, value);
-        }
-        return false;
-    }
-
-    virtual void setup_saveable_parameters() override {
-        if (this->saveable_parameters==nullptr) {
-            ISaveableParameterHost::setup_saveable_parameters();
-
-            for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-                BaseSequencer *s = this->sequencers->get(i);
-                if (s!=nullptr)
-                    s->setup_saveable_parameters();
-            }
+            if (s==nullptr) continue;
+            register_child(s);
+            s->setup_saveable_settings();
         }
     }
 };

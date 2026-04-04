@@ -277,31 +277,19 @@ class EuclidianSequencer : public BaseSequencer {
         virtual void create_menu_euclidian_mutation(Euclidian::CombinePageOption combine_setting);
     #endif
 
+    virtual void setup_saveable_settings() override {
+        // inherit parent's settings
+        BaseSequencer::setup_saveable_settings();
 
-    // save/load stuff
-    virtual LinkedList<String> *save_pattern_add_lines(LinkedList<String> *lines) override {
-        lines = BaseSequencer::save_pattern_add_lines(lines);
-
-        return lines;
-    }
-    virtual bool load_parse_key_value(String key, String value) override {
-        return BaseSequencer::load_parse_key_value(key, value);
-    }
-
-    virtual void setup_saveable_parameters() override {
-        if (this->saveable_parameters==nullptr) {
-            BaseSequencer::setup_saveable_parameters();
-
-            this->saveable_parameters->add(new LSaveableParameter<float>("global_density_0", "Euclidian", &all_global_density[0]));
-            this->saveable_parameters->add(new LSaveableParameter<float>("global_density_1", "Euclidian", &all_global_density[1]));
-            this->saveable_parameters->add(new LSaveableParameter<float>("global_density_2", "Euclidian", &all_global_density[2]));
-            this->saveable_parameters->add(new LSaveableParameter<float>("global_density_3", "Euclidian", &all_global_density[3]));
-            this->saveable_parameters->add(new LSaveableParameter<bool>("mutate_enabled", "Euclidian", &this->mutate_enabled));
-            this->saveable_parameters->add(new LSaveableParameter<bool>("reset_before_mutate", "Euclidian", &this->reset_before_mutate));
-            this->saveable_parameters->add(new LSaveableParameter<bool>("add_phrase", "Euclidian", &this->add_phrase_to_seed));
-            this->saveable_parameters->add(new LSaveableParameter<bool>("fills_enabled", "Euclidian", &this->fills_enabled));
-            this->saveable_parameters->add(new LSaveableParameter<int>("seed", "Euclidian", &this->seed));
-            this->saveable_parameters->add(new LSaveableParameter<uint_fast8_t>("mutation_count", "Euclidian", &this->mutation_count));
-        }
+        register_setting(new LSaveableSetting<float>("Global Density 0", "Euclidian", &all_global_density[0]));
+        register_setting(new LSaveableSetting<float>("Global Density 1", "Euclidian", &all_global_density[1]));
+        register_setting(new LSaveableSetting<float>("Global Density 2", "Euclidian", &all_global_density[2]));
+        register_setting(new LSaveableSetting<float>("Global Density 3", "Euclidian", &all_global_density[3]));
+        register_setting(new LSaveableSetting<bool>("Mutate Enabled", "Euclidian", &this->mutate_enabled));
+        register_setting(new LSaveableSetting<bool>("Reset Before Mutate", "Euclidian", &this->reset_before_mutate));
+        register_setting(new LSaveableSetting<bool>("Add Phrase To Seed", "Euclidian", &this->add_phrase_to_seed));
+        register_setting(new LSaveableSetting<bool>("Fills Enabled", "Euclidian", &this->fills_enabled));
+        register_setting(new LSaveableSetting<int>("Seed", "Euclidian", &this->seed));
+        register_setting(new LSaveableSetting<uint_fast8_t>("Mutation Count", "Euclidian", &this->mutation_count));
     }
 };

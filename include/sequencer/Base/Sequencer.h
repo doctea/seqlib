@@ -6,7 +6,7 @@
     #include <LinkedList.h>
 #endif
 
-#include "SaveableParameters.h"
+#include "saveload_settings.h"
 
 #ifdef ENABLE_SHUFFLE
     #include "../shuffle.h"
@@ -20,7 +20,7 @@ class BaseOutput;
 class FloatParameter;
 class Menu;
 
-class BaseSequencer : virtual public ISaveableParameterHost {
+class BaseSequencer : virtual public ISaveableSettingHost {
     public:
 
     BaseSequencer() {}
@@ -95,19 +95,7 @@ class BaseSequencer : virtual public ISaveableParameterHost {
         virtual void make_menu_items(Menu *menu, int combine_pages);
     #endif
 
-    // save/load stuff
-    // todo: ideally, all this can be dealt with by inheriting from a file_manager "ISaveableParameterHost" class, or something like this
-    virtual LinkedList<String> *save_pattern_add_lines(LinkedList<String> *lines) {
-        ISaveableParameterHost::add_save_lines_saveable_parameters(lines);
-        return lines;
-    }
-    virtual bool load_parse_key_value(String key, String value) {
-        if (ISaveableParameterHost::load_parse_key_value_saveable_parameters(key, value))
-            return true;
-        return false;
-    }
-
-    virtual void setup_saveable_parameters() override;
+    virtual void setup_saveable_settings() override;
 };
 
 class SimpleSequencer : public BaseSequencer {

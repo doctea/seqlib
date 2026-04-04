@@ -22,8 +22,8 @@
     #include "parameters/Parameter.h"
 #endif
 
-#include "SaveableParameters.h"
-#include "outputs/SeqlibSaveableParameters.h"
+#include "saveload_settings.h"
+#include "outputs/SeqlibSaveableSettings.h"
 
 #define DEFAULT_VELOCITY    MIDI_MAX_VELOCITY
 
@@ -32,7 +32,7 @@
 class BaseOutput;
 class BaseSequencer;
 
-class BasePattern {
+class BasePattern : public ISaveableSettingHost {
     public:
 
     uint8_t steps = MAX_STEPS;
@@ -161,21 +161,20 @@ class BasePattern {
         virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, int combine_pages = 0);
     #endif
 
-    virtual void add_saveable_parameters(int pattern_index, LinkedList<SaveableParameterBase*> *target) {
+    virtual void add_saveable_settings(int pattern_index) {
         char prefix[40];
         snprintf(prefix, 40, "track_%i_", pattern_index);
-        target->add(new LSaveableParameter<uint8_t>((String(prefix) + String("steps")).c_str(), "BasePattern", &this->steps));
-        target->add(new LSaveableParameter<bool>((String(prefix) + String("locked")).c_str(), "BasePattern", &this->locked));
 
-        //target->add(new LSaveableParameter<bool>((String(prefix) + String("active_status")).c_str(), "EuclidianPattern", &this->active_status));
+        register_setting(new LSaveableSetting<uint8_t>((String(prefix) + String("steps")).c_str(), "BasePattern", &this->steps));
+        register_setting(new LSaveableSetting<bool>((String(prefix) + String("locked")).c_str(), "BasePattern", &this->locked));
+
         #ifdef ENABLE_SHUFFLE
-            target->add(new LSaveableParameter<uint8_t>((String(prefix) + String("shuffle_track")).c_str(), "EuclidianPattern", &this->shuffle_track));
+            register_setting(new LSaveableSetting<uint8_t>((String(prefix) + String("shuffle_track")).c_str(), "BasePattern", &this->shuffle_track));
         #endif
 
         // add the output pattern..
-        // todo: move this up into BasePattern and make it virtual?
-        target->add(new PatternOutputSaveableParameter((String(prefix) + String("output")).c_str(), "EuclidianPattern", this));
-
+        register_setting(new PatternOutputSaveableSetting((String(prefix) + String("output")).c_str(), "BasePattern", this));
+        
         // todo: add the rest of the params...?
     }
 };
