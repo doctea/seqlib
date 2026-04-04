@@ -82,6 +82,15 @@ class EnvelopeOutput : public MIDIDrumOutput {
             return this->envelope->get_parameters();
         }
     #endif
+
+    #ifdef ENABLE_STORAGE
+        virtual void setup_saveable_settings() override {
+            BaseOutput::setup_saveable_settings();
+
+            register_child(this->envelope);
+        }
+
+    #endif
 };
 
 

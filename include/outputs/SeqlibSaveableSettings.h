@@ -26,3 +26,4 @@ class PatternOutputSaveableSetting : public SaveableSettingBase {
         set_category(category_name);
     }
 };
+

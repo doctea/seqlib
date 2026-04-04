@@ -20,6 +20,16 @@ class BaseOutputProcessor : public ISaveableSettingHost {
             this->enabled = v;
         }
 
+        virtual void setup_saveable_settings() {
+            register_setting(new LSaveableSetting<bool>(
+                "Output enabled",
+                "BaseOutputProcessor",
+                &this->enabled,
+                [=](bool v) { this->set_enabled(v); },
+                [=]() -> bool { return this->is_enabled(); }
+            ));
+        }
+
 };
 
 //#include "envelopes.h"
@@ -138,6 +148,8 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
     virtual void setup_saveable_settings() override {
         // inherit parent's settings
         BaseOutputProcessor::setup_saveable_settings();
+
+        // register all of the output nodes
         const uint_fast8_t size = this->nodes->size();
         for (uint_fast8_t i = 0 ; i < size ; i++) {
             BaseOutput *o = this->nodes->get(i);
@@ -145,6 +157,66 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
 
             register_child(o);
         }
+
+        #ifdef ENABLE_SCALES
+            // global quantise
+            register_setting(new LSaveableSetting<bool>(
+                "Global quantise on",
+                "Quantise",
+                &this->global_quantise_on,
+                [=](bool v) { this->global_quantise_on = v; },
+                [=]() -> bool { return this->global_quantise_on; }
+            ));
+
+            register_setting(new LSaveableSetting<bool>(
+                "Global chord quantise on",
+                "Chord Quantise",
+                &this->global_quantise_chord_on,
+                [=](bool v) { this->global_quantise_chord_on = v; },
+                [=]() -> bool { return this->global_quantise_chord_on; }
+            ));
+
+            // register the global key and scale settings
+            register_setting(new LSaveableSetting<scale_index_t>(
+                "Global scale",
+                "Key/Scale",
+                &this->global_scale_identity.scale_number,
+                [=](scale_index_t v) { this->global_scale_identity.scale_number = v; },
+                [=]() -> scale_index_t { return this->global_scale_identity.scale_number; }
+            ));
+
+            register_setting(new LSaveableSetting<int_fast8_t>(
+                "Global key",
+                "Key/Scale",
+                &this->global_scale_identity.root_note,
+                [=](int_fast8_t v) { this->global_scale_identity.root_note = v; },
+                [=]() -> int_fast8_t { return this->global_scale_identity.root_note; }
+            ));
+
+            // global chord settings
+            register_setting(new LSaveableSetting<CHORD::Type>(
+                "Global chord type",
+                "Chord",
+                &this->global_chord_identity.type,
+                [=](CHORD::Type v) { this->global_chord_identity.type = v; },
+                [=]() -> CHORD::Type { return this->global_chord_identity.type; }
+            ));
+            register_setting(new LSaveableSetting<int8_t>(
+                "Global chord degree",
+                "Chord",
+                &this->global_chord_identity.degree,
+                [=](int8_t v) { this->global_chord_identity.degree = v; },
+                [=]() -> int8_t { return this->global_chord_identity.degree; }
+            ));
+            register_setting(new LSaveableSetting<int8_t>(
+                "Global chord inversion",
+                "Chord",
+                &this->global_chord_identity.inversion,
+                [=](int8_t v) { this->global_chord_identity.inversion = v; },
+                [=]() -> int8_t { return this->global_chord_identity.inversion; }
+            ));
+
+        #endif
     }
 };
 
