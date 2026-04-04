@@ -10,7 +10,7 @@ class EuclidianSequencer : public BaseSequencer {
     int_fast8_t number_added_patterns = 0;  // just so we can count how many patterns have been added, so we know where to add the next one
 
     int seed = 0;
-    uint_fast8_t mutate_minimum_pattern = 0, mutate_maximum_pattern = number_patterns;
+    uint_fast8_t mutate_minimum_pattern = 0, mutate_maximum_pattern = 0;
     uint_fast8_t mutation_count = DEFAULT_MUTATION_COUNT, effective_mutation_count = DEFAULT_MUTATION_COUNT;
     bool    reset_before_mutate = true, 
             mutate_enabled = true, 
@@ -76,8 +76,11 @@ class EuclidianSequencer : public BaseSequencer {
             Serial.printf("Error: cannot add more than %i patterns to EuclidianSequencer\n", number_patterns);
             return;
         }
+        
         this->patterns[number_added_patterns] = (EuclidianPattern*)pattern;
         number_added_patterns++;
+
+        mutate_maximum_pattern = number_added_patterns;
     }
 
     // parameters and settings
