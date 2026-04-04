@@ -42,7 +42,7 @@ class EuclidianSequencer : public BaseSequencer {
                 Serial.flush();
             }
             EuclidianPattern *p = new EuclidianPattern(available_outputs, i / (number_patterns / NUM_GLOBAL_DENSITY_GROUPS));
-            p->set_path_segment((String("pattern_") + String(i)).c_str());
+            p->set_path_segment_fmt("pattern_%i", i);
             this->add_pattern(p);
 
             #ifdef ENABLE_SHUFFLE
@@ -76,7 +76,7 @@ class EuclidianSequencer : public BaseSequencer {
             Serial.printf("Error: cannot add more than %i patterns to EuclidianSequencer\n", number_patterns);
             return;
         }
-        
+
         this->patterns[number_added_patterns] = (EuclidianPattern*)pattern;
         number_added_patterns++;
 
