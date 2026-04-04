@@ -22,7 +22,7 @@ class PatternOutputSaveableSetting : public SaveableSettingBase {
     PatternOutputSaveableSetting(const char *label, const char *category_name, BasePattern *target)
         : target(target)
     {
-        this->label = label;
-        this->category_name = category_name;
+        set_label(label);
+        set_category(category_name);
     }
 };

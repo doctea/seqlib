@@ -145,13 +145,15 @@ class MultiSequencer : public BaseSequencer {
         // inherit parent's settings
         // don't do that here cos we want to expose each of the child sequencers as 'sub-devices' in the 
         // save/load system, so we call register_child for each of them instead 
-        //BaseSequencer::setup_saveable_settings();
+        //BaseSequencer::setup_saveable_settings();   
 
+        Serial.printf("\n=== MultiSequencer::setup_saveable_settings() for sequencer %p with %i child sequencers...\n", this, this->sequencers->size()); Serial.flush();
         for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
             BaseSequencer *s = this->sequencers->get(i);
             if (s==nullptr) continue;
             register_child(s);
-            s->setup_saveable_settings();
         }
+        if (Serial) Serial.printf("=== MultiSequencer::setup_saveable_settings() done for sequencer %p\n\n", this); 
+        if (Serial) Serial.flush();
     }
 };

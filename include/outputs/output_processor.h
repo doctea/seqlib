@@ -144,7 +144,6 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
             if (o==nullptr) continue;
 
             register_child(o);
-            o->setup_saveable_settings();
         }
     }
 };
