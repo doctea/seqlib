@@ -53,6 +53,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
             set_global_scale_identity_target(&this->global_scale_identity);
             set_global_chord_identity_target(&this->global_chord_identity);
         #endif
+        set_path_segment("MIDIOutputProcessor");
     }
     virtual void addNode(BaseOutput* node) {
         this->nodes->add(node);
