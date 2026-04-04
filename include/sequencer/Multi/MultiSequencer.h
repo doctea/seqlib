@@ -7,14 +7,17 @@
 class MultiSequencer : public BaseSequencer {
     public:
     LinkedList<BaseSequencer*> *sequencers = nullptr;
+    int number_patterns = 0;
 
     MultiSequencer() : BaseSequencer() {
         this->sequencers = new LinkedList<BaseSequencer*>();
+        this->set_path_segment("MultiSequencer");
     }
     virtual ~MultiSequencer() {};
 
     virtual void addSequencer(BaseSequencer *sequencer) {
         this->sequencers->add(sequencer);
+        this->number_patterns += sequencer->get_number_patterns();
     }
 
     virtual SimplePattern *get_pattern(unsigned int pattern) override {
@@ -31,6 +34,18 @@ class MultiSequencer : public BaseSequencer {
         }
 
         return nullptr;
+    }
+    virtual uint16_t get_number_patterns() override {
+        // this is set whenever we add a sequencer or pattern
+        Serial.printf("MultiSequencer::get_number_patterns() returns %i\n", this->number_patterns);
+        return this->number_patterns;
+    }
+    virtual void add_pattern(BasePattern *pattern) override {
+        // add to the last sequencer by default, but this is a bit hacky and we should probably specify which sequencer to add to
+        if (this->sequencers->size() > 0) {
+            this->sequencers->get(this->sequencers->size() - 1)->add_pattern(pattern);
+            this->number_patterns += 1;
+        }
     }
 
     virtual void on_tick(int tick) override {
@@ -128,7 +143,9 @@ class MultiSequencer : public BaseSequencer {
     // save/load stuff
     virtual void setup_saveable_settings() override {
         // inherit parent's settings
-        BaseSequencer::setup_saveable_settings();
+        // don't do that here cos we want to expose each of the child sequencers as 'sub-devices' in the 
+        // save/load system, so we call register_child for each of them instead 
+        //BaseSequencer::setup_saveable_settings();
 
         for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
             BaseSequencer *s = this->sequencers->get(i);

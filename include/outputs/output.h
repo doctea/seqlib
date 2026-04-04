@@ -74,7 +74,9 @@ class MIDIBaseOutput : public BaseOutput {
     IMIDINoteAndCCTarget *output_wrapper; // = nullptr;
 
     MIDIBaseOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t note_number, int_fast8_t channel = 1) 
-        : BaseOutput(label), output_wrapper(output_wrapper), note_number(note_number), channel(channel) {}
+        : BaseOutput(label), output_wrapper(output_wrapper), note_number(note_number), channel(channel) {
+            this->set_path_segment(label);
+        }
 
     virtual int_fast8_t get_note_number() {
         return this->note_number;

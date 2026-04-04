@@ -75,8 +75,10 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
 void BaseSequencer::setup_saveable_settings() {
     ISaveableSettingHost::setup_saveable_settings();
 
-    for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
-        if (Serial) Serial.printf("BaseSequencer::setup_saveable_settings() for pattern [%i/%i]...\n", i+1, this->get_number_patterns()); Serial.flush();
+    if (Serial) Serial.printf("\n=== BaseSequencer::setup_saveable_settings() for sequencer %p with %i patterns...\n", this, this->get_number_patterns()); Serial.flush();
+    size_t pattern_count = this->get_number_patterns();
+    for (uint_fast8_t i = 0 ; i < pattern_count ; i++) {
+        //if (Serial) Serial.printf("BaseSequencer::setup_saveable_settings() for pattern [%i/%i]...\n", i+1, pattern_count); Serial.flush();
         BasePattern *p = this->get_pattern(i);
         if (p==nullptr) {
             if (Serial) Serial.printf("\tWARN: pattern %i is nullptr!\n", i); Serial.flush();
@@ -85,6 +87,8 @@ void BaseSequencer::setup_saveable_settings() {
         register_child(p);
         p->add_saveable_settings(i);   
     }
+    if (Serial) Serial.printf("=== BaseSequencer::setup_saveable_settings() done for sequencer %p\n\n", this); 
+    if (Serial) Serial.flush();
 }
 
 void SimpleSequencer::on_step(int step) {

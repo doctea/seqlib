@@ -162,18 +162,16 @@ class BasePattern : public ISaveableSettingHost {
     #endif
 
     virtual void add_saveable_settings(int pattern_index) {
-        char prefix[40];
-        snprintf(prefix, 40, "track_%i_", pattern_index);
 
-        register_setting(new LSaveableSetting<uint8_t>((String(prefix) + String("steps")).c_str(), "BasePattern", &this->steps));
-        register_setting(new LSaveableSetting<bool>((String(prefix) + String("locked")).c_str(), "BasePattern", &this->locked));
+        register_setting(new LSaveableSetting<uint8_t>("steps", "BasePattern", &this->steps));
+        register_setting(new LSaveableSetting<bool>("locked", "BasePattern", &this->locked));
 
         #ifdef ENABLE_SHUFFLE
-            register_setting(new LSaveableSetting<uint8_t>((String(prefix) + String("shuffle_track")).c_str(), "BasePattern", &this->shuffle_track));
+            register_setting(new LSaveableSetting<uint8_t>("shuffle_track", "BasePattern", &this->shuffle_track));
         #endif
 
         // add the output pattern..
-        register_setting(new PatternOutputSaveableSetting((String(prefix) + String("output")).c_str(), "BasePattern", this));
+        register_setting(new PatternOutputSaveableSetting("output", "BasePattern", this));
         
         // todo: add the rest of the params...?
     }

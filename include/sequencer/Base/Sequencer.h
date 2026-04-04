@@ -23,15 +23,19 @@ class Menu;
 class BaseSequencer : virtual public ISaveableSettingHost {
     public:
 
-    BaseSequencer() {}
+    BaseSequencer() {
+        this->set_path_segment("BaseSequencer");
+    }
     virtual ~BaseSequencer() = default;
 
     bool running = true;
-    uint_fast8_t number_patterns = 20;
+    //uint_fast8_t number_patterns = 0; // = 20;
     bool debug = false;
     bool shuffle_enabled = true;
 
     virtual SimplePattern *get_pattern(unsigned int pattern) = 0;
+    virtual void add_pattern(BasePattern *pattern) = 0;
+    virtual uint16_t get_number_patterns() = 0;
 
     virtual bool is_running() {
         return this->running;
@@ -40,9 +44,6 @@ class BaseSequencer : virtual public ISaveableSettingHost {
         this->running = state;
     }
 
-    virtual uint16_t get_number_patterns() {
-        return this->number_patterns;
-    }
 
     // called every tick, call the appropriate callbacks for the current tick, step, beat, bar, and phrase
     //virtual void on_tick(int tick) = 0;
@@ -120,9 +121,9 @@ class SimpleSequencer : public BaseSequencer {
         return (SimplePattern*)this->patterns->get(pattern);
     }
 
-    virtual void add_pattern(BasePattern *pattern) {
+    virtual void add_pattern(BasePattern *pattern) override {
         this->patterns->add(pattern);
-    };
+    }
 
     virtual void on_tick(int tick) override;
 

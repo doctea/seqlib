@@ -14,9 +14,9 @@ class EuclidianPattern : public SimplePattern {
     arguments_t used_arguments;
     int maximum_steps = TIME_SIG_MAX_STEPS_PER_BAR;
 
-    int8_t global_density_channel = 0;
+    int8_t global_density_group = 0;
 
-    EuclidianPattern(LinkedList<BaseOutput*> *available_outputs, int8_t global_density_channel, int steps = MAX_STEPS, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
+    EuclidianPattern(LinkedList<BaseOutput*> *available_outputs, int8_t global_density_group, int steps = MAX_STEPS, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
         : SimplePattern(available_outputs)
         {
             default_arguments.steps = steps;
@@ -27,7 +27,7 @@ class EuclidianPattern : public SimplePattern {
 
             this->maximum_steps = steps > 0 ? steps : default_arguments.steps;
 
-            this->set_global_density_channel(global_density_channel);
+            this->set_global_density_group(global_density_group);
             set_arguments(&default_arguments);
             make_euclid();
         }
@@ -60,13 +60,13 @@ class EuclidianPattern : public SimplePattern {
     }
 
     virtual float get_global_density() {
-        return all_global_density[this->global_density_channel];
+        return all_global_density[this->global_density_group];
     }
-    virtual int8_t get_global_density_channel() {
-        return this->global_density_channel;
+    virtual int8_t get_global_density_group() {
+        return this->global_density_group;
     }
-    virtual void set_global_density_channel(int8_t channel) {
-        this->global_density_channel = channel % NUM_GLOBAL_DENSITY_CHANNELS;
+    virtual void set_global_density_group(int8_t channel) {
+        this->global_density_group = channel % NUM_GLOBAL_DENSITY_GROUPS;
     }
 
     FLASHMEM
@@ -203,16 +203,14 @@ class EuclidianPattern : public SimplePattern {
 
     virtual void add_saveable_settings(int pattern_index) override {
         SimplePattern::add_saveable_settings(pattern_index);
-        char prefix[40];
-        snprintf(prefix, 40, "track_%i_", pattern_index);
 
-        register_setting(new LSaveableSetting<int_fast8_t>((String(prefix) + String("steps")).c_str(), "EuclidianPattern", &this->arguments.steps), true);
-        register_setting(new LSaveableSetting<int8_t>((String(prefix) + String("global_density_channel")).c_str(), "EuclidianPattern", &this->global_density_channel));
-        register_setting(new LSaveableSetting<int_fast8_t>((String(prefix) + String("pulses")).c_str(), "EuclidianPattern", &this->arguments.pulses));
-        register_setting(new LSaveableSetting<int_fast8_t>((String(prefix) + String("rotation")).c_str(), "EuclidianPattern", &this->arguments.rotation));
-        register_setting(new LSaveableSetting<int_fast8_t>((String(prefix) + String("duration")).c_str(), "EuclidianPattern", &this->arguments.duration));
+        register_setting(new LSaveableSetting<int_fast8_t>("steps", "EuclidianPattern", &this->arguments.steps), true);
+        register_setting(new LSaveableSetting<int8_t>("global_density_group", "EuclidianPattern", &this->global_density_group));
+        register_setting(new LSaveableSetting<int_fast8_t>("pulses", "EuclidianPattern", &this->arguments.pulses));
+        register_setting(new LSaveableSetting<int_fast8_t>("rotation", "EuclidianPattern", &this->arguments.rotation));
+        register_setting(new LSaveableSetting<int_fast8_t>("duration", "EuclidianPattern", &this->arguments.duration));
         //register_setting(new LSaveableSetting<float>(String(prefix) + String("effective_euclidian_density"), "EuclidianPattern", &this->arguments.effective_euclidian_density));
-        register_setting(new LSaveableSetting<int_fast8_t>((String(prefix) + String("tie_on")).c_str(), "EuclidianPattern", &this->arguments.tie_on));
+        register_setting(new LSaveableSetting<int_fast8_t>("tie_on", "EuclidianPattern", &this->arguments.tie_on));
     }
 
 };

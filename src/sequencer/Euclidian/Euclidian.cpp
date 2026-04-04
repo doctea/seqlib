@@ -57,27 +57,28 @@
 
             if (this->debug) Serial.printf("initialise_patterns for pattern[% 2i/% 2i]...\n", i+1, this->get_number_patterns());
 
+            if (this->get_pattern(i)==nullptr) {
+                if (this->debug) {
+                    Serial.printf("\tWARNING: initialise_patterns for pattern[% 2i]: null pattern!\n", i);
+                    Serial.flush();
+                }
+                continue;
+            }
+            BaseOutput *output = this->get_pattern(i)->get_output();
+            if (output == nullptr) {
+                Serial.printf("\tWARNING: initialise_patterns for pattern[% 2i]: no output assigned to pattern\n", i);
+                Serial.flush();
+                continue;
+            }
+
             bool found_assignment = false;
             for (int args = 0 ; args < num_initial_arguments ; args++) {
-                if (this->patterns[i]==nullptr) {
-                    if (this->debug) {
-                        Serial.printf("\tWARNING: initialise_patterns for pattern[% 2i]: null pattern!\n", i);
-                        Serial.flush();
-                    }
-                    continue;
-                }
-                BaseOutput *output = this->patterns[i]->get_output();
-                if (output == nullptr) {
-                    Serial.printf("\tWARNING: initialise_patterns for pattern[% 2i]: no output assigned to pattern\n", i);
-                    Serial.flush();
-                    continue;
-                }
                 if (output->matches_label(initial_arguments[args].associated_label)) {
                     if (this->debug) {
                         Serial.printf("\tinitialise_patterns for pattern[% 2i]: found initial_arguments[% 2i] with label '%s' matched output label '%s'\n", i, args, initial_arguments[args].associated_label, output->label);
                         Serial.flush();
                     }
-                    this->patterns[i]->set_default_arguments(&initial_arguments[args]);
+                    ((EuclidianPattern*)this->get_pattern(i))->set_default_arguments(&initial_arguments[args]);
                     found_assignment = true;
                     break;
                 }
@@ -100,12 +101,12 @@
     }
 #endif
 
-float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
+float all_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
     DEFAULT_DENSITY, DEFAULT_DENSITY
-    #if NUM_GLOBAL_DENSITY_CHANNELS > 2
+    #if NUM_GLOBAL_DENSITY_GROUPS > 2
         , DEFAULT_DENSITY
     #endif
-    #if NUM_GLOBAL_DENSITY_CHANNELS > 3
+    #if NUM_GLOBAL_DENSITY_GROUPS > 3
         , DEFAULT_DENSITY
     #endif
 };
@@ -144,7 +145,7 @@ float all_global_density[NUM_GLOBAL_DENSITY_CHANNELS] = {
         // todo: unsure what this comment originally meant?!.... store these in the object, create a page for the local-only ones
 
         // multiple global density parameters
-        for (int i = 0  ; i < NUM_GLOBAL_DENSITY_CHANNELS ; i++) {
+        for (int i = 0  ; i < NUM_GLOBAL_DENSITY_GROUPS ; i++) {
             parameters->add(new LDataParameter<float>(
                 (String("Global density ") + String(i)).c_str(),
                 [=] (float v) { all_global_density[i] = v; },
