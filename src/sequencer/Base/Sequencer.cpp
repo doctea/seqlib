@@ -87,7 +87,8 @@ void BaseSequencer::setup_saveable_settings() {
         p->add_saveable_settings(i);   
     }
     
-    if (Serial) Serial.printf("... BaseSequencer::setup_saveable_settings() after doing settings, free ram is %u\n\n", rp2040.getFreeHeap()); Serial.flush();
+    if (Serial) 
+        Serial.printf("... BaseSequencer::setup_saveable_settings() after doing settings, free ram is %u\n\n", freeRam()); Serial.flush();
 
     // register parameters for this output
     LinkedList<FloatParameter*> *parameters = this->getParameters();
@@ -98,7 +99,7 @@ void BaseSequencer::setup_saveable_settings() {
         }
     }
     
-    if (Serial) Serial.printf("=== BaseSequencer::setup_saveable_settings() done for sequencer  %p, free ram is %u\n\n", this, rp2040.getFreeHeap()); Serial.flush();
+    if (Serial) Serial.printf("=== BaseSequencer::setup_saveable_settings() done for sequencer  %p, free ram is %u\n\n", this, freeRam()); Serial.flush();
     if (Serial) Serial.flush();
 }
 
@@ -139,7 +140,7 @@ void SimpleSequencer::on_step_end(int step) {
     void SimpleSequencer::on_step_shuffled(int8_t track, int step) {
         if (!is_shuffle_enabled()) return;
 
-        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+        for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
             if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
                 //if (Serial) Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
                 this->get_pattern(i)->process_step(step);
@@ -150,7 +151,7 @@ void SimpleSequencer::on_step_end(int step) {
     void SimpleSequencer::on_step_end_shuffled(int8_t track, int step) {
         if (!is_shuffle_enabled()) return;
 
-        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+        for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
             if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
                 this->get_pattern(i)->process_step_end(step);
             }
