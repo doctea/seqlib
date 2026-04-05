@@ -17,7 +17,7 @@ class ISequencerEventReceiver {
 #include "parameters/Parameter.h"
 
 // class to receive triggers from a sequencer and return values to the owner Processor
-class BaseOutput : public ISequencerEventReceiver, public ISaveableSettingHost {
+class BaseOutput : public ISequencerEventReceiver, public SHStorage<8, 8> {  // parameter children; own settings
     public:
     bool enabled = true;
     bool has_gone_on = false;

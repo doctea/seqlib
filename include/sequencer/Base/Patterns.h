@@ -32,7 +32,7 @@
 class BaseOutput;
 class BaseSequencer;
 
-class BasePattern : public ISaveableSettingHost {
+class BasePattern : public SHStorage<8, 8> {  // parameter children; steps/locked/output/shuffle settings
     public:
 
     uint8_t steps = MAX_STEPS;

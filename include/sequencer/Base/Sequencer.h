@@ -20,7 +20,7 @@ class BaseOutput;
 class FloatParameter;
 class Menu;
 
-class BaseSequencer : virtual public ISaveableSettingHost {
+class BaseSequencer : virtual public SHStorage<20, 4> {  // up to 16 pattern + parameter children; few own settings
     public:
 
     BaseSequencer() {

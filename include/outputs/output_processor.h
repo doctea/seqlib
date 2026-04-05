@@ -6,7 +6,7 @@
 #include "envelopes.h"
 
 // holds individual output nodes and processes them (eg queries them for the pitch and sends note on/offs)
-class BaseOutputProcessor : public ISaveableSettingHost {
+class BaseOutputProcessor : public SHStorage<4, 12> {  // 1-2 output children; 8+ settings
 
     bool enabled = true;
 
