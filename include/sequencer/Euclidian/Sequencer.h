@@ -3,7 +3,7 @@
 #include "Euclidian.h"
 #include "Pattern.h"
 
-class EuclidianSequencer : public BaseSequencer {
+class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<20, 12> {
     // todo: list of EuclidianPatterns...? althoguh array is probably fine
     EuclidianPattern **patterns = nullptr;
     int_fast8_t number_patterns = 0;
