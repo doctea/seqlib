@@ -23,7 +23,7 @@ void TuringMachinePattern::trigger_on_for_step(int step) {
 
         if (this->output!=nullptr) {
             //Serial.printf("TuringMachinePattern: triggering on for step %i\twith note %i\t (%s)\n", step % get_effective_steps(), this->events[step%get_effective_steps()].note, get_note_name_c(this->events[step%get_effective_steps()].note));
-            this->output->receive_event(1,0,note_to_play);
+            this->output->receive_event(1,0,note_to_play,this->get_velocity());
             this->output->process();
             note_held = true;
 
@@ -36,7 +36,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
     this->triggered_on_tick = -1;
     if (this->output!=nullptr) {
         //Serial.printf("TuringMachinePattern: triggering off for step %i\twith note %i\t (%s)\n", step % get_effective_steps(), this->current_note_number, get_note_name_c(this->current_note_number));
-        this->output->receive_event(0,1,this->current_note_number);
+        this->output->receive_event(0,1,this->current_note_number,this->get_velocity());
         this->output->process();
         note_held = false;
     }

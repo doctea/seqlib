@@ -69,7 +69,7 @@ class MIDIBaseOutput : public BaseOutput {
     
     int8_t note_number = NOTE_OFF, last_note_number = NOTE_OFF;
     int_fast8_t channel = 1;
-    int_fast8_t event_value_1, event_value_2, event_value_3;
+    int_fast8_t event_value_1, event_value_2, event_value_3, event_value_4;
 
     IMIDINoteAndCCTarget *output_wrapper; // = nullptr;
 
@@ -118,7 +118,7 @@ class MIDIBaseOutput : public BaseOutput {
             if (is_enabled() && is_valid_note(note_number)) {
                 Debug_printf("\t\tMIDIBaseOutput#process: goes on note\t%i\t(%s) \n", note_number, get_note_name_c(note_number));
                 set_last_note_number(note_number);
-                output_wrapper->sendNoteOn(note_number, MIDI_MAX_VELOCITY, get_channel());
+                output_wrapper->sendNoteOn(note_number, this->event_value_4, get_channel());
                 this->has_gone_on = true;
             }
             //count += i;
@@ -144,15 +144,16 @@ class MIDIBaseOutput : public BaseOutput {
     }
 
     // receive an event from a sequencer
-    virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3) override {
-        this->event_value_1 += event_value_1;
-        this->event_value_2 += event_value_2;
-        this->event_value_3 += event_value_3;
+    virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3, int_fast8_t event_value_4) override {
+        this->event_value_1 += event_value_1;   // note ons?
+        this->event_value_2 += event_value_2;   // note offs?
+        this->event_value_3 = event_value_3;    // used for carrying note value
+        this->event_value_4 = event_value_4;    // used for carrying velocity value
     }
 
     // forget the last message
     virtual void reset() {
-        this->event_value_1 = this->event_value_2 = this->event_value_3 = 0;
+        this->event_value_1 = this->event_value_2 = this->event_value_3 = this->event_value_4 = 0;
     }
 
     virtual void setup_saveable_settings() override {

@@ -11,7 +11,7 @@
 
 class ISequencerEventReceiver {
     public:
-    virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3) = 0;
+    virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3, int_fast8_t event_value_4) = 0;
 };
 
 #include "parameters/Parameter.h"
@@ -29,8 +29,9 @@ class BaseOutput : public ISequencerEventReceiver, public SHStorage<8, 8> {  // 
     
     // event_value_1 = send a note on
     // event_value_2 = send a note off
-    // event_value_3 = ??
-    virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3) = 0;
+    // event_value_3 = note value (0-127)
+    // event_value_4 = velocity value (0-127)
+    //virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3, int_fast8_t event_value_4) = 0;
     virtual void reset() = 0;
     virtual bool matches_label(const char *compare) {
         return strcmp(compare, this->label)==0;
@@ -107,7 +108,7 @@ class NullOutput : public BaseOutput {
     public:
     NullOutput(const char *label) : BaseOutput(label) {}
 
-    virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3) override {
+    virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3, int_fast8_t event_value_4) override {
         // do nothing
     }
     virtual void reset() override {

@@ -89,6 +89,12 @@ class BasePattern : virtual public SHStorage<8, 8> {  // parameter children; ste
     }
     virtual const char *get_output_label();
 
+    // get the velocity for the note about to be played (current step)
+    // 127 by default, but can be overridden by patterns with velocity control
+    virtual int8_t get_velocity() {
+        return DEFAULT_VELOCITY;
+    }
+
     // todo: ability to pass in step, offset, and bar number, like we have for the current euclidian...?
     //          or, tbf, we can derive this from the 'tick'
     virtual bool query_note_on_for_tick(unsigned int tick) = 0;

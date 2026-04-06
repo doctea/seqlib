@@ -192,6 +192,24 @@ class EuclidianPattern : public SimplePattern, virtual public SHStorage<20, 12> 
         ;
     }
 
+    virtual int8_t get_velocity() override {
+        //return this->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR) ? DEFAULT_VELOCITY : 0;
+        // add some accenting based on where in the bar we are, to make it sound more interesting?
+        // start with a simple version that just accents the first beat of the bar, then we can experiment with more complex accent patterns later if we want to
+        int default_velocity = 96;
+
+        if (is_bpm_on_phrase(ticks)) {
+            return MIDI_MAX_VELOCITY; //127;
+        } else if (is_bpm_on_half_phrase(ticks)) {
+            return 115;
+        } else if (is_bpm_on_beat(ticks) && BPM_CURRENT_BEAT_OF_BAR % 3 == 0) {
+            return 110;
+        } else {
+            //return (int)((float)DEFAULT_VELOCITY * 0.75);
+            return default_velocity + random(-8, 8);
+        }
+    }
+
     #ifdef ENABLE_SCREEN
         //FLASHMEM
         virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, int combine_settings = (Euclidian::CombinePageOption)Euclidian::COMBINE_NONE) override;
