@@ -204,13 +204,13 @@ class EuclidianPattern : public SimplePattern, virtual public SHStorage<20, 12> 
     virtual void add_saveable_settings(int pattern_index) override {
         SimplePattern::add_saveable_settings(pattern_index);
 
-        register_setting(new LSaveableSetting<int_fast8_t>("steps", "EuclidianPattern", &this->arguments.steps), true);
-        register_setting(new LSaveableSetting<int8_t>("global_density_group", "EuclidianPattern", &this->global_density_group));
-        register_setting(new LSaveableSetting<int_fast8_t>("pulses", "EuclidianPattern", &this->arguments.pulses));
-        register_setting(new LSaveableSetting<int_fast8_t>("rotation", "EuclidianPattern", &this->arguments.rotation));
-        register_setting(new LSaveableSetting<int_fast8_t>("duration", "EuclidianPattern", &this->arguments.duration));
+        register_setting(new LSaveableSetting<int_fast8_t>("steps", "EuclidianPattern", &this->arguments.steps), SL_SCOPE_SCENE | SL_SCOPE_PROJECT, true);
+        register_setting(new LSaveableSetting<int8_t>("global_density_group", "EuclidianPattern", &this->global_density_group), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+        register_setting(new LSaveableSetting<int_fast8_t>("pulses", "EuclidianPattern", &this->arguments.pulses), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+        register_setting(new LSaveableSetting<int_fast8_t>("rotation", "EuclidianPattern", &this->arguments.rotation), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+        register_setting(new LSaveableSetting<int_fast8_t>("duration", "EuclidianPattern", &this->arguments.duration), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
         //register_setting(new LSaveableSetting<float>(String(prefix) + String("effective_euclidian_density"), "EuclidianPattern", &this->arguments.effective_euclidian_density));
-        register_setting(new LSaveableSetting<int_fast8_t>("tie_on", "EuclidianPattern", &this->arguments.tie_on));
+        register_setting(new LSaveableSetting<int_fast8_t>("tie_on", "EuclidianPattern", &this->arguments.tie_on), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
     }
 
 };

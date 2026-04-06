@@ -22,12 +22,13 @@ class BaseOutputProcessor : public SHStorage<4, 12> {  // 1-2 output children; 8
 
         virtual void setup_saveable_settings() {
             register_setting(new LSaveableSetting<bool>(
-                "Output enabled",
-                "BaseOutputProcessor",
-                &this->enabled,
-                [=](bool v) { this->set_enabled(v); },
-                [=]() -> bool { return this->is_enabled(); }
-            ));
+                    "Output enabled",
+                    "BaseOutputProcessor",
+                    &this->enabled,
+                    [=](bool v) { this->set_enabled(v); },
+                    [=]() -> bool { return this->is_enabled(); }
+                ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow enabled state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
         }
 
 };
@@ -162,60 +163,76 @@ class MIDIOutputProcessor : public BaseOutputProcessor {
         #ifdef ENABLE_SCALES
             // global quantise
             register_setting(new LSaveableSetting<bool>(
-                "Global quantise on",
-                "Quantise",
-                &this->global_quantise_on,
-                [=](bool v) { this->global_quantise_on = v; },
-                [=]() -> bool { return this->global_quantise_on; }
-            ));
+                    "Global quantise on",
+                    "Quantise",
+                    &this->global_quantise_on,
+                    [=](bool v) { this->global_quantise_on = v; },
+                    [=]() -> bool { return this->global_quantise_on; }
+                ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global quantise state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
 
             register_setting(new LSaveableSetting<bool>(
-                "Global chord quantise on",
-                "Chord Quantise",
-                &this->global_quantise_chord_on,
-                [=](bool v) { this->global_quantise_chord_on = v; },
-                [=]() -> bool { return this->global_quantise_chord_on; }
-            ));
+                    "Global chord quantise on",
+                    "Chord Quantise",
+                    &this->global_quantise_chord_on,
+                    [=](bool v) { this->global_quantise_chord_on = v; },
+                    [=]() -> bool { return this->global_quantise_chord_on; }
+                ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global chord quantise state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
 
             // register the global key and scale settings
             register_setting(new LSaveableSetting<scale_index_t>(
-                "Global scale",
-                "Key/Scale",
-                &this->global_scale_identity.scale_number,
-                [=](scale_index_t v) { this->global_scale_identity.scale_number = v; },
-                [=]() -> scale_index_t { return this->global_scale_identity.scale_number; }
-            ));
+                    "Global scale",
+                    "Key/Scale",
+                    &this->global_scale_identity.scale_number,
+                    [=](scale_index_t v) { this->global_scale_identity.scale_number = v; },
+                    [=]() -> scale_index_t { return this->global_scale_identity.scale_number; }
+                ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global scale state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
 
             register_setting(new LSaveableSetting<int_fast8_t>(
-                "Global key",
-                "Key/Scale",
-                &this->global_scale_identity.root_note,
-                [=](int_fast8_t v) { this->global_scale_identity.root_note = v; },
-                [=]() -> int_fast8_t { return this->global_scale_identity.root_note; }
-            ));
+                    "Global key",
+                    "Key/Scale",
+                    &this->global_scale_identity.root_note,
+                    [=](int_fast8_t v) { this->global_scale_identity.root_note = v; },
+                    [=]() -> int_fast8_t { return this->global_scale_identity.root_note; }
+                ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global key state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );  
+
+            register_setting(new LSaveableSetting<int_fast8_t>(
+                    "Global key",
+                    "Key/Scale",
+                    &this->global_scale_identity.root_note,
+                    [=](int_fast8_t v) { this->global_scale_identity.root_note = v; },
+                    [=]() -> int_fast8_t { return this->global_scale_identity.root_note; }
+                ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global key state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
 
             // global chord settings
             register_setting(new LSaveableSetting<CHORD::Type>(
-                "Global chord type",
-                "Chord",
-                &this->global_chord_identity.type,
-                [=](CHORD::Type v) { this->global_chord_identity.type = v; },
-                [=]() -> CHORD::Type { return this->global_chord_identity.type; }
-            ));
+                    "Global chord type",
+                    "Chord",
+                    &this->global_chord_identity.type,
+                    [=](CHORD::Type v) { this->global_chord_identity.type = v; },
+                    [=]() -> CHORD::Type { return this->global_chord_identity.type; }
+                ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global chord type state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
             register_setting(new LSaveableSetting<int8_t>(
-                "Global chord degree",
-                "Chord",
-                &this->global_chord_identity.degree,
-                [=](int8_t v) { this->global_chord_identity.degree = v; },
-                [=]() -> int8_t { return this->global_chord_identity.degree; }
-            ));
+                    "Global chord degree",
+                    "Chord",
+                    &this->global_chord_identity.degree,
+                    [=](int8_t v) { this->global_chord_identity.degree = v; },
+                    [=]() -> int8_t { return this->global_chord_identity.degree; }
+                ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global chord degree state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
             register_setting(new LSaveableSetting<int8_t>(
-                "Global chord inversion",
-                "Chord",
-                &this->global_chord_identity.inversion,
-                [=](int8_t v) { this->global_chord_identity.inversion = v; },
-                [=]() -> int8_t { return this->global_chord_identity.inversion; }
-            ));
+                    "Global chord inversion",
+                    "Chord",
+                    &this->global_chord_identity.inversion,
+                    [=](int8_t v) { this->global_chord_identity.inversion = v; },
+                    [=]() -> int8_t { return this->global_chord_identity.inversion; }
+                ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global chord inversion state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
         #endif
 
     }

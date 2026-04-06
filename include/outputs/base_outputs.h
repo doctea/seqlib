@@ -87,13 +87,13 @@ class BaseOutput : public ISequencerEventReceiver, public SHStorage<8, 8> {  // 
                 [=](void) -> bool {
                     return this->is_enabled();
                 }
-            )
+            ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow enabled state to be saved at scene or project level, since it's more of a preference setting than a performance setting
         );
 
         // save parameters for this output
         LinkedList<FloatParameter*> *parameters = this->get_parameters();
         if (parameters!=nullptr) {
-            for (int i = 0 ; i < parameters->size() ; i++) {
+            for (size_t i = 0 ; i < parameters->size() ; i++) {
                 FloatParameter *param = parameters->get(i);
                 register_child(param);
             }

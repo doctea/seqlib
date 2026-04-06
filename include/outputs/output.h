@@ -170,7 +170,7 @@ class MIDIBaseOutput : public BaseOutput {
                 [=](void) -> int_fast8_t {
                     return this->channel;
                 }
-            )
+            ), SL_SCOPE_PROJECT  // allow MIDI channel to be saved at scene or project level, since it's more of a preference setting than a performance setting
         );
     }
 };
@@ -275,7 +275,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                         [=](void) -> bool {
                             return this->is_quantise();
                         }
-                    )
+                    ), SL_SCOPE_SCENE  // allow quantise state to be saved at scene level, since it's more of a performance setting than a preference setting
                 );
 
                 register_setting(
@@ -289,7 +289,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                         [=](void) -> int_fast8_t {
                             return this->octave;
                         }
-                    )
+                    ), SL_SCOPE_SCENE  // allow octave to be saved at scene level, since it's more of a performance setting than a preference setting
                 );
 
                 register_setting(
@@ -303,7 +303,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                         [=](void) -> int_fast8_t {
                             return this->get_scale_root();
                         }
-                    )
+                    ), SL_SCOPE_SCENE  // allow scale root to be saved at scene level, since it's more of a performance setting than a preference setting
                 );
 
                 register_setting(
@@ -317,7 +317,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                         [=](void) -> scale_index_t {
                             return this->get_scale_number();
                         }
-                    )
+                    ), SL_SCOPE_SCENE  // allow scale to be saved at scene level, since it's more of a performance setting than a preference setting
                 );
             }
     };

@@ -103,10 +103,10 @@ class TuringMachinePattern : public SimplePattern {
 
     virtual void add_saveable_settings(int pattern_index) override {
 
-        register_setting(new LSaveableSetting<int16_t>("duration", "TuringMachinePattern", &this->current_duration));
-        register_setting(new LSaveableSetting<float>("probability", "TuringMachinePattern", &this->probability));
-        register_setting(new LSaveableSetting<int8_t>("lowest_note", "TuringMachinePattern", &this->lowest_note));
-        register_setting(new LSaveableSetting<int8_t>("highest_note", "TuringMachinePattern", &this->highest_note));
+        register_setting(new LSaveableSetting<int16_t>("duration", "TuringMachinePattern", &this->current_duration), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+        register_setting(new LSaveableSetting<float>("probability", "TuringMachinePattern", &this->probability), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+        register_setting(new LSaveableSetting<int8_t>("lowest_note", "TuringMachinePattern", &this->lowest_note), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+        register_setting(new LSaveableSetting<int8_t>("highest_note", "TuringMachinePattern", &this->highest_note), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
     }
 
     virtual void setLowestNote(int8_t note) {
