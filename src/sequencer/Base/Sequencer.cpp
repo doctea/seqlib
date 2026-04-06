@@ -11,7 +11,7 @@
 void SimpleSequencer::on_tick(int tick) {
     BaseSequencer::on_tick(tick);
 
-    for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
+    for (size_t i = 0 ; i < this->get_number_patterns() ; i++) {
         this->get_pattern(i)->process_tick(tick);
     }
 };
@@ -37,14 +37,14 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
     #include "mymenu/menuitems_sequencer.h"
     void BaseSequencer::make_menu_items(Menu *menu, int combine_pages) {
         menu->add_page("BaseSequencer");
-        for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
+        for (size_t i = 0 ; i < this->get_number_patterns() ; i++) {
             char label[MENU_C_MAX];
             snprintf(label, MENU_C_MAX, "Pattern %i", i);
             menu->add(new PatternDisplay(label, this->get_pattern(i)));
             this->get_pattern(i)->set_colour(menu->get_next_colour());
         }
 
-        for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
+        for (size_t i = 0 ; i < this->get_number_patterns() ; i++) {
             //Serial.printf("adding controls for pattern %i..\n", i);
             BasePattern *p = (BasePattern *)this->get_pattern(i);
 
@@ -62,7 +62,7 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
         LinkedList<FloatParameter*> *params = this->getParameters();
         if (params==nullptr)
             return nullptr;
-        for (unsigned int i = 0 ; i < params->size() ; i++) {
+        for (size_t i = 0 ; i < params->size() ; i++) {
             FloatParameter *p = params->get(i);
             if (p!=nullptr && strcmp(p->label, name)==0)
                 return p;
@@ -93,7 +93,7 @@ void BaseSequencer::setup_saveable_settings() {
     // register parameters for this output
     LinkedList<FloatParameter*> *parameters = this->getParameters();
     if (parameters!=nullptr) {
-        for (int i = 0 ; i < parameters->size() ; i++) {
+        for (size_t i = 0 ; i < parameters->size() ; i++) {
             FloatParameter *param = parameters->get(i);
             register_child(param);
         }

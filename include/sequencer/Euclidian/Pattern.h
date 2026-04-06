@@ -2,7 +2,7 @@
 
 #include "Euclidian.h"
 
-class EuclidianPattern : public SimplePattern {
+class EuclidianPattern : public SimplePattern, virtual public SHStorage<20, 12> {
     public:
 
     bool locked = false;

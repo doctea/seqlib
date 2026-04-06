@@ -32,7 +32,7 @@
 class BaseOutput;
 class BaseSequencer;
 
-class BasePattern : public SHStorage<8, 8> {  // parameter children; steps/locked/output/shuffle settings
+class BasePattern : virtual public SHStorage<8, 8> {  // parameter children; steps/locked/output/shuffle settings
     public:
 
     uint8_t steps = MAX_STEPS;
@@ -176,7 +176,7 @@ class BasePattern : public SHStorage<8, 8> {  // parameter children; steps/locke
         // register parameters for this pattern
         LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
         if (parameters!=nullptr) {
-            for (int i = 0 ; i < parameters->size() ; i++) {
+            for (size_t i = 0 ; i < parameters->size() ; i++) {
                 FloatParameter *param = parameters->get(i);
                 register_child(param);
             }
@@ -259,7 +259,7 @@ class SimplePattern : public BasePattern {
 
         if (
             this->note_held && 
-            (ticks >= triggered_on_tick + this->current_duration || ticks < triggered_on_tick)
+            ((uint32_t)ticks >= triggered_on_tick + this->current_duration || (uint32_t)ticks < triggered_on_tick)
         ) {
             this->trigger_off_for_step(step);
         }

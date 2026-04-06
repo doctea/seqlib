@@ -3,7 +3,7 @@
 #include "Euclidian.h"
 #include "Pattern.h"
 
-class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<20, 12> {
+class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<40, 12> {
     // todo: list of EuclidianPatterns...? althoguh array is probably fine
     EuclidianPattern **patterns = nullptr;
     int_fast8_t number_patterns = 0;
@@ -64,7 +64,7 @@ class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<20, 12
 
     // pattern management
     virtual SimplePattern *get_pattern(unsigned int pattern) override {
-        if (pattern < 0 || pattern >= number_patterns)
+        if (pattern < 0 || pattern >= get_number_patterns())
             return nullptr;
         return this->patterns[pattern];
     }
@@ -155,7 +155,7 @@ class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<20, 12
     // reset all patterns to their default parameters, with optional force param to ignore locked status
     void reset_patterns(bool force = false) {
         //if (Serial) Serial.println("reset_patterns!");
-        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+        for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
             reset_pattern(i, false);
         }
     }
@@ -174,10 +174,10 @@ class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<20, 12
             if (is_mutate_enabled()) {
                 uint_fast8_t tick_of_step = tick % TICKS_PER_STEP;
                 if (tick_of_step==TICKS_PER_STEP-1) {
-                    for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
-                        if (!get_pattern(i)->is_locked()) {
+                    for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
+                        if (!this->get_pattern(i)->is_locked()) {
                             //if (Serial) Serial.println("mutate every tick!");
-                            ((EuclidianPattern*)get_pattern(i))->make_euclid();
+                            ((EuclidianPattern*)this->get_pattern(i))->make_euclid();
                         }
                     }
                 }
@@ -187,13 +187,13 @@ class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<20, 12
         // call base on_tick to trigger the appropriate callbacks for the current tick, step, beat, bar, and phrase
         BaseSequencer::on_tick(tick);
 
-        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+        for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
             this->get_pattern(i)->process_tick(tick);
         }
     };
     virtual void on_step(int step) override {
         //Serial.printf("EuclidianSequencer::on_step(%i), is_shuffle_enabled()=%i\n", step, is_shuffle_enabled());
-        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+        for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
             #ifdef ENABLE_SHUFFLE
                 if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->get_pattern(i)->is_shuffled())) {
                     //if (Serial) Serial.printf("at tick %i, received on_step(%i, %i) callback for non-shuffled pattern\n", ticks, step, i);
@@ -207,7 +207,7 @@ class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<20, 12
 
     virtual void on_step_end(int step) override {
         //Serial.printf("at tick %i, on_step_end(%i)\n", ticks, step);
-        for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+        for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
             #ifdef ENABLE_SHUFFLE
                 if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->get_pattern(i)->is_shuffled())) {
                     this->get_pattern(i)->process_step_end(step);
@@ -222,7 +222,7 @@ class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<20, 12
         virtual void on_step_shuffled(int8_t track, int step) override {
             if (!is_shuffle_enabled()) return;
 
-            for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+            for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
                 if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
                     //if (Serial) Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
                     this->get_pattern(i)->process_step(step);
@@ -233,7 +233,7 @@ class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<20, 12
         virtual void on_step_end_shuffled(int8_t track, int step) override {
             if (!is_shuffle_enabled()) return;
 
-            for (uint_fast8_t i = 0 ; i < number_patterns ; i++) {
+            for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
                 if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
                     this->get_pattern(i)->process_step_end(step);
                 }
@@ -258,7 +258,13 @@ class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<20, 12
                 }
             }
             for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
-                uint_fast8_t ran = random(mutate_minimum_pattern % number_patterns, constrain(1 + mutate_maximum_pattern, (unsigned int)0, number_patterns));
+                uint_fast8_t ran = random(
+                    mutate_minimum_pattern % number_patterns, 
+                    constrain(
+                        1 + mutate_maximum_pattern, 
+                        (unsigned int)0, number_patterns
+                    )
+                );
                 if (!this->get_pattern(ran)->is_locked()) {
                     ((EuclidianPattern*)this->get_pattern(ran))->set_rotation(((EuclidianPattern*)this->get_pattern(ran))->get_rotation() * 2);
                     //this->patterns[ran]->arguments.pulses *= 2;
