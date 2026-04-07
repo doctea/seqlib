@@ -4,12 +4,12 @@
 
 #include "../Base/Sequencer.h"
 
-class MultiSequencer : public BaseSequencer {
+class MultiSequencer : public SimpleSequencer {
     public:
     LinkedList<BaseSequencer*> *sequencers = nullptr;
     int number_patterns = 0;
 
-    MultiSequencer() : BaseSequencer() {
+    MultiSequencer() : SimpleSequencer(nullptr) {
         this->sequencers = new LinkedList<BaseSequencer*>();
         this->set_path_segment("MultiSequencer");
     }
@@ -37,7 +37,7 @@ class MultiSequencer : public BaseSequencer {
     }
     virtual uint16_t get_number_patterns() override {
         // this is set whenever we add a sequencer or pattern
-        Serial.printf("MultiSequencer::get_number_patterns() returns %i\n", this->number_patterns);
+        //Serial.printf("MultiSequencer::get_number_patterns() returns %i\n", this->number_patterns);
         return this->number_patterns;
     }
     virtual void add_pattern(BasePattern *pattern) override {
@@ -48,6 +48,7 @@ class MultiSequencer : public BaseSequencer {
         }
     }
 
+    /*
     virtual void on_tick(int tick) override {
         for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
             this->sequencers->get(i)->on_tick(tick);
@@ -84,8 +85,9 @@ class MultiSequencer : public BaseSequencer {
         for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
             this->sequencers->get(i)->on_step_end(step);
         }
-    }
+    }*/
 
+    /*
     #ifdef ENABLE_SHUFFLE
         virtual void on_step_shuffled(int8_t track, int step) override {
             for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
@@ -108,11 +110,16 @@ class MultiSequencer : public BaseSequencer {
             }
         }
     #endif
+    */
 
     //virtual void configure_pattern_output(int index, BaseOutput *output);
     
     #if defined(ENABLE_PARAMETERS)
+        LinkedList<FloatParameter*> *parameters = nullptr;
         virtual LinkedList<FloatParameter*> *getParameters() {
+            if (this->parameters!=nullptr) 
+                return this->parameters;
+
             LinkedList<FloatParameter*> *params = new LinkedList<FloatParameter*>();
             for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
                 BaseSequencer *s = this->sequencers->get(i);
@@ -141,19 +148,21 @@ class MultiSequencer : public BaseSequencer {
     #endif
 
     // save/load stuff
-    virtual void setup_saveable_settings() override {
-        // inherit parent's settings
-        // don't do that here cos we want to expose each of the child sequencers as 'sub-devices' in the 
-        // save/load system, so we call register_child for each of them instead 
-        //BaseSequencer::setup_saveable_settings();   
+    #ifdef ENABLE_STORAGE
+        virtual void setup_saveable_settings() override {
+            // inherit parent's settings
+            // don't do that here cos we want to expose each of the child sequencers as 'sub-devices' in the 
+            // save/load system, so we call register_child for each of them instead 
+            //BaseSequencer::setup_saveable_settings();   
 
-        Serial.printf("\n=== MultiSequencer::setup_saveable_settings() for sequencer %p with %i child sequencers...\n", this, this->sequencers->size()); Serial.flush();
-        for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-            BaseSequencer *s = this->sequencers->get(i);
-            if (s==nullptr) continue;
-            register_child(s);
+            Serial.printf("\n=== MultiSequencer::setup_saveable_settings() for sequencer %p with %i child sequencers...\n", this, this->sequencers->size()); Serial.flush();
+            for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
+                BaseSequencer *s = this->sequencers->get(i);
+                if (s==nullptr) continue;
+                register_child(s);
+            }
+            if (Serial) Serial.printf("=== MultiSequencer::setup_saveable_settings() done for sequencer %p, free ram is %u\n\n", this, rp2040.getFreeHeap()); Serial.flush();
+            if (Serial) Serial.flush();
         }
-        if (Serial) Serial.printf("=== MultiSequencer::setup_saveable_settings() done for sequencer %p, free ram is %u\n\n", this, rp2040.getFreeHeap()); Serial.flush();
-        if (Serial) Serial.flush();
-    }
+    #endif
 };
