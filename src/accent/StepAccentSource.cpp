@@ -1,3 +1,4 @@
+#ifdef ENABLE_ACCENTS
 
 #ifdef ENABLE_SCREEN
     #include "mymenu/menuitems_accent.h"
@@ -9,5 +10,7 @@
         menu->add(new GlobalAccentPage());
 
     }
+
+#endif
 
 #endif

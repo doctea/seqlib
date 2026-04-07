@@ -66,10 +66,10 @@ class BaseSequencer
             this->on_beat(BPM_CURRENT_BEAT_OF_BAR);
         }
         if (is_bpm_on_sixteenth(tick)) {
-            this->on_step(BPM_CURRENT_STEP_OF_SONG);
+            this->on_step(tick / TICKS_PER_STEP);
         } else if (is_bpm_on_sixteenth(tick,1)) {
             // this re-enabled 2025-05-14 for Compulidean -- if usb_teensy_clocker/Microlidian start playing up then this might be the reason?
-            this->on_step_end(BPM_CURRENT_STEP_OF_SONG);
+            this->on_step_end(tick / TICKS_PER_STEP);
         }
     }
 

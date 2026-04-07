@@ -1,3 +1,5 @@
+#ifdef ENABLE_ACCENTS
+
 // menuitems_accent.h
 // UI page for controlling the global StepAccentSource.
 //
@@ -16,6 +18,9 @@
 #include "menuitems_lambda.h"
 #include "accent/IAccentSource.h"
 #include "accent/StepAccentSource.h"
+
+#define STEP_EDITOR_GRAPH_HEIGHT 50
+
 
 // ---------------------------------------------------------------------------
 // GlobalAccentStepEditorControl
@@ -45,6 +50,9 @@ public:
     // Display — bar-chart rows
     // -----------------------------------------------------------------------
     virtual int renderValue(bool selected, bool opened, uint16_t /*max_character_width*/) override {
+        // Must set text size explicitly — caller (MenuItem::display) sets size 0.
+        tft->setTextSize(1);
+
         Coord pos(tft->getCursorX(), tft->getCursorY());
         const int initial_x = pos.x;
         const int initial_y = pos.y;
@@ -57,10 +65,14 @@ public:
             return tft->getCursorY();
         }
 
-        const uint8_t num_steps = src->get_num_steps();
+        const uint16_t num_steps = src->get_num_steps();
         const int     avail_w   = tft->width() - initial_x;
         const int     bar_w     = max(1, avail_w / (int)num_steps);
-        const int     bar_max_h = tft->getRowHeight() * 2;   // two text rows tall
+        const int     bar_max_h = STEP_EDITOR_GRAPH_HEIGHT;   // fixed pixel height for bars, independent of text size
+        const bool    show_labels = (bar_w >= tft->characterWidth());
+
+        // Single clear of the entire bar area — much faster than erasing each bar individually.
+        tft->fillRect(initial_x, initial_y, avail_w, bar_max_h, BLACK);
 
         for (int i = 0; i < (int)num_steps; i++) {
             const float level = src->get_accent_raw(i);
@@ -82,24 +94,22 @@ public:
             else
                 fill_colour = tft->halfbright_565(C_WHITE);
 
-            // erase old bar first
-            tft->fillRect(x, initial_y, bar_w - 1, bar_max_h, BLACK);
-
             if (bar_h > 0)
                 tft->fillRect(x, y_top, bar_w - 1, bar_h, fill_colour);
             else
                 tft->drawRect(x, initial_y + bar_max_h - 1, bar_w - 1, 1, GREY);
 
-            // single-char level label underneath
-            this->colours(is_selected && (selected || opened), fill_colour, this->default_bg);
-            tft->setCursor(x, initial_y + bar_max_h + 1);
-            // show level as 0-8 hex digit
-            int level_digit = (int)roundf(level / STEP_SIZE);
-            tft->printf("%1X", level_digit);
+            // digit label — only when bars are wide enough to fit a character
+            if (show_labels) {
+                this->colours(is_selected && (selected || opened), fill_colour, this->default_bg);
+                tft->setCursor(x, initial_y + bar_max_h + 1);
+                tft->printf("%1X", (int)roundf(level / STEP_SIZE));
+            }
         }
 
-        tft->setCursor(initial_x, initial_y + bar_max_h + tft->getRowHeight());
-        tft->println();
+        const int label_row_h = show_labels ? tft->getRowHeight() : 0;
+        tft->setCursor(initial_x, initial_y + bar_max_h + label_row_h);
+        //tft->println();
 
         return tft->getCursorY();
     }
@@ -209,12 +219,12 @@ public:
             StepAccentSource* src = global_accent_source ? global_accent_source->as_step_source() : nullptr;
             if (!src) return;
             const uint8_t strong_110[] = {0};   // +10% on first beat of phrase
-            const uint8_t strong_95[]  = {0, 16, 32, 48};   // +5% on first beat of bars
+            const uint8_t strong_95[]  = {16, 32, 48};   // +5% on first beat of bars
             const uint8_t strong_85[]  = {4, 12, 20, 28, 36, 44, 52, 60};   // +5% on other strong beats
-            src->set_all(0.625f);   // 62.5% on everything else
-            src->set_pattern(strong_110, 1, 1.10f, 0.625f);
-            src->set_pattern(strong_95, 4, 0.95f, 0.625f);
-            src->set_pattern(strong_85, 8, 0.85f, 0.625f);
+            src->set_all(0.7f);   // 70% on everything else
+            src->set_pattern(strong_110, 1, 1.10f, 0.7f);
+            src->set_pattern(strong_95, 3, 0.95f, 0.7f);
+            src->set_pattern(strong_85, 8, 0.85f, 0.7f);
         }));
 
         // Preset: strong quarter-note beats (steps 0, 4, 8, 12)
@@ -222,7 +232,8 @@ public:
             StepAccentSource* src = global_accent_source ? global_accent_source->as_step_source() : nullptr;
             if (!src) return;
             const uint8_t strong[] = {0, 4, 8, 12};
-            src->set_pattern(strong, 4, 1.0f, 0.625f);
+            src->set_all(0.7f);   // 70% on weak beats
+            src->set_pattern(strong, 4, 1.0f, 0.7f);
         }));
 
         // Preset: flat full velocity
@@ -283,3 +294,5 @@ public:
 };
 
 #endif // ENABLE_SCREEN
+
+#endif

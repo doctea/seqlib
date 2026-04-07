@@ -27,7 +27,9 @@
     #include "outputs/SeqlibSaveableSettings.h"
 #endif
 
-#include "accent/IAccentSource.h"
+#ifdef ENABLE_ACCENTS
+    #include "accent/IAccentSource.h"
+#endif
 
 #define DEFAULT_VELOCITY    MIDI_MAX_VELOCITY
 
@@ -87,20 +89,22 @@ class BasePattern
     }
     virtual const char *get_output_label();
 
-    // ---------------------------------------------------------------------------
-    // Accent source — controls per-step velocity scaling.
-    // nullptr means "use global_accent_source"; if that is also nullptr, velocity
-    // is returned unmodified (equivalent to a ConstantAccentSource(1.0)).
-    // ---------------------------------------------------------------------------
-    IAccentSource* accent_source = nullptr;
+    #ifdef ENABLE_ACCENTS
+        // ---------------------------------------------------------------------------
+        // Accent source — controls per-step velocity scaling.
+        // nullptr means "use global_accent_source"; if that is also nullptr, velocity
+        // is returned unmodified (equivalent to a ConstantAccentSource(1.0)).
+        // ---------------------------------------------------------------------------
+        IAccentSource* accent_source = nullptr;
 
-    IAccentSource* get_effective_accent_source() const {
-        return accent_source ? accent_source : global_accent_source;
-    }
+        IAccentSource* get_effective_accent_source() const {
+            return accent_source ? accent_source : global_accent_source;
+        }
 
-    void set_accent_source(IAccentSource* src) {
-        accent_source = src;
-    }
+        void set_accent_source(IAccentSource* src) {
+            accent_source = src;
+        }
+    #endif
 
     // get the velocity for the note about to be played (current step)
     // 127 by default, but can be overridden by patterns with velocity control
@@ -224,11 +228,13 @@ class SimplePattern : public BasePattern {
 
     // Override get_velocity() to apply accent scaling.
     virtual int8_t get_velocity() override {
-        IAccentSource* src = get_effective_accent_source();
-        if (src) {
-            float accent = src->get_accent((int)triggered_on_step, BPM_CURRENT_STEP_OF_SONG);
-            return (int8_t)constrain((int)((float)DEFAULT_VELOCITY * accent), 0, MIDI_MAX_VELOCITY);
-        }
+        #ifdef ENABLE_ACCENTS
+            IAccentSource* src = get_effective_accent_source();
+            if (src) {
+                float accent = src->get_accent(BPM_CURRENT_STEP_OF_SONG, BPM_CURRENT_STEP_OF_PHRASE);
+                return (int8_t)constrain((int)((float)DEFAULT_VELOCITY * accent), 0, MIDI_MAX_VELOCITY);
+            }
+        #endif
         return DEFAULT_VELOCITY;
     }
 

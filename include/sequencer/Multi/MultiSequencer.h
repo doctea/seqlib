@@ -50,7 +50,6 @@ class MultiSequencer : public SimpleSequencer {
         }
     }
 
-    /*
     virtual void on_tick(int tick) override {
         for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
             this->sequencers->get(i)->on_tick(tick);
@@ -87,9 +86,8 @@ class MultiSequencer : public SimpleSequencer {
         for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
             this->sequencers->get(i)->on_step_end(step);
         }
-    }*/
+    }
 
-    /*
     #ifdef ENABLE_SHUFFLE
         virtual void on_step_shuffled(int8_t track, int step) override {
             for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
@@ -112,7 +110,6 @@ class MultiSequencer : public SimpleSequencer {
             }
         }
     #endif
-    */
 
     //virtual void configure_pattern_output(int index, BaseOutput *output);
     

@@ -1,3 +1,5 @@
+#ifdef ENABLE_ACCENTS
+
 // StepAccentSource.h
 // Per-step accent source: holds a float multiplier for each step in a bar.
 // Steps beyond the configured length wrap (modulo).
@@ -22,11 +24,11 @@
 
 
 class StepAccentSource : public IAccentSource {
-    float*   accent_levels = nullptr;
-    uint8_t  num_steps;
+    float*    accent_levels = nullptr;
+    uint16_t  num_steps;
 
 public:
-    explicit StepAccentSource(uint8_t steps = 16) : num_steps(steps) {
+    explicit StepAccentSource(uint16_t steps = 16) : num_steps(steps) {
         accent_levels = (float*)CALLOC_FUNC(steps, sizeof(float));
         set_all(1.0f);
 
@@ -42,7 +44,7 @@ public:
     // RTTI-free downcast (see IAccentSource::as_step_source)
     virtual StepAccentSource* as_step_source() override { return this; }
 
-    uint8_t get_num_steps() const { return num_steps; }
+    uint16_t get_num_steps() const { return num_steps; }
 
     void set_accent(int step, float value) {
         if (accent_levels && step >= 0 && step < (int)num_steps)
@@ -55,7 +57,7 @@ public:
     }
 
     void set_all(float value) {
-        for (uint8_t i = 0; i < num_steps; ++i)
+        for (uint16_t i = 0; i < num_steps; ++i)
             accent_levels[i] = value;
     }
 
@@ -63,7 +65,7 @@ public:
     // strong_steps: array of step indices that get 'strong' level; rest get 'weak'
     void set_pattern(const uint8_t* strong_steps, uint8_t count,
                      float strong = 1.0f, float weak = 0.6f) {
-        set_all(weak);
+        //set_all(weak);
         for (uint8_t i = 0; i < count; ++i)
             set_accent(strong_steps[i], strong);
     }
@@ -91,3 +93,5 @@ public:
     #endif
 
 };
+
+#endif

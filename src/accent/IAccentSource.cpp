@@ -4,6 +4,10 @@
 // If left as nullptr, BasePattern::get_effective_accent_source() returns nullptr
 // and get_velocity() returns DEFAULT_VELOCITY unchanged.
 
-#include "accent/IAccentSource.h"
+#ifdef ENABLE_ACCENTS
 
-IAccentSource* global_accent_source = nullptr;
+    #include "accent/IAccentSource.h"
+
+    IAccentSource* global_accent_source = nullptr;
+
+#endif

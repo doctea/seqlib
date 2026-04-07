@@ -1,3 +1,5 @@
+#ifdef ENABLE_ACCENTS
+
 // IAccentSource.h
 // Interface for per-step velocity accent sources.
 //
@@ -104,3 +106,6 @@ public:
         }
     #endif
 };
+
+
+#endif
