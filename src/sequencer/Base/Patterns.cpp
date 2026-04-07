@@ -3,6 +3,18 @@
 #include "sequencer/Base/Patterns.h"
 #include "outputs/base_outputs.h"
 
+void BasePattern::set_output_by_name(const char *output_name) {
+    if (this->available_outputs!=nullptr) {
+        for (size_t i = 0 ; i < this->available_outputs->size() ; i++) {
+            BaseOutput *o = this->available_outputs->get(i);
+            if (o->matches_label(output_name)) {
+                this->set_output(o);
+                return;
+            }
+        }
+    }
+}
+
 const char *BasePattern::get_output_label() {        
     if (this->output!=nullptr)
         return this->output->label;

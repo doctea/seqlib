@@ -6,7 +6,9 @@
     #include <LinkedList.h>
 #endif
 
-#include "saveload_settings.h"
+#ifdef ENABLE_STORAGE
+    #include "saveload_settings.h"
+#endif
 
 #ifdef ENABLE_SHUFFLE
     #include "../shuffle.h"
@@ -20,11 +22,17 @@ class BaseOutput;
 class FloatParameter;
 class Menu;
 
-class BaseSequencer : virtual public SHStorage<20, 4> {  // up to 16 pattern + parameter children; few own settings
+class BaseSequencer 
+    #ifdef ENABLE_STORAGE
+        : virtual public SHStorage<20, 4>   // up to 16 pattern + parameter children; few own settings
+    #endif
+    {
     public:
 
     BaseSequencer() {
-        this->set_path_segment("BaseSequencer");
+        #ifdef ENABLE_STORAGE
+            this->set_path_segment("BaseSequencer");
+        #endif
     }
     virtual ~BaseSequencer() = default;
 
@@ -96,7 +104,9 @@ class BaseSequencer : virtual public SHStorage<20, 4> {  // up to 16 pattern + p
         virtual void make_menu_items(Menu *menu, int combine_pages);
     #endif
 
-    virtual void setup_saveable_settings() override;
+    #ifdef ENABLE_STORAGE
+        virtual void setup_saveable_settings() override;
+    #endif
 };
 
 class SimpleSequencer : public BaseSequencer {

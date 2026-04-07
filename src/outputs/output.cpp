@@ -71,7 +71,9 @@ void setup_output(IMIDINoteAndCCTarget *output_target, MIDIOutputProcessor *proc
         processor = new FullDrumKitMIDIOutputProcessor(output_target);
     }
     output_processor = processor;     // todo: set this up dynamically, probably reading from a config file
-    output_processor->set_path_segment("MIDIOutputProcessor");
+    #ifdef ENABLE_STORAGE
+        output_processor->set_path_segment("MIDIOutputProcessor");
+    #endif
     if (Serial) { Serial.println("exiting setup_output"); Serial_flush(); }
 }
 

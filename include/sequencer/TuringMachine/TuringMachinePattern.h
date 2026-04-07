@@ -101,13 +101,16 @@ class TuringMachinePattern : public SimplePattern {
         virtual LinkedList<FloatParameter*> *getParameters(unsigned int i) override;
     #endif
 
-    virtual void add_saveable_settings(int pattern_index) override {
-
-        register_setting(new LSaveableSetting<int16_t>("duration", "TuringMachinePattern", &this->current_duration), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-        register_setting(new LSaveableSetting<float>("probability", "TuringMachinePattern", &this->probability), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-        register_setting(new LSaveableSetting<int8_t>("lowest_note", "TuringMachinePattern", &this->lowest_note), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-        register_setting(new LSaveableSetting<int8_t>("highest_note", "TuringMachinePattern", &this->highest_note), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-    }
+    #ifdef ENABLE_STORAGE
+        virtual void add_saveable_settings(int pattern_index) override {
+            SimplePattern::add_saveable_settings(pattern_index);
+            
+            register_setting(new LSaveableSetting<int16_t>("duration", "TuringMachinePattern", &this->current_duration), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new LSaveableSetting<float>("probability", "TuringMachinePattern", &this->probability), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new LSaveableSetting<int8_t>("lowest_note", "TuringMachinePattern", &this->lowest_note), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new LSaveableSetting<int8_t>("highest_note", "TuringMachinePattern", &this->highest_note), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+        }
+    #endif
 
     virtual void setLowestNote(int8_t note) {
         // don't allow highest note to be set higher than highest note

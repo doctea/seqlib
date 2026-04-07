@@ -3,7 +3,11 @@
 #include "Euclidian.h"
 #include "Pattern.h"
 
-class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<40, 12> {
+class EuclidianSequencer : public BaseSequencer
+    #ifdef ENABLE_STORAGE
+        , virtual public SHStorage<40, 12>
+    #endif
+    {
     // todo: list of EuclidianPatterns...? althoguh array is probably fine
     EuclidianPattern **patterns = nullptr;
     int_fast8_t number_patterns = 0;
@@ -26,7 +30,9 @@ class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<40, 12
     // need to pass desired number_patterns so that we can pre-allocate the patterns array... default to 20
     EuclidianSequencer(LinkedList<BaseOutput*> *available_outputs, int8_t number_patterns = 20) : BaseSequencer() {
 
-        this->set_path_segment("EuclidianSequencer");
+        #ifdef ENABLE_STORAGE
+             this->set_path_segment("EuclidianSequencer");
+        #endif
 
         EuclidianPattern *p = nullptr;
         if (number_patterns > 0) {
@@ -42,7 +48,9 @@ class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<40, 12
                 Serial.flush();
             }
             EuclidianPattern *p = new EuclidianPattern(available_outputs, i / (number_patterns / NUM_GLOBAL_DENSITY_GROUPS));
-            p->set_path_segment_fmt("pattern_%i", i);
+            #ifdef ENABLE_STORAGE
+                 p->set_path_segment_fmt("pattern_%i", i);
+            #endif
             this->add_pattern(p);
 
             #ifdef ENABLE_SHUFFLE
@@ -314,49 +322,51 @@ class EuclidianSequencer : public BaseSequencer, virtual public SHStorage<40, 12
         virtual void create_menu_euclidian_mutation(Euclidian::CombinePageOption combine_setting);
     #endif
 
-    virtual void setup_saveable_settings() override {
-        // inherit parent's settings
-        BaseSequencer::setup_saveable_settings();
+    #ifdef ENABLE_STORAGE
+        virtual void setup_saveable_settings() override {
+            // inherit parent's settings
+            BaseSequencer::setup_saveable_settings();
 
-        register_setting(
-            new LSaveableSetting<float>("Global Density 0", "Euclidian", &all_global_density[0]), 
-            SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global density to be saved at scene or project level, since it's more of a preference setting than a performance setting
-        );
-        register_setting(
-            new LSaveableSetting<float>("Global Density 1", "Euclidian", &all_global_density[1]), 
-            SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global density to be saved at scene or project level, since it's more of a preference setting than a performance setting
-        );
-        register_setting(
-            new LSaveableSetting<float>("Global Density 2", "Euclidian", &all_global_density[2]), 
-            SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global density to be saved at scene or project level, since it's more of a preference setting than a performance setting
-        );
-        register_setting(
-            new LSaveableSetting<float>("Global Density 3", "Euclidian", &all_global_density[3]), 
-            SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global density to be saved at scene or project level, since it's more of a preference setting than a performance setting
-        );
-        register_setting(
-            new LSaveableSetting<bool>("Mutate Enabled", "Euclidian", &this->mutate_enabled),
-            SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow mutate enabled state to be saved at scene or project level, since it's more of a preference setting than a performance setting
-        );
-        register_setting(
-            new LSaveableSetting<bool>("Reset Before Mutate", "Euclidian", &this->reset_before_mutate),
-            SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow reset before mutate state to be saved at scene or project level, since it's more of a preference setting than a performance setting
-        );
-        register_setting(
-            new LSaveableSetting<bool>("Add Phrase To Seed", "Euclidian", &this->add_phrase_to_seed),
-            SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow add phrase to seed state to be saved at scene or project level, since it's more of a preference setting than a performance setting
-        );
-        register_setting(
-            new LSaveableSetting<bool>("Fills Enabled", "Euclidian", &this->fills_enabled),
-            SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow fills enabled state to be saved at scene or project level, since it's more of a preference setting than a performance setting
-        );
-        register_setting(
-            new LSaveableSetting<int>("Seed", "Euclidian", &this->seed),
-            SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow seed state to be saved at scene or project level, since it's more of a preference setting than a performance setting
-        );
-        register_setting(
-            new LSaveableSetting<uint_fast8_t>("Mutation Count", "Euclidian", &this->mutation_count),
-            SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow mutation count state to be saved at scene or project level, since it's more of a preference setting than a performance setting
-        );
-    }
+            register_setting(
+                new LSaveableSetting<float>("Global Density 0", "Euclidian", &all_global_density[0]), 
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global density to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
+            register_setting(
+                new LSaveableSetting<float>("Global Density 1", "Euclidian", &all_global_density[1]), 
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global density to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
+            register_setting(
+                new LSaveableSetting<float>("Global Density 2", "Euclidian", &all_global_density[2]), 
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global density to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
+            register_setting(
+                new LSaveableSetting<float>("Global Density 3", "Euclidian", &all_global_density[3]), 
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global density to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
+            register_setting(
+                new LSaveableSetting<bool>("Mutate Enabled", "Euclidian", &this->mutate_enabled),
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow mutate enabled state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
+            register_setting(
+                new LSaveableSetting<bool>("Reset Before Mutate", "Euclidian", &this->reset_before_mutate),
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow reset before mutate state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
+            register_setting(
+                new LSaveableSetting<bool>("Add Phrase To Seed", "Euclidian", &this->add_phrase_to_seed),
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow add phrase to seed state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
+            register_setting(
+                new LSaveableSetting<bool>("Fills Enabled", "Euclidian", &this->fills_enabled),
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow fills enabled state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
+            register_setting(
+                new LSaveableSetting<int>("Seed", "Euclidian", &this->seed),
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow seed state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
+            register_setting(
+                new LSaveableSetting<uint_fast8_t>("Mutation Count", "Euclidian", &this->mutation_count),
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow mutation count state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
+        }
+    #endif
 };

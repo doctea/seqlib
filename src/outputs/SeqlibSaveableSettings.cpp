@@ -1,3 +1,5 @@
+#ifdef ENABLE_STORAGE
+
 #include "outputs/SeqlibSaveableSettings.h"
 #include "sequencer/Base/Patterns.h"
 
@@ -22,3 +24,5 @@ bool PatternOutputSaveableSetting::parse_key_value(const char* key, const char* 
     }
     return false;
 }
+
+#endif

@@ -7,8 +7,9 @@
     #include "menu.h"
 #endif
 
-#include "saveload_settings.h"
-
+#ifdef ENABLE_STORAGE
+    #include "saveload_settings.h"
+#endif
 class ISequencerEventReceiver {
     public:
     virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3, int_fast8_t event_value_4) = 0;
@@ -17,7 +18,11 @@ class ISequencerEventReceiver {
 #include "parameters/Parameter.h"
 
 // class to receive triggers from a sequencer and return values to the owner Processor
-class BaseOutput : public ISequencerEventReceiver, public SHStorage<8, 8> {  // parameter children; own settings
+class BaseOutput : public ISequencerEventReceiver
+    #ifdef ENABLE_STORAGE
+        , virtual public SHStorage<8, 8> // parameter children; own settings
+    #endif
+    {
     public:
     bool enabled = true;
     bool has_gone_on = false;
@@ -73,33 +78,35 @@ class BaseOutput : public ISequencerEventReceiver, public SHStorage<8, 8> {  // 
         }
     #endif
 
-    virtual void setup_saveable_settings() override {
-        // inherit parent's settings
-        ISaveableSettingHost::setup_saveable_settings();
+    #ifdef ENABLE_STORAGE
+        virtual void setup_saveable_settings() override {
+            // inherit parent's settings
+            ISaveableSettingHost::setup_saveable_settings();
 
-        register_setting(
-            new LSaveableSetting<bool>(
-                "Enabled",
-                "BaseOutput",
-                &this->enabled,
-                [=](bool value) -> void {
-                    this->set_enabled(value);
-                },
-                [=](void) -> bool {
-                    return this->is_enabled();
+            register_setting(
+                new LSaveableSetting<bool>(
+                    "Enabled",
+                    "BaseOutput",
+                    &this->enabled,
+                    [=](bool value) -> void {
+                        this->set_enabled(value);
+                    },
+                    [=](void) -> bool {
+                        return this->is_enabled();
+                    }
+                ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow enabled state to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
+
+            // save parameters for this output
+            LinkedList<FloatParameter*> *parameters = this->get_parameters();
+            if (parameters!=nullptr) {
+                for (size_t i = 0 ; i < parameters->size() ; i++) {
+                    FloatParameter *param = parameters->get(i);
+                    register_child(param);
                 }
-            ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow enabled state to be saved at scene or project level, since it's more of a preference setting than a performance setting
-        );
-
-        // save parameters for this output
-        LinkedList<FloatParameter*> *parameters = this->get_parameters();
-        if (parameters!=nullptr) {
-            for (size_t i = 0 ; i < parameters->size() ; i++) {
-                FloatParameter *param = parameters->get(i);
-                register_child(param);
             }
         }
-    }
+    #endif
 
 };
 

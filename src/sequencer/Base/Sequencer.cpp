@@ -71,37 +71,39 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
     }
 #endif
 
-void BaseSequencer::setup_saveable_settings() {
-    ISaveableSettingHost::setup_saveable_settings();
+#ifdef ENABLE_STORAGE
+    void BaseSequencer::setup_saveable_settings() {
+        ISaveableSettingHost::setup_saveable_settings();
 
-    if (Serial) Serial.printf("\n=== BaseSequencer::setup_saveable_settings() for sequencer %p with %i patterns...\n", this, this->get_number_patterns()); Serial.flush();
-    size_t pattern_count = this->get_number_patterns();
-    for (uint_fast8_t i = 0 ; i < pattern_count ; i++) {
-        //if (Serial) Serial.printf("BaseSequencer::setup_saveable_settings() for pattern [%i/%i]...\n", i+1, pattern_count); Serial.flush();
-        BasePattern *p = this->get_pattern(i);
-        if (p==nullptr) {
-            if (Serial) Serial.printf("\tWARN: pattern %i is nullptr!\n", i); Serial.flush();
-            continue;
+        if (Serial) Serial.printf("\n=== BaseSequencer::setup_saveable_settings() for sequencer %p with %i patterns...\n", this, this->get_number_patterns()); Serial.flush();
+        size_t pattern_count = this->get_number_patterns();
+        for (uint_fast8_t i = 0 ; i < pattern_count ; i++) {
+            //if (Serial) Serial.printf("BaseSequencer::setup_saveable_settings() for pattern [%i/%i]...\n", i+1, pattern_count); Serial.flush();
+            BasePattern *p = this->get_pattern(i);
+            if (p==nullptr) {
+                if (Serial) Serial.printf("\tWARN: pattern %i is nullptr!\n", i); Serial.flush();
+                continue;
+            }
+            register_child(p);
+            p->add_saveable_settings(i);   
         }
-        register_child(p);
-        p->add_saveable_settings(i);   
-    }
-    
-    if (Serial) 
-        Serial.printf("... BaseSequencer::setup_saveable_settings() after doing settings, free ram is %u\n\n", freeRam()); Serial.flush();
+        
+        if (Serial) 
+            Serial.printf("... BaseSequencer::setup_saveable_settings() after doing settings, free ram is %u\n\n", freeRam()); Serial.flush();
 
-    // register parameters for this output
-    LinkedList<FloatParameter*> *parameters = this->getParameters();
-    if (parameters!=nullptr) {
-        for (size_t i = 0 ; i < parameters->size() ; i++) {
-            FloatParameter *param = parameters->get(i);
-            register_child(param);
+        // register parameters for this output
+        LinkedList<FloatParameter*> *parameters = this->getParameters();
+        if (parameters!=nullptr) {
+            for (size_t i = 0 ; i < parameters->size() ; i++) {
+                FloatParameter *param = parameters->get(i);
+                register_child(param);
+            }
         }
+        
+        if (Serial) Serial.printf("=== BaseSequencer::setup_saveable_settings() done for sequencer  %p, free ram is %u\n\n", this, freeRam()); Serial.flush();
+        if (Serial) Serial.flush();
     }
-    
-    if (Serial) Serial.printf("=== BaseSequencer::setup_saveable_settings() done for sequencer  %p, free ram is %u\n\n", this, freeRam()); Serial.flush();
-    if (Serial) Serial.flush();
-}
+#endif
 
 void SimpleSequencer::on_step(int step) {
     //Serial.printf("EuclidianSequencer::on_step(%i), is_shuffle_enabled()=%i\n", step, is_shuffle_enabled());

@@ -22,8 +22,10 @@
     #include "parameters/Parameter.h"
 #endif
 
-#include "saveload_settings.h"
-#include "outputs/SeqlibSaveableSettings.h"
+#ifdef ENABLE_STORAGE
+    #include "saveload_settings.h"
+    #include "outputs/SeqlibSaveableSettings.h"
+#endif
 
 #define DEFAULT_VELOCITY    MIDI_MAX_VELOCITY
 
@@ -32,7 +34,11 @@
 class BaseOutput;
 class BaseSequencer;
 
-class BasePattern : virtual public SHStorage<8, 8> {  // parameter children; steps/locked/output/shuffle settings
+class BasePattern 
+    #ifdef ENABLE_STORAGE
+        : virtual public SHStorage<8, 8> // parameter children; steps/locked/output/shuffle settings
+    #endif
+    {
     public:
 
     uint8_t steps = MAX_STEPS;
@@ -56,17 +62,7 @@ class BasePattern : virtual public SHStorage<8, 8> {  // parameter children; ste
         this->set_available_outputs(available_outputs);
     }
 
-    virtual void set_output_by_name(const char *output_name) {
-        if (this->available_outputs!=nullptr) {
-            for (size_t i = 0 ; i < this->available_outputs->size() ; i++) {
-                BaseOutput *o = this->available_outputs->get(i);
-                if (o->matches_label(output_name)) {
-                    this->set_output(o);
-                    return;
-                }
-            }
-        }
-    }
+    virtual void set_output_by_name(const char *output_name);
     virtual void set_output(BaseOutput *output) {
         this->output = output;
     }
@@ -167,36 +163,38 @@ class BasePattern : virtual public SHStorage<8, 8> {  // parameter children; ste
         virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, int combine_pages = 0);
     #endif
 
-    virtual void add_saveable_settings(int pattern_index) {
+    #ifdef ENABLE_STORAGE
+        virtual void add_saveable_settings(int pattern_index) {
 
-        register_setting(
-            new LSaveableSetting<uint8_t>("steps", "BasePattern", &this->steps), 
-            SL_SCOPE_SCENE  // allow pattern length to be saved at scene level, since it's more of a performance setting than a preference setting
-        );
-        register_setting(
-            new LSaveableSetting<bool>("locked", "BasePattern", &this->locked), 
-            SL_SCOPE_SCENE  // allow locked state to be saved at scene level, since it's more of a performance setting than a preference setting
-        );
-
-        #ifdef ENABLE_SHUFFLE
             register_setting(
-                new LSaveableSetting<uint8_t>("shuffle_track", "BasePattern", &this->shuffle_track), 
-                SL_SCOPE_SCENE  // allow shuffle track to be saved at scene level, since it's more of a performance setting than a preference setting
+                new LSaveableSetting<uint8_t>("steps", "BasePattern", &this->steps), 
+                SL_SCOPE_SCENE  // allow pattern length to be saved at scene level, since it's more of a performance setting than a preference setting
             );
-        #endif
+            register_setting(
+                new LSaveableSetting<bool>("locked", "BasePattern", &this->locked), 
+                SL_SCOPE_SCENE  // allow locked state to be saved at scene level, since it's more of a performance setting than a preference setting
+            );
 
-        // add the output pattern..
-        register_setting(new PatternOutputSaveableSetting("output", "BasePattern", this), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);  // allow pattern output to be saved at scene level, since it's more of a performance setting than a preference setting
-        
-        // register parameters for this pattern
-        LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
-        if (parameters!=nullptr) {
-            for (size_t i = 0 ; i < parameters->size() ; i++) {
-                FloatParameter *param = parameters->get(i);
-                register_child(param);
+            #ifdef ENABLE_SHUFFLE
+                register_setting(
+                    new LSaveableSetting<uint8_t>("shuffle_track", "BasePattern", &this->shuffle_track), 
+                    SL_SCOPE_SCENE  // allow shuffle track to be saved at scene level, since it's more of a performance setting than a preference setting
+                );
+            #endif
+
+            // add the output pattern..
+            register_setting(new PatternOutputSaveableSetting("output", "BasePattern", this), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);  // allow pattern output to be saved at scene level, since it's more of a performance setting than a preference setting
+            
+            // register parameters for this pattern
+            LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
+            if (parameters!=nullptr) {
+                for (size_t i = 0 ; i < parameters->size() ; i++) {
+                    FloatParameter *param = parameters->get(i);
+                    register_child(param);
+                }
             }
         }
-    }
+    #endif
 };
 
 class SimplePattern : public BasePattern {

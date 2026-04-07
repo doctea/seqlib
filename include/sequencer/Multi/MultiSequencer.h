@@ -11,7 +11,9 @@ class MultiSequencer : public SimpleSequencer {
 
     MultiSequencer() : SimpleSequencer(nullptr) {
         this->sequencers = new LinkedList<BaseSequencer*>();
-        this->set_path_segment("MultiSequencer");
+        #ifdef ENABLE_STORAGE
+             this->set_path_segment("MultiSequencer");
+        #endif
     }
     virtual ~MultiSequencer() {};
 

@@ -2,7 +2,11 @@
 
 #include "Euclidian.h"
 
-class EuclidianPattern : public SimplePattern, virtual public SHStorage<20, 12> {
+class EuclidianPattern : public SimplePattern
+    #ifdef ENABLE_STORAGE
+        , virtual public SHStorage<20, 12>
+    #endif
+    {
     public:
 
     bool locked = false;
@@ -219,16 +223,18 @@ class EuclidianPattern : public SimplePattern, virtual public SHStorage<20, 12> 
         virtual LinkedList<FloatParameter*> *getParameters(unsigned int i) override;
     #endif
 
-    virtual void add_saveable_settings(int pattern_index) override {
-        SimplePattern::add_saveable_settings(pattern_index);
+    #ifdef ENABLE_STORAGE
+        virtual void add_saveable_settings(int pattern_index) override {
+            SimplePattern::add_saveable_settings(pattern_index);
 
-        register_setting(new LSaveableSetting<int_fast8_t>("steps", "EuclidianPattern", &this->arguments.steps), SL_SCOPE_SCENE | SL_SCOPE_PROJECT, true);
-        register_setting(new LSaveableSetting<int8_t>("global_density_group", "EuclidianPattern", &this->global_density_group), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-        register_setting(new LSaveableSetting<int_fast8_t>("pulses", "EuclidianPattern", &this->arguments.pulses), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-        register_setting(new LSaveableSetting<int_fast8_t>("rotation", "EuclidianPattern", &this->arguments.rotation), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-        register_setting(new LSaveableSetting<int_fast8_t>("duration", "EuclidianPattern", &this->arguments.duration), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-        //register_setting(new LSaveableSetting<float>(String(prefix) + String("effective_euclidian_density"), "EuclidianPattern", &this->arguments.effective_euclidian_density));
-        register_setting(new LSaveableSetting<int_fast8_t>("tie_on", "EuclidianPattern", &this->arguments.tie_on), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-    }
+            register_setting(new LSaveableSetting<int_fast8_t>("steps", "EuclidianPattern", &this->arguments.steps), SL_SCOPE_SCENE | SL_SCOPE_PROJECT, true);
+            register_setting(new LSaveableSetting<int8_t>("global_density_group", "EuclidianPattern", &this->global_density_group), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new LSaveableSetting<int_fast8_t>("pulses", "EuclidianPattern", &this->arguments.pulses), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new LSaveableSetting<int_fast8_t>("rotation", "EuclidianPattern", &this->arguments.rotation), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new LSaveableSetting<int_fast8_t>("duration", "EuclidianPattern", &this->arguments.duration), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            //register_setting(new LSaveableSetting<float>(String(prefix) + String("effective_euclidian_density"), "EuclidianPattern", &this->arguments.effective_euclidian_density));
+            register_setting(new LSaveableSetting<int_fast8_t>("tie_on", "EuclidianPattern", &this->arguments.tie_on), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+        }
+    #endif
 
 };

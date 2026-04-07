@@ -75,7 +75,9 @@ class MIDIBaseOutput : public BaseOutput {
 
     MIDIBaseOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t note_number, int_fast8_t channel = 1) 
         : BaseOutput(label), output_wrapper(output_wrapper), note_number(note_number), channel(channel) {
-            this->set_path_segment(label);
+            #ifdef ENABLE_STORAGE
+                 this->set_path_segment(label);
+            #endif
         }
 
     virtual int_fast8_t get_note_number() {
@@ -156,24 +158,26 @@ class MIDIBaseOutput : public BaseOutput {
         this->event_value_1 = this->event_value_2 = this->event_value_3 = this->event_value_4 = 0;
     }
 
-    virtual void setup_saveable_settings() override {
-        // inherit parent's settings
-        BaseOutput::setup_saveable_settings();
+    #ifdef ENABLE_STORAGE
+        virtual void setup_saveable_settings() override {
+            // inherit parent's settings
+            BaseOutput::setup_saveable_settings();
 
-        register_setting(
-            new LSaveableSetting<int_fast8_t>(
-                "MIDI Channel",
-                "MIDIBaseOutput",
-                &this->channel,
-                [=](int_fast8_t value) -> void {
-                    this->channel = value;
-                }, 
-                [=](void) -> int_fast8_t {
-                    return this->channel;
-                }
-            ), SL_SCOPE_PROJECT  // allow MIDI channel to be saved at scene or project level, since it's more of a preference setting than a performance setting
-        );
-    }
+            register_setting(
+                new LSaveableSetting<int_fast8_t>(
+                    "MIDI Channel",
+                    "MIDIBaseOutput",
+                    &this->channel,
+                    [=](int_fast8_t value) -> void {
+                        this->channel = value;
+                    }, 
+                    [=](void) -> int_fast8_t {
+                        return this->channel;
+                    }
+                ), SL_SCOPE_PROJECT  // allow MIDI channel to be saved at scene or project level, since it's more of a preference setting than a performance setting
+            );
+        }
+    #endif
 };
 
 // an output that tracks MIDI drum triggers
@@ -261,66 +265,68 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 virtual void make_menu_items(Menu *menu, int index) override;
             #endif
 
-            virtual void setup_saveable_settings() override {
-                // inherit parent's settings
-                MIDIBaseOutput::setup_saveable_settings();
+            #ifdef ENABLE_STORAGE
+                virtual void setup_saveable_settings() override {
+                    // inherit parent's settings
+                    MIDIBaseOutput::setup_saveable_settings();
 
-                register_setting(
-                    new LSaveableSetting<bool>(
-                        "Quantise",
-                        "MIDINoteOutput",
-                        &this->quantise,
-                        [=](bool value) -> void {
-                            this->set_quantise(value);
-                        },
-                        [=](void) -> bool {
-                            return this->is_quantise();
-                        }
-                    ), SL_SCOPE_SCENE  // allow quantise state to be saved at scene level, since it's more of a performance setting than a preference setting
-                );
+                    register_setting(
+                        new LSaveableSetting<bool>(
+                            "Quantise",
+                            "MIDINoteOutput",
+                            &this->quantise,
+                            [=](bool value) -> void {
+                                this->set_quantise(value);
+                            },
+                            [=](void) -> bool {
+                                return this->is_quantise();
+                            }
+                        ), SL_SCOPE_SCENE  // allow quantise state to be saved at scene level, since it's more of a performance setting than a preference setting
+                    );
 
-                register_setting(
-                    new LSaveableSetting<int_fast8_t>(
-                        "Octave",
-                        "MIDINoteOutput",
-                        &this->octave,
-                        [=](int_fast8_t value) -> void {
-                            this->octave = value;
-                        },
-                        [=](void) -> int_fast8_t {
-                            return this->octave;
-                        }
-                    ), SL_SCOPE_SCENE  // allow octave to be saved at scene level, since it's more of a performance setting than a preference setting
-                );
+                    register_setting(
+                        new LSaveableSetting<int_fast8_t>(
+                            "Octave",
+                            "MIDINoteOutput",
+                            &this->octave,
+                            [=](int_fast8_t value) -> void {
+                                this->octave = value;
+                            },
+                            [=](void) -> int_fast8_t {
+                                return this->octave;
+                            }
+                        ), SL_SCOPE_SCENE  // allow octave to be saved at scene level, since it's more of a performance setting than a preference setting
+                    );
 
-                register_setting(
-                    new LSaveableSetting<int_fast8_t>(
-                        "Scale Root",
-                        "MIDINoteOutput",
-                        &this->scale_root,
-                        [=](int_fast8_t value) -> void {
-                            this->set_scale_root(value);
-                        },
-                        [=](void) -> int_fast8_t {
-                            return this->get_scale_root();
-                        }
-                    ), SL_SCOPE_SCENE  // allow scale root to be saved at scene level, since it's more of a performance setting than a preference setting
-                );
+                    register_setting(
+                        new LSaveableSetting<int_fast8_t>(
+                            "Scale Root",
+                            "MIDINoteOutput",
+                            &this->scale_root,
+                            [=](int_fast8_t value) -> void {
+                                this->set_scale_root(value);
+                            },
+                            [=](void) -> int_fast8_t {
+                                return this->get_scale_root();
+                            }
+                        ), SL_SCOPE_SCENE  // allow scale root to be saved at scene level, since it's more of a performance setting than a preference setting
+                    );
 
-                register_setting(
-                    new LSaveableSetting<scale_index_t>(
-                        "Scale",
-                        "MIDINoteOutput",
-                        &this->scale_number,
-                        [=](scale_index_t value) -> void {
-                            this->set_scale_number(value);
-                        },
-                        [=](void) -> scale_index_t {
-                            return this->get_scale_number();
-                        }
-                    ), SL_SCOPE_SCENE  // allow scale to be saved at scene level, since it's more of a performance setting than a preference setting
-                );
-            }
+                    register_setting(
+                        new LSaveableSetting<scale_index_t>(
+                            "Scale",
+                            "MIDINoteOutput",
+                            &this->scale_number,
+                            [=](scale_index_t value) -> void {
+                                this->set_scale_number(value);
+                            },
+                            [=](void) -> scale_index_t {
+                                return this->get_scale_number();
+                            }
+                        ), SL_SCOPE_SCENE  // allow scale to be saved at scene level, since it's more of a performance setting than a preference setting
+                    );
+                }
+            #endif
     };
 
     // class that counts up all active triggers from passed-in nodes, and calculates a note from that, for eg monophonic basslines
