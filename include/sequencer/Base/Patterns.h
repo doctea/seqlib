@@ -27,6 +27,8 @@
     #include "outputs/SeqlibSaveableSettings.h"
 #endif
 
+#include "accent/IAccentSource.h"
+
 #define DEFAULT_VELOCITY    MIDI_MAX_VELOCITY
 
 #define MAX_STEPS TIME_SIG_MAX_STEPS_PER_BAR
@@ -84,6 +86,21 @@ class BasePattern
         return "??";
     }
     virtual const char *get_output_label();
+
+    // ---------------------------------------------------------------------------
+    // Accent source — controls per-step velocity scaling.
+    // nullptr means "use global_accent_source"; if that is also nullptr, velocity
+    // is returned unmodified (equivalent to a ConstantAccentSource(1.0)).
+    // ---------------------------------------------------------------------------
+    IAccentSource* accent_source = nullptr;
+
+    IAccentSource* get_effective_accent_source() const {
+        return accent_source ? accent_source : global_accent_source;
+    }
+
+    void set_accent_source(IAccentSource* src) {
+        accent_source = src;
+    }
 
     // get the velocity for the note about to be played (current step)
     // 127 by default, but can be overridden by patterns with velocity control
@@ -204,6 +221,16 @@ class SimplePattern : public BasePattern {
         byte velocity = DEFAULT_VELOCITY;
         byte channel = 0;
     };
+
+    // Override get_velocity() to apply accent scaling.
+    virtual int8_t get_velocity() override {
+        IAccentSource* src = get_effective_accent_source();
+        if (src) {
+            float accent = src->get_accent((int)triggered_on_step, BPM_CURRENT_STEP_OF_SONG);
+            return (int8_t)constrain((int)((float)DEFAULT_VELOCITY * accent), 0, MIDI_MAX_VELOCITY);
+        }
+        return DEFAULT_VELOCITY;
+    }
 
     uint32_t triggered_on_step = -1;
     uint32_t triggered_on_tick = -1;
