@@ -6,6 +6,9 @@
 // todo: make it so that it can also take into account the actual note values of the other nodes, not just count them, for more interesting melodic possibilities
 // todo: make a base class for melodic outputs, and then have this and a more advanced version that takes into account the note values of other nodes both inherit from it
 // todo: make it output chords, not just single notes
+
+#ifdef ENABLE_SCALES
+
 class MIDINoteTriggerCountOutput : public MIDINoteOutput {
     public:
         LinkedList<BaseOutput*> *nodes = nullptr;   // output nodes that will count towards the note calculation
@@ -82,3 +85,5 @@ class MIDINoteTriggerCountOutput : public MIDINoteOutput {
         }
 
 };
+
+#endif
