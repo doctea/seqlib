@@ -40,7 +40,7 @@ class BaseSequencer;
 
 class BasePattern 
     #ifdef ENABLE_STORAGE
-        : virtual public SHStorage<8, 8> // parameter children; steps/locked/output/shuffle settings
+        : virtual public SHDynamic<8, 8> // parameter children; steps/locked/output/shuffle settings
     #endif
     {
     public:

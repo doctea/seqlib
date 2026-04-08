@@ -20,7 +20,7 @@ class ISequencerEventReceiver {
 // class to receive triggers from a sequencer and return values to the owner Processor
 class BaseOutput : public ISequencerEventReceiver
     #ifdef ENABLE_STORAGE
-        , virtual public SHStorage<8, 8> // parameter children; own settings
+        , virtual public SHDynamic<8, 8> // parameter children; own settings
     #endif
     {
     public:
@@ -30,6 +30,10 @@ class BaseOutput : public ISequencerEventReceiver
     char label[MAX_LABEL];
     BaseOutput (const char *label) {
         strncpy(this->label, label, MAX_LABEL);
+
+        #ifdef ENABLE_STORAGE
+            this->set_path_segment(label);
+        #endif
     }
     
     // event_value_1 = send a note on

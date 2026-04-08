@@ -8,7 +8,7 @@
 // holds individual output nodes and processes them (eg queries them for the pitch and sends note on/offs)
 class BaseOutputProcessor 
     #ifdef ENABLE_STORAGE
-        : virtual public SHStorage<4, 12>  // 1-2 output children; 8+ settings
+        : virtual public SHDynamic<4, 12>  // 1-2 output children; 8+ settings
     #endif
     {
     bool enabled = true;
@@ -42,7 +42,11 @@ class BaseOutputProcessor
 
 // handles MIDI output; 
 // possibly todo: move MIDIOutputWrapper stuff out of usb_midi_clocker and into a library and use that here?
-class MIDIOutputProcessor : public BaseOutputProcessor {
+class MIDIOutputProcessor : public BaseOutputProcessor 
+    #ifdef ENABLE_STORAGE
+        , virtual public SHDynamic<26, 12>  // 26 output children; 8+ settings
+    #endif
+    {
     public:
 
     LinkedList<BaseOutput*> *nodes = new LinkedList<BaseOutput*>();

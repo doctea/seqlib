@@ -24,7 +24,7 @@ class Menu;
 
 class BaseSequencer 
     #ifdef ENABLE_STORAGE
-        : virtual public SHStorage<20, 4>   // up to 16 pattern + parameter children; few own settings
+        : virtual public SHDynamic<20, 4>   // up to 16 pattern + parameter children; few own settings
     #endif
     {
     public:

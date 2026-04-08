@@ -7,7 +7,7 @@
         // subclasses can add their own menu items if they want
 
         menu->add_page("Accents");
-        menu->add(new GlobalAccentPage());
+        menu->add(new GlobalAccentStepPresetControl());
 
     }
 

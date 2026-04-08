@@ -5,7 +5,7 @@
 
 class EuclidianSequencer : public BaseSequencer
     #ifdef ENABLE_STORAGE
-        , virtual public SHStorage<40, 12>
+        , virtual public SHDynamic<40, 12>
     #endif
     {
     // todo: list of EuclidianPatterns...? althoguh array is probably fine
