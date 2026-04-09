@@ -144,7 +144,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 &this->steps,
                 &this->effective_steps,
                 1, 
-                16
+                TIME_SIG_MAX_STEPS_PER_BAR*2
             ));
 
         snprintf(label, MAX_LABEL, "TM %i duration", i);
@@ -176,7 +176,6 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 MIDI_MIN_NOTE, 
                 MIDI_MAX_NOTE
             ));
-
 
         parameter_manager->addParameters(parameters);
 

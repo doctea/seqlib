@@ -15,6 +15,10 @@
 #include <bpm.h>
 #include <midi_helpers.h>
 
+#ifdef ENABLE_PARAMETERS
+    #include "parameter_inputs/AnalogParameterInputBase.h"
+#endif
+
 namespace TuringMachine {    
     enum CombinePageOption {
         COMBINE_NONE = 0,
@@ -30,8 +34,12 @@ namespace TuringMachine {
 
 using namespace TuringMachine;
 
-class TuringMachinePattern : public SimplePattern {
-    uint8_t effective_steps = MAX_STEPS;
+class TuringMachinePattern : public SimplePattern 
+    #ifdef ENABLE_PARAMETERS
+        , public AnalogParameterInputBase<float>
+    #endif
+    {
+    uint8_t effective_steps = TIME_SIG_MAX_STEPS_PER_BAR;
     int default_duration = PPQN/6;
     int effective_duration = default_duration;
     int8_t current_note_number = NOTE_OFF;
@@ -48,8 +56,12 @@ class TuringMachinePattern : public SimplePattern {
 
     public:
 
-    TuringMachinePattern(LinkedList<BaseOutput*> *available_outputs) : SimplePattern(available_outputs) {
-    }
+    TuringMachinePattern(LinkedList<BaseOutput*> *available_outputs) 
+        : SimplePattern(available_outputs) 
+        #ifdef ENABLE_PARAMETERS
+            , AnalogParameterInputBase<float>((char*)"TM", "Seqs", 0.005, UNIPOLAR)
+        #endif
+    {}
 
     virtual const char *get_summary() override {
         return "Turing Machine";
@@ -135,4 +147,40 @@ class TuringMachinePattern : public SimplePattern {
     virtual int8_t getHighestNote() {
         return this->highest_note;
     }
+
+
+    #ifdef ENABLE_PARAMETERS
+        virtual const char* getInputInfo() override {
+            return "TM";
+        }
+
+        virtual void read() override {
+            this->currentValue = (float)this->current_note_number / 127.0f;
+        }
+
+        virtual const char *getExtra() override {
+            if (this->supports_pitch()) {
+                static char extra_output[40];
+                snprintf(
+                    extra_output, 
+                    40,
+                    "MIDI pitch for %3.3f is %s\n", 
+                    this->currentValue, 
+                    //get_note_name(get_voltage_pitch()).c_str()
+                    get_note_name_c(this->get_voltage_pitch())
+                );
+                return extra_output;
+            }
+            return "";
+        }
+
+        virtual bool supports_pitch() override {
+            return true;
+        }
+
+        virtual int8_t get_voltage_pitch() override {
+            return this->current_note_number;
+        }
+    #endif
+
 };
