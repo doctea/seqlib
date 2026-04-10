@@ -29,6 +29,10 @@ class EnvelopeOutput : public MIDIDrumOutput {
 
     EnvelopeBase *envelope;
 
+    // throttle: only run process_envelope once per tick to avoid redundant
+    // float ADSR math and excess USB MIDI CC sends within the same tick interval
+    uint32_t last_loop_tick = UINT32_MAX;
+
     EnvelopeOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, byte note_number, byte channel, byte cc_number) : 
         MIDIDrumOutput(label, output_wrapper, note_number, channel), midi_cc(cc_number)
         {
@@ -67,6 +71,8 @@ class EnvelopeOutput : public MIDIDrumOutput {
 
     virtual void loop() override {
         if (!is_enabled()) return;
+        if (ticks == last_loop_tick) return;  // already processed this tick
+        last_loop_tick = ticks;
         this->envelope->process_envelope(ticks);
     }
 

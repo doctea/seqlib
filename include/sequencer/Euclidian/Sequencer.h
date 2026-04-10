@@ -25,6 +25,8 @@ class EuclidianSequencer : public BaseSequencer
     bool seed_locked = false;
     uint32_t last_locked_seed = 0;
 
+
+
     public:
     
     // need to pass desired number_patterns so that we can pre-allocate the patterns array... default to 20
@@ -199,12 +201,12 @@ class EuclidianSequencer : public BaseSequencer
             this->get_pattern(i)->process_tick(tick);
         }
     };
+
     virtual void on_step(int step) override {
-        //Serial.printf("EuclidianSequencer::on_step(%i), is_shuffle_enabled()=%i\n", step, is_shuffle_enabled());
+        //Serial.printf("EuclidianSequencer::do_step(%i)\n", step);
         for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
             #ifdef ENABLE_SHUFFLE
                 if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->get_pattern(i)->is_shuffled())) {
-                    //if (Serial) Serial.printf("at tick %i, received on_step(%i, %i) callback for non-shuffled pattern\n", ticks, step, i);
                     this->get_pattern(i)->process_step(step);
                 }
             #else
@@ -214,7 +216,7 @@ class EuclidianSequencer : public BaseSequencer
     };
 
     virtual void on_step_end(int step) override {
-        //Serial.printf("at tick %i, on_step_end(%i)\n", ticks, step);
+        //Serial.printf("EuclidianSequencer::do_step_end_dispatch(%i)\n", step);
         for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
             #ifdef ENABLE_SHUFFLE
                 if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->get_pattern(i)->is_shuffled())) {
@@ -252,60 +254,58 @@ class EuclidianSequencer : public BaseSequencer
 
     };
     virtual void on_bar(int bar) override {
-        //if (Serial) Serial.println("on_bar!");
         if (fills_enabled && bar == BARS_PER_PHRASE - 1) {
-            //if (Serial) Serial.println("on_bar doing fill!");
-            // do fill
-            uint_fast8_t effective_mutation_count = this->get_effective_mutation_count();
-            for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
-                uint_fast8_t ran = random(
-                    mutate_minimum_pattern % (uint8_t)number_patterns, 
-                    constrain(
-                        1 + mutate_maximum_pattern, 
-                        (uint8_t)0, (uint8_t)number_patterns)
-                    );
-                if (!this->get_pattern(ran)->is_locked()) {
-                    //this->patterns[ran]->arguments.rotation += 2;
-                    ((EuclidianPattern*)this->get_pattern(ran))->set_rotation(((EuclidianPattern*)this->get_pattern(ran))->get_rotation() + 2);
-                    ((EuclidianPattern*)this->get_pattern(ran))->make_euclid();
-                }
-            }
-            for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
-                uint_fast8_t ran = random(
-                    mutate_minimum_pattern % (uint8_t)number_patterns, 
-                    constrain(
-                        1 + mutate_maximum_pattern, 
-                        (unsigned int)0, 
-                        (uint8_t)number_patterns
-                    )
-                );
-                if (!this->get_pattern(ran)->is_locked()) {
-                    ((EuclidianPattern*)this->get_pattern(ran))->set_rotation(((EuclidianPattern*)this->get_pattern(ran))->get_rotation() * 2);
-                    //this->patterns[ran]->arguments.pulses *= 2;
-                    if (((EuclidianPattern*)this->get_pattern(ran))->get_pulses() > ((EuclidianPattern*)this->get_pattern(ran))->get_steps()) 
-                        ((EuclidianPattern*)this->get_pattern(ran))->set_pulses(((EuclidianPattern*)this->get_pattern(ran))->get_pulses() / 8);
-                    ((EuclidianPattern*)this->get_pattern(ran))->make_euclid();
-                }
-            }
+            do_bar_fill(bar);
         }
     };
+
     virtual void on_phrase(int phrase) override {
-        if (is_mutate_enabled()) {
-            if (reset_before_mutate)
-                reset_patterns();
-            unsigned long seed = get_euclidian_seed();
-            randomSeed(seed);
-            uint_fast8_t effective_mutation_count = this->get_effective_mutation_count();
-            for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
-                // choose a pattern to mutate, out of all those for whom mutate is enabled
-                uint_fast8_t ran = random(mutate_minimum_pattern % this->get_number_patterns(), constrain(1 + mutate_maximum_pattern, (unsigned int)0, this->get_number_patterns()));
-                randomSeed(seed + ran);
-                if (!((EuclidianPattern*)this->get_pattern(ran))->is_locked()) {
-                    ((EuclidianPattern*)this->get_pattern(ran))->mutate();
-                }
+        do_phrase_mutations(phrase);
+    };
+
+    void do_phrase_mutations(int phrase) {
+        if (!is_mutate_enabled()) return;
+        if (reset_before_mutate)
+            reset_patterns();
+        unsigned long seed = get_euclidian_seed();
+        randomSeed(seed);
+        uint_fast8_t effective_mutation_count = this->get_effective_mutation_count();
+        for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
+            uint_fast8_t ran = random(mutate_minimum_pattern % this->get_number_patterns(), constrain(1 + mutate_maximum_pattern, (unsigned int)0, this->get_number_patterns()));
+            randomSeed(seed + ran);
+            if (!((EuclidianPattern*)this->get_pattern(ran))->is_locked()) {
+                ((EuclidianPattern*)this->get_pattern(ran))->mutate();
             }
         }
-    };
+    }
+
+    void do_bar_fill(int bar) {
+        uint_fast8_t effective_mutation_count = this->get_effective_mutation_count();
+        for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
+            uint_fast8_t ran = random(
+                mutate_minimum_pattern % (uint8_t)number_patterns,
+                constrain(1 + mutate_maximum_pattern, (uint8_t)0, (uint8_t)number_patterns)
+            );
+            if (!this->get_pattern(ran)->is_locked()) {
+                ((EuclidianPattern*)this->get_pattern(ran))->set_rotation(((EuclidianPattern*)this->get_pattern(ran))->get_rotation() + 2);
+                ((EuclidianPattern*)this->get_pattern(ran))->make_euclid();
+            }
+        }
+        for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
+            uint_fast8_t ran = random(
+                mutate_minimum_pattern % (uint8_t)number_patterns,
+                constrain(1 + mutate_maximum_pattern, (unsigned int)0, (uint8_t)number_patterns)
+            );
+            if (!this->get_pattern(ran)->is_locked()) {
+                ((EuclidianPattern*)this->get_pattern(ran))->set_rotation(((EuclidianPattern*)this->get_pattern(ran))->get_rotation() * 2);
+                if (((EuclidianPattern*)this->get_pattern(ran))->get_pulses() > ((EuclidianPattern*)this->get_pattern(ran))->get_steps())
+                    ((EuclidianPattern*)this->get_pattern(ran))->set_pulses(((EuclidianPattern*)this->get_pattern(ran))->get_pulses() / 8);
+                ((EuclidianPattern*)this->get_pattern(ran))->make_euclid();
+            }
+        }
+    }
+
+
     
     #if defined(ENABLE_PARAMETERS)
         virtual LinkedList<FloatParameter*> *getParameters() override;

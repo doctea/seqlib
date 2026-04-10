@@ -106,11 +106,9 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
 #endif
 
 void SimpleSequencer::on_step(int step) {
-    //Serial.printf("EuclidianSequencer::on_step(%i), is_shuffle_enabled()=%i\n", step, is_shuffle_enabled());
     for (uint_fast8_t i = 0 ; i < get_number_patterns() ; i++) {
         #ifdef ENABLE_SHUFFLE
             if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->patterns->get(i)->is_shuffled())) {
-                //if (Serial) Serial.printf("at tick %i, received on_step(%i, %i) callback for non-shuffled pattern\n", ticks, step, i);
                 this->patterns->get(i)->process_step(step);
             }
         #else
@@ -122,7 +120,6 @@ void SimpleSequencer::on_step(int step) {
 };
 
 void SimpleSequencer::on_step_end(int step) {
-    //Serial.printf("at tick %i, on_step_end(%i)\n", ticks, step);
     for (uint_fast8_t i = 0 ; i < get_number_patterns() ; i++) {
         #ifdef ENABLE_SHUFFLE
             if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->patterns->get(i)->is_shuffled())) {

@@ -94,7 +94,7 @@ class BaseSequencer
     #endif
 
     virtual void configure_pattern_output(int index, BaseOutput *output);
-    
+
     #if defined(ENABLE_PARAMETERS)
         virtual LinkedList<FloatParameter*> *getParameters();
         virtual FloatParameter* getParameterByName(const char *name);   // UNTESTED!!
