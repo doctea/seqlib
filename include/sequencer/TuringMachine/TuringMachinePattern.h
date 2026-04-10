@@ -39,7 +39,7 @@ class TuringMachinePattern : public SimplePattern
         , public AnalogParameterInputBase<float>
     #endif
     {
-    uint8_t effective_steps = TIME_SIG_MAX_STEPS_PER_BAR;
+    uint8_t effective_steps = STEPS_PER_BAR; //TIME_SIG_MAX_STEPS_PER_BAR;
     int default_duration = PPQN/6;
     int effective_duration = default_duration;
     int8_t current_note_number = NOTE_OFF;
@@ -53,6 +53,10 @@ class TuringMachinePattern : public SimplePattern
     int8_t highest_note = MIDI_MAX_NOTE;
     int8_t effective_lowest_note = MIDI_MIN_NOTE;
     int8_t effective_highest_note = MIDI_MAX_NOTE;
+
+    uint8_t mutation_locks[TIME_SIG_MAX_STEPS_PER_BAR];
+    int mutation_lock_count = 4; // how many times a step should be played before it can mutate again
+    bool mutation_lock_active = true;
 
     public:
 
@@ -79,6 +83,34 @@ class TuringMachinePattern : public SimplePattern
         return this->effective_steps;
     }
 
+    inline virtual bool is_mutation_lock_active() {
+        return this->mutation_lock_active;
+    }
+    inline virtual void set_mutation_lock_active(bool active) {
+        this->mutation_lock_active = active;
+    }
+    inline virtual int get_mutation_lock_count() {
+        return this->mutation_lock_count;
+    }
+    inline virtual void set_mutation_lock_count(int count) {
+        this->mutation_lock_count = count;
+    }
+    inline virtual bool is_step_locked(int step) {
+        return (mutation_locks[step % this->get_effective_steps()] > 0);
+    }
+    inline virtual void lock_step(int step, int number_locks_to_add = -1) {
+        if (number_locks_to_add < 0) {
+            number_locks_to_add = this->mutation_lock_count;
+        }
+        mutation_locks[step % this->get_effective_steps()] = number_locks_to_add;
+    }
+    inline virtual void unlock_step(int step, int number_locks_to_remove = 1) {
+        mutation_locks[step % this->get_effective_steps()] = 0;
+    }
+    inline virtual void unlock_step_completely(int step) {
+        mutation_locks[step % this->get_effective_steps()] = 0;
+    }
+
     virtual bool flipacoin() {
         float r = random(10000) / 10000.0f;
         return r < effective_probability;
@@ -89,6 +121,12 @@ class TuringMachinePattern : public SimplePattern
         SimplePattern::process_step(step);
         
         bool current_state = this->query_note_on_for_step(step);
+
+        if (is_mutation_lock_active() && is_step_locked(step)) {
+            // if mutation lock is active and this step is locked, skip mutation
+            unlock_step(step, 1); // reduce the lock count by 1, so that it will eventually unlock after being played a few times
+            return;
+        }
         
         // each time a step has played, flip its state (or not), according to our probability value
         // and potentially change its note value
@@ -102,6 +140,7 @@ class TuringMachinePattern : public SimplePattern
                 int8_t new_note = random(128); // choose from the full range of MIDI notes, then transpose into getLowestNote/getHighestNote range if necessary -- this seems to produce more interesting results than just choosing from within the range to begin with
                 this->set_event_for_tick(step * TICKS_PER_STEP, new_note, MIDI_MAX_VELOCITY, 1);
             }
+            if (is_mutation_lock_active()) this->lock_step(step);
         }
     }
 
@@ -121,6 +160,9 @@ class TuringMachinePattern : public SimplePattern
             register_setting(new LSaveableSetting<float>("probability", "TuringMachinePattern", &this->probability), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
             register_setting(new LSaveableSetting<int8_t>("lowest_note", "TuringMachinePattern", &this->lowest_note), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
             register_setting(new LSaveableSetting<int8_t>("highest_note", "TuringMachinePattern", &this->highest_note), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+
+            register_setting(new LSaveableSetting<bool>("mutation_lock_active", "TuringMachinePattern", &this->mutation_lock_active), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new LSaveableSetting<int>("mutation_lock_count", "TuringMachinePattern", &this->mutation_lock_count), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
         }
     #endif
 

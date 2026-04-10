@@ -177,6 +177,25 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 MIDI_MAX_NOTE
             ));
 
+        snprintf(label, MAX_LABEL, "TM %i mutlock amt", i);
+        parameters->add(
+            new ProxyParameter<int>(
+                label,
+                &this->mutation_lock_count,
+                &this->mutation_lock_count,
+                1,
+                8
+            ));
+        snprintf(label, MAX_LABEL, "TM %i mutlock on", i);
+        parameters->add(
+            new ProxyParameter<bool>(
+                label,
+                &this->mutation_lock_active,
+                &this->mutation_lock_active,
+                false,
+                true
+            ));
+
         parameter_manager->addParameters(parameters);
 
         return parameters;
