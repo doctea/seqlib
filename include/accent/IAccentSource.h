@@ -108,4 +108,35 @@ public:
 };
 
 
+class SimpleAccentSource : public IAccentSource {
+public:
+    SimpleAccentSource() {
+        #ifdef ENABLE_STORAGE
+            this->set_path_segment("SimpleAccent");
+        #endif
+    }
+
+    float get_accent(int local_step, int global_step) override {
+        //return this->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR) ? DEFAULT_VELOCITY : 0;
+        // add some accenting based on where in the bar we are, to make it sound more interesting?
+        // start with a simple version that just accents the first beat of the bar, then we can experiment with more complex accent patterns later if we want to
+        int default_velocity = 96;
+
+        if (global_step % STEPS_PER_PHRASE == 0) {
+            default_velocity += 24; //MIDI_MAX_VELOCITY; //127;
+        } else if (global_step % (STEPS_PER_PHRASE / 2) == 0) {
+            default_velocity += 20;
+        } else if (global_step % STEPS_PER_BAR == 0) {
+            default_velocity += 16;
+        } else if (local_step == 3) {
+            default_velocity += 13;
+        } else {
+            default_velocity += random(-8, 8);
+        }
+        return (float)default_velocity / 127.0f; // convert to [0.0, 1.0] range
+    }
+
+    const char* get_label() const override { return "Simple"; }
+};
+
 #endif
