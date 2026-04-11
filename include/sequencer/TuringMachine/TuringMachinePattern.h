@@ -219,10 +219,22 @@ class TuringMachinePattern : public SimplePattern
         virtual bool supports_pitch() override {
             return true;
         }
-
+        
         virtual int8_t get_voltage_pitch() override {
+            // current_note_number should only change when a step actually fires
             return this->current_note_number;
         }
+
+        // int8_t last_note_number = NOTE_OFF;
+        // virtual int8_t get_voltage_pitch() override {
+        //     // only report a pitch while a step is actively held; otherwise the chord player
+        //     // would keep playing a stale (possibly zero-initialised) note between steps
+        //     if (!this->note_held) 
+        //         return this->last_note_number;
+        //     this->last_note_number = this->current_note_number;
+        //     return this->current_note_number;
+        // }
+
     #endif
 
 };

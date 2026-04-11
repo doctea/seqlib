@@ -61,6 +61,7 @@ class BaseOutput : public ISequencerEventReceiver
 
     void set_enabled(bool state) {
         this->enabled = state;
+        // todo: should probably ensure we go off?
     }
     bool is_enabled() {
         return this->enabled;

@@ -107,7 +107,7 @@ class MIDIBaseOutput : public BaseOutput {
                 //this->went_off();
             }
         }
-        if (should_go_on()) {
+        if (this->is_enabled() && should_go_on()) {
             this->stop();
 
             int8_t note_number = get_note_number();

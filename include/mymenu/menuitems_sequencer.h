@@ -47,21 +47,19 @@ class PatternDisplay : public MenuItem {
             uint16_t base_row = pos.y;
             //static float ticks_per_pixel = (float)LOOP_LENGTH_TICKS / (float)tft->width();
 
-            /*#define STEP_WIDTH 8
-            #define STEP_HEIGHT 8
-            #define STEP_GAP 2*/
-            #define MAX_COLUMNS 16
+            // #define MAX_COLUMNS 16
+            #define MAX_COLUMNS STEPS_PER_BAR
             //int columns = target_pattern->get_steps();
 
-            static int width_per_cell = tft->width() / MAX_COLUMNS;
+            const int width_per_cell = tft->width() / STEPS_PER_BAR;
             int STEP_GAP_H = 2, STEP_GAP_V = 2; //width_per_cell - (width_per_cell/4);
-            static int STEP_WIDTH = width_per_cell - STEP_GAP_H;
+            int STEP_WIDTH = width_per_cell - STEP_GAP_H;
             int STEP_HEIGHT = STEP_WIDTH;
 
-            if (target_pattern->get_effective_steps() > MAX_COLUMNS) {
+            if (target_pattern->get_effective_steps() > STEPS_PER_BAR) {
                 // number of steps puts us onto two rows, so adjust height of row so that we 
                 // still fit into the same vertical space
-                int_fast8_t div = 1 + (target_pattern->get_effective_steps() / MAX_COLUMNS);
+                const int_fast8_t div = 1 + (target_pattern->get_effective_steps() / STEPS_PER_BAR);
                 STEP_HEIGHT /= div;
                 //STEP_GAP_V /= div;
                 //STEP_GAP_V += 1;
@@ -75,8 +73,8 @@ class PatternDisplay : public MenuItem {
                 // for every step of sequence
 
                 // first calculate the row, column and on-screen coordinates
-                const int row = step / MAX_COLUMNS;
-                const int col = step % MAX_COLUMNS;
+                const int row = step / STEPS_PER_BAR;
+                const int col = step % STEPS_PER_BAR;
                 const int x = col * (STEP_WIDTH+STEP_GAP_H);
                 const int y = base_row + (row*(STEP_HEIGHT+STEP_GAP_V));
 
@@ -98,12 +96,12 @@ class PatternDisplay : public MenuItem {
             //base_row += (1+(target_pattern->get_steps() / MAX_COLUMNS)) * (STEP_HEIGHT + STEP_GAP);
             base_row += max(
                 STEP_HEIGHT+STEP_GAP_V,
-                ((target_pattern->get_effective_steps() / MAX_COLUMNS)) * (STEP_HEIGHT + STEP_GAP_V)
+                ((target_pattern->get_effective_steps() / STEPS_PER_BAR)) * (STEP_HEIGHT + STEP_GAP_V)
             );
             tft->setCursor(0, base_row);
             return base_row;
             
-            //base_row *= (target_pattern->get_steps() / MAX_COLUMNS);
+            //base_row *= (target_pattern->get_steps() / STEPS_PER_BAR);
 
             /*for (int i = 0 ; i < target_pattern->steps ; i++) {
                 tft->printf("%02i: ", i);

@@ -36,6 +36,10 @@ class BaseOutputProcessor
             }
         #endif
 
+        virtual BaseOutput *get_output_for_label(const char *label) = 0;
+        virtual LinkedList<BaseOutput*> *get_available_outputs() = 0;
+
+         // configure target sequencer to use the output nodes held by this OutputProcessor
 };
 
 //#include "envelopes.h"
@@ -74,7 +78,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor
         this->addNode(new MIDIDrumOutput(label, this->output_target, note_number));
     }
 
-    virtual BaseOutput *get_output_for_label(const char *label) {
+    virtual BaseOutput *get_output_for_label(const char *label) override {
         const uint_fast8_t size = this->nodes->size();
         for (uint_fast8_t i = 0 ; i < size ; i++) {
             BaseOutput *o = this->nodes->get(i);
@@ -82,6 +86,10 @@ class MIDIOutputProcessor : public BaseOutputProcessor
                 return o;
         }
         return nullptr;
+    }
+
+    virtual LinkedList<BaseOutput*> *get_available_outputs() override {
+        return this->nodes;
     }
 
     //virtual void on_tick(uint32_t ticks) {
@@ -345,6 +353,14 @@ class FullDrumKitMIDIOutputProcessor : public MIDIOutputProcessor {
                         "Melody",
                         output_target,
                         1
+                    )
+                );
+                this->addNode(
+                    // todo: write a MIDIPolyOutput .. or do we actually want to make a MIDIChordOutput that uses the chord_player itself?  yes, probably!
+                    new MIDINoteOutput(
+                        "Chords",
+                        output_target,
+                        2
                     )
                 );
             }
