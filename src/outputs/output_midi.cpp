@@ -16,21 +16,19 @@
             snprintf(label, 40, "MIDINoteOutput %i: %s", index, this->label);
             menu->add_page(label, C_WHITE, false);
 
-            SubMenuItemColumns *sub_menu_item_columns = new SubMenuItemColumns("Options", 3);
-            // todo: convert all these ObjectNumberControls and ObjectToggleControls into LambdaNumberControls and LambdaToggleControls
-            // todo: probably turn this Quantise toggle into a feature of LambdaScaleMenuItemBar to avoid having to make a custom menu item for it
-            sub_menu_item_columns->add(new ObjectToggleControl<MIDINoteOutput>("Quantise", this, &MIDINoteOutput::set_quantise, &MIDINoteOutput::is_quantise));
-            // todo: turn this into a lambda-based control, kill off any playing notes when the octave is changed to avoid stuck notes
-            sub_menu_item_columns->add(new DirectNumberControl<int_fast8_t>("Octave", &this->octave, this->octave, (int_fast8_t)0, (int_fast8_t)10));
-            // todo: turn this into a lambda-based control, kill off any playing notes when the channel is changed to avoid stuck notes
-            sub_menu_item_columns->add(new DirectNumberControl<int_fast8_t>("Channel", &this->channel, this->channel, (int_fast8_t)1, (int_fast8_t)16));
+            // SubMenuItemColumns *sub_menu_item_columns = new SubMenuItemColumns("Options", 3);
+            // // todo: convert all these ObjectNumberControls and ObjectToggleControls into LambdaNumberControls and LambdaToggleControls
+            // // todo: probably turn this Quantise toggle into a feature of LambdaScaleMenuItemBar to avoid having to make a custom menu item for it
+            // //sub_menu_item_columns->add(new ObjectToggleControl<MIDINoteOutput>("Quantise", this, &MIDINoteOutput::set_quantise, &MIDINoteOutput::is_quantise));
+            // // todo: turn this into a lambda-based control, kill off any playing notes when the octave is changed to avoid stuck notes
+            // sub_menu_item_columns->add(new DirectNumberControl<int_fast8_t>("Octave", &this->octave, this->octave, (int_fast8_t)0, (int_fast8_t)10));
+            // // todo: turn this into a lambda-based control, kill off any playing notes when the channel is changed to avoid stuck notes
+            // sub_menu_item_columns->add(new DirectNumberControl<int_fast8_t>("Channel", &this->channel, this->channel, (int_fast8_t)1, (int_fast8_t)16));
 
-            menu->add(sub_menu_item_columns);
+            // menu->add(sub_menu_item_columns);
 
             #ifdef ENABLE_SCALES
-                menu->add(new HarmonyDisplay("Output", &this->scale_number, &this->scale_root, &this->last_note_number, &this->quantise));
-
-                menu->add(new LambdaScaleMenuItemBar(
+                LambdaScaleMenuItemBar *scale_menu = new LambdaScaleMenuItemBar(
                     "Scale / Key",
                     [=](scale_index_t scale) -> void { this->set_scale_number(scale); },
                     [=]() -> scale_index_t { return this->get_scale_number(); },
@@ -39,9 +37,70 @@
                     true,
                     true,
                     false
-                ));
+                );
+
+                scale_menu->add(new ObjectToggleControl<MIDINoteOutput>("Quantise", this, &MIDINoteOutput::set_quantise, &MIDINoteOutput::is_quantise));
+
+                menu->add(scale_menu);
+
             #endif
-            
+
+            SubMenuItemBar *transposition_bar = new SubMenuItemBar("Transpose", true, false);
+            LambdaScaleNoteMenuItem<int8_t> *lowest_note_control = new LambdaScaleNoteMenuItem<int8_t>(
+                "Low",
+                [=](int8_t v) -> void { this->setLowestNote(v); },
+                [=]() -> int8_t { return this->getLowestNote(); },
+                nullptr,
+                (int8_t)MIDI_MIN_NOTE,
+                (int8_t)MIDI_MAX_NOTE,
+                true,
+                true
+            );
+            transposition_bar->add(lowest_note_control);
+
+            LambdaScaleNoteMenuItem<int8_t> *highest_note_control = new LambdaScaleNoteMenuItem<int8_t>(
+                "High",
+                [=](int8_t v) -> void { this->setHighestNote(v); },
+                [=]() -> int8_t { return this->getHighestNote(); },
+                nullptr,
+                (int8_t)MIDI_MIN_NOTE,
+                (int8_t)MIDI_MAX_NOTE,
+                true,
+                true
+            );
+            transposition_bar->add(highest_note_control);
+
+            LambdaSelectorControl<int8_t> *lowest_note_mode_control = new LambdaSelectorControl<int8_t>(
+                "Lo Mode",
+                [=](int8_t v) -> void { this->setLowestNoteMode(v); },
+                [=]() -> int8_t { return this->getLowestNoteMode(); },
+                nullptr,
+                true
+            );
+            lowest_note_mode_control->add_available_value(NOTE_MODE::IGNORE, "Drop");
+            lowest_note_mode_control->add_available_value(NOTE_MODE::TRANSPOSE, "Move");
+            transposition_bar->add(lowest_note_mode_control);
+
+            LambdaSelectorControl<int8_t> *highest_note_mode_control = new LambdaSelectorControl<int8_t>(
+                "Hi Mode",
+                [=](int8_t v) -> void { this->setHighestNoteMode(v); },
+                [=]() -> int8_t { return this->getHighestNoteMode(); },
+                nullptr,
+                true
+            );
+            highest_note_mode_control->set_available_values(lowest_note_mode_control->available_values);
+            transposition_bar->add(highest_note_mode_control);
+
+            transposition_bar->add(new DirectNumberControl<int_fast8_t>("Octave", &this->octave, this->octave, (int_fast8_t)0, (int_fast8_t)10));
+            menu->add(transposition_bar);
+
+            SubMenuItemBar *midi_settings_bar = new SubMenuItemBar("MIDI settings", true, false);
+            midi_settings_bar->add(new DirectNumberControl<int_fast8_t>("MIDI Channel", &this->channel, this->channel, (int_fast8_t)1, (int_fast8_t)16));
+            menu->add(midi_settings_bar);
+
+            #ifdef ENABLE_SCALES
+                menu->add(new HarmonyDisplay("Output", &this->scale_number, &this->scale_root, &this->last_note_number, &this->quantise, false));
+            #endif
         //#endif
     }
 

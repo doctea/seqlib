@@ -154,6 +154,8 @@ class MultiSequencer : public SimpleSequencer {
             // save/load system, so we call register_child for each of them instead 
             //BaseSequencer::setup_saveable_settings();   
 
+            // todo: remove rp2040-specify code
+
             Serial.printf("\n=== MultiSequencer::setup_saveable_settings() for sequencer %p with %i child sequencers...\n", this, this->sequencers->size()); Serial.flush();
             for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
                 BaseSequencer *s = this->sequencers->get(i);

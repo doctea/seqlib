@@ -75,7 +75,7 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
     void BaseSequencer::setup_saveable_settings() {
         ISaveableSettingHost::setup_saveable_settings();
 
-        if (Serial) Serial.printf("\n=== BaseSequencer::setup_saveable_settings() for sequencer %p with %i patterns...\n", this, this->get_number_patterns()); Serial.flush();
+        if (Serial) Serial.printf("\n=== BaseSequencer::setup_saveable_settings() for sequencer %p with %i patterns, free ram is %u ...\n", this, this->get_number_patterns(), freeRam()); Serial.flush();
         size_t pattern_count = this->get_number_patterns();
         for (uint_fast8_t i = 0 ; i < pattern_count ; i++) {
             //if (Serial) Serial.printf("BaseSequencer::setup_saveable_settings() for pattern [%i/%i]...\n", i+1, pattern_count); Serial.flush();

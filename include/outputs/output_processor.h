@@ -365,6 +365,36 @@ class FullDrumKitMIDIOutputProcessor : public MIDIOutputProcessor {
                 );
             }
     };
+
+    class BassAndChordsAndMelodyMIDIOutputProcessor : public MIDIOutputProcessor {
+        public:
+            BassAndChordsAndMelodyMIDIOutputProcessor(IMIDINoteAndCCTarget *output_target) : MIDIOutputProcessor(output_target) {
+                this->addNode(
+                    new MIDINoteTriggerCountOutput(
+                        "Bass", 
+                        output_target, 
+                        this->nodes,
+                        1
+                    )
+                );
+                this->addNode(
+                    new MIDINoteOutput(
+                        "Melody",
+                        output_target,
+                        2
+                    )
+                );
+                this->addNode(
+                    // todo: write a MIDIPolyOutput .. or do we actually want to make a MIDIChordOutput that uses the chord_player itself?  yes, probably!
+                    new MIDINoteOutput(
+                        "Chords",
+                        output_target,
+                        3
+                    )
+                );
+            }
+    };
+
 #endif
 
 

@@ -21,10 +21,19 @@
 
 #include "midi_helpers.h"
 
-#include "ParameterManager.h"
-#include "parameters/MIDICCParameter.h"
+#ifdef ENABLE_PARAMETERS
+    #include "ParameterManager.h"
+    //#include "parameters/MIDICCParameter.h"
+    #include "parameters/ProxyParameter.h"
+#endif
 
 #include <atomic>
+
+// for transpose mode
+enum NOTE_MODE {
+    IGNORE, TRANSPOSE
+};
+
 
 int8_t get_muso_note_for_drum(int8_t drum_note);
 
@@ -111,6 +120,9 @@ class MIDIBaseOutput : public BaseOutput {
             this->stop();
 
             int8_t note_number = get_note_number();
+
+            // limit note number to range of allowed notes
+
             //Serial.printf("Sending note on  for node %i on note_number %i chan %i\n", i, o->get_note_number(), o->get_channel());
             if (is_enabled() && is_valid_note(note_number)) {
                 Debug_printf("\t\tMIDIBaseOutput#process: goes on note\t%i\t(%s) \n", note_number, get_note_name_c(note_number));
@@ -175,6 +187,16 @@ class MIDIBaseOutput : public BaseOutput {
     #endif
 };
 
+
+// an output that tracks MIDI drum triggers
+class MIDIDrumOutput : public MIDIBaseOutput {
+    public:
+    MIDIDrumOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t note_number, int_fast8_t channel = GM_CHANNEL_DRUMS) 
+        : MIDIBaseOutput(label, output_wrapper, note_number, channel) {
+    }
+};
+
+
 #ifdef ENABLE_SCALES
     #include "scales.h"
     
@@ -186,12 +208,78 @@ class MIDIBaseOutput : public BaseOutput {
         protected:
 
         int_fast8_t octave = 3;
-        int_fast8_t scale_root = SCALE_ROOT_A;
-        scale_index_t scale_number = SCALE_FIRST;
+        int_fast8_t scale_root = SCALE_GLOBAL_ROOT;
+        scale_index_t scale_number = SCALE_GLOBAL;
+
+        int8_t lowest_note_mode = NOTE_MODE::IGNORE;
+        int8_t highest_note_mode = NOTE_MODE::IGNORE;
+        int8_t lowest_note = MIDI_MIN_NOTE;
+        int8_t highest_note = MIDI_MAX_NOTE;
+        int8_t effective_lowest_note = MIDI_MIN_NOTE;
+        int8_t effective_highest_note = MIDI_MAX_NOTE;
+
+        virtual int8_t get_effective_lowest_note() {
+            return min(effective_lowest_note, effective_highest_note);
+        }
+        virtual int8_t get_effective_highest_note() {
+            return max(effective_highest_note, effective_lowest_note);
+        }
+
+        virtual void setLowestNote(int8_t note) {
+            // don't allow highest note to be set higher than highest note
+            if (note > this->getHighestNote())
+                note = this->getHighestNote();
+            if (!is_valid_note(note)) 
+                note = MIDI_MIN_NOTE;
+
+            this->lowest_note = note;
+        }
+        virtual int8_t getLowestNote() {
+            return this->lowest_note;
+        }
+        virtual int8_t getLowestNoteMode() {
+            return lowest_note_mode;
+        }
+        // mode from NOTE_MODE enum (IGNORE or TRANSPOSE)
+        virtual void setLowestNoteMode(int8_t mode) {
+            this->lowest_note_mode = mode;
+        }
+
+        virtual void setHighestNote(int8_t note) {
+            // don't allow highest note to be set lower than lowest note
+            if (note < this->getLowestNote())
+                note = this->getLowestNote();
+            if (!is_valid_note(note)) 
+                note = MIDI_MAX_NOTE;
+            this->highest_note = note;
+        }
+        virtual int8_t getHighestNote() {
+            return this->highest_note;
+        }
+        virtual int8_t getHighestNoteMode() {
+            return this->highest_note_mode;
+        }
+        // mode from NOTE_MODE enum (IGNORE or TRANSPOSE)
+        virtual void setHighestNoteMode(int8_t mode) {
+            this->highest_note_mode = mode;
+        }
+
+
+        #ifdef ENABLE_PARAMETERS
+            LinkedList<FloatParameter*> *parameters = nullptr;
+        #endif
 
         public:
-            MIDINoteOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t channel = 1, int_fast8_t scale_root = SCALE_ROOT_A, scale_index_t scale_number = SCALE_MAJOR, int_fast8_t octave = 3) 
-                : MIDIBaseOutput(label, output_wrapper, NOTE_OFF, channel) {
+            //MIDINoteOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t channel = 1, int_fast8_t scale_root = SCALE_ROOT_A, scale_index_t scale_number = SCALE_MAJOR, int_fast8_t octave = 3) 
+            MIDINoteOutput(
+                const char *label, 
+                IMIDINoteAndCCTarget *output_wrapper, 
+                int_fast8_t channel = 1, 
+                int_fast8_t scale_root = SCALE_GLOBAL_ROOT, 
+                scale_index_t scale_number = SCALE_GLOBAL, 
+                int_fast8_t octave = 3
+            ) : MIDIBaseOutput(label, output_wrapper, NOTE_OFF, channel) 
+            {
                 this->scale_root = scale_root;
                 this->scale_number = scale_number;
                 this->octave = octave;
@@ -208,6 +296,14 @@ class MIDIBaseOutput : public BaseOutput {
 
                 if (!is_valid_note(note_to_play))
                     return NOTE_OFF;
+
+                // transpose the note to within the allowed range
+                while (note_to_play < get_effective_lowest_note()) {
+                    note_to_play += 12;
+                }
+                while (note_to_play > get_effective_highest_note()) {
+                    note_to_play -= 12;
+                }
 
                 if (!this->is_quantise())
                     return note_to_play;
@@ -265,6 +361,37 @@ class MIDIBaseOutput : public BaseOutput {
             #ifdef ENABLE_SCREEN
                 //FLASHMEM
                 virtual void make_menu_items(Menu *menu, int index) override;
+            #endif
+
+            #ifdef ENABLE_PARAMETERS
+                virtual LinkedList<FloatParameter*> *get_parameters() override {
+                    if (this->parameters!=nullptr)
+                        return this->parameters;
+
+                    LinkedList<FloatParameter*> *parameters = MIDIBaseOutput::get_parameters();
+                    if (parameters == nullptr) {
+                        parameters = new LinkedList<FloatParameter*>();
+                    }
+                    this->parameters = parameters;
+
+                    parameters->add(new ProxyParameter<int8_t>(
+                        "Lowest note",
+                        &this->lowest_note,
+                        &this->effective_lowest_note,
+                        MIDI_MIN_NOTE,
+                        MIDI_MAX_NOTE
+                    ));
+
+                    parameters->add(new ProxyParameter<int8_t>(
+                        "Highest note",
+                        &this->highest_note,
+                        &this->effective_highest_note,
+                        MIDI_MIN_NOTE,
+                        MIDI_MAX_NOTE
+                    ));
+
+                    return parameters;
+                }
             #endif
 
             #ifdef ENABLE_STORAGE
@@ -327,6 +454,62 @@ class MIDIBaseOutput : public BaseOutput {
                             }
                         ), SL_SCOPE_SCENE  // allow scale to be saved at scene level, since it's more of a performance setting than a preference setting
                     );
+
+                    register_setting(
+                        new LSaveableSetting<int8_t>(
+                            "Lowest note",
+                            "MIDINoteOutput",
+                            &this->lowest_note,
+                            [=](int8_t value) -> void {
+                                this->lowest_note = value;
+                            },
+                            [=](void) -> int8_t {
+                                return this->lowest_note;
+                            }
+                        ), SL_SCOPE_SCENE  // allow lowest note to be saved at scene level, since it's more of a performance setting than a preference setting
+                    );
+
+                    register_setting(
+                        new LSaveableSetting<int8_t>(
+                            "Highest note",
+                            "MIDINoteOutput",
+                            &this->highest_note,
+                            [=](int8_t value) -> void {
+                                this->highest_note = value;
+                            },
+                            [=](void) -> int8_t {
+                                return this->highest_note;
+                            }
+                        ), SL_SCOPE_SCENE  // allow highest note to be saved at scene level, since it's more of a performance setting than a preference setting
+                    );
+
+                    register_setting(
+                        new LSaveableSetting<int8_t>(
+                            "Lowest note mode",
+                            "MIDINoteOutput",
+                            &this->lowest_note_mode,
+                            [=](int8_t value) -> void {
+                                this->lowest_note_mode = value;
+                            },
+                            [=](void) -> int8_t {
+                                return this->lowest_note_mode;
+                            }
+                        ), SL_SCOPE_SCENE  // allow lowest note mode to be saved at scene level, since it's more of a performance setting than a preference setting
+                    );
+
+                    register_setting(
+                        new LSaveableSetting<int8_t>(
+                            "Highest note mode",
+                            "MIDINoteOutput",
+                            &this->highest_note_mode,
+                            [=](int8_t value) -> void {
+                                this->highest_note_mode = value;
+                            },
+                            [=](void) -> int8_t {
+                                return this->highest_note_mode;
+                            }
+                        ), SL_SCOPE_SCENE  // allow highest note mode to be saved at scene level, since it's more of a performance setting than a preference setting
+                    );
                 }
             #endif
     };
@@ -335,15 +518,6 @@ class MIDIBaseOutput : public BaseOutput {
     // individually from different step triggers, for eg polyphonic arpegiator-ish outputs
 
 #endif
-
-
-// an output that tracks MIDI drum triggers
-class MIDIDrumOutput : public MIDIBaseOutput {
-    public:
-    MIDIDrumOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t note_number, int_fast8_t channel = GM_CHANNEL_DRUMS) 
-        : MIDIBaseOutput(label, output_wrapper, note_number, channel) {
-    }
-};
 
 void setup_output_processor_parameters();
 

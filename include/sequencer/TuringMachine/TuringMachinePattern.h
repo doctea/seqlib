@@ -47,13 +47,6 @@ class TuringMachinePattern : public SimplePattern
     float probability = 0.1f;
     float effective_probability = probability;
 
-    // for random note generation, we can specify a range of notes to choose from
-    // todo: crib the way this works from Nexus6
-    int8_t lowest_note = MIDI_MIN_NOTE;
-    int8_t highest_note = MIDI_MAX_NOTE;
-    int8_t effective_lowest_note = MIDI_MIN_NOTE;
-    int8_t effective_highest_note = MIDI_MAX_NOTE;
-
     uint8_t mutation_locks[TIME_SIG_MAX_STEPS_PER_BAR];
     int mutation_lock_count = 4; // how many times a step should be played before it can mutate again
     bool mutation_lock_active = true;
@@ -136,8 +129,7 @@ class TuringMachinePattern : public SimplePattern
             if (current_state) {
                 this->unset_event_for_tick(step * TICKS_PER_STEP);
             } else {
-                //int8_t new_note = random(effective_lowest_note, effective_highest_note);
-                int8_t new_note = random(128); // choose from the full range of MIDI notes, then transpose into getLowestNote/getHighestNote range if necessary -- this seems to produce more interesting results than just choosing from within the range to begin with
+                int8_t new_note = random(128);
                 this->set_event_for_tick(step * TICKS_PER_STEP, new_note, MIDI_MAX_VELOCITY, 1);
             }
             if (is_mutation_lock_active()) this->lock_step(step);
@@ -158,38 +150,11 @@ class TuringMachinePattern : public SimplePattern
             
             register_setting(new LSaveableSetting<int16_t>("duration", "TuringMachinePattern", &this->current_duration), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
             register_setting(new LSaveableSetting<float>("probability", "TuringMachinePattern", &this->probability), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-            register_setting(new LSaveableSetting<int8_t>("lowest_note", "TuringMachinePattern", &this->lowest_note), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-            register_setting(new LSaveableSetting<int8_t>("highest_note", "TuringMachinePattern", &this->highest_note), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
 
             register_setting(new LSaveableSetting<bool>("mutation_lock_active", "TuringMachinePattern", &this->mutation_lock_active), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
             register_setting(new LSaveableSetting<int>("mutation_lock_count", "TuringMachinePattern", &this->mutation_lock_count), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
         }
     #endif
-
-    virtual void setLowestNote(int8_t note) {
-        // don't allow highest note to be set higher than highest note
-        if (note > this->getHighestNote())
-            note = this->getHighestNote();
-        if (!is_valid_note(note)) 
-            note = MIDI_MIN_NOTE;
-        this->lowest_note = note;
-    }
-    virtual int8_t getLowestNote() {
-        return this->lowest_note;
-    }
-
-    virtual void setHighestNote(int8_t note) {
-        // don't allow highest note to be set lower than lowest note
-        if (note < this->getLowestNote())
-            note = this->getLowestNote();
-        if (!is_valid_note(note)) 
-            note = MIDI_MAX_NOTE;
-        this->highest_note = note;
-    }
-    virtual int8_t getHighestNote() {
-        return this->highest_note;
-    }
-
 
     #ifdef ENABLE_PARAMETERS
         virtual const char* getInputInfo() override {

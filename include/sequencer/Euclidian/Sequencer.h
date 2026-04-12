@@ -183,7 +183,7 @@ class EuclidianSequencer : public BaseSequencer
         #ifdef SEQLIB_MUTATE_EVERY_TICK
             if (is_mutate_enabled()) {
                 uint_fast8_t tick_of_step = tick % TICKS_PER_STEP;
-                if (tick_of_step==TICKS_PER_STEP-1) {
+                if (tick_of_step==(uint_fast8_t)(TICKS_PER_STEP-1)) {
                     for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
                         if (!this->get_pattern(i)->is_locked()) {
                             //if (Serial) Serial.println("mutate every tick!");

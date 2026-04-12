@@ -7,16 +7,7 @@ void TuringMachinePattern::trigger_on_for_step(int step) {
     this->triggered_on_tick = ticks;
     this->current_duration = this->get_tick_duration();
 
-    // if the note is outside our specified range, transpose it by octaves until it's within the range -- this is a bit of a hack, but it seems to produce more musical results than just silencing notes outside the range, and it's not too hard to implement
     int8_t note_to_play = this->events[step%get_effective_steps()].note;
-    while (is_valid_note(note_to_play) && note_to_play < getLowestNote()) {
-        //Serial.printf("TuringMachinePattern: note %i is below lowest note %i, transposing up an octave\n", note_to_play, getLowestNote());
-        note_to_play += 12;
-    }
-    while (is_valid_note(note_to_play) && note_to_play > getHighestNote()) {
-        //Serial.printf("TuringMachinePattern: note %i is above highest note %i, transposing down an octave\n", note_to_play, getHighestNote());
-        note_to_play -= 12;
-    }
 
     if (is_valid_note(note_to_play)) {
         this->current_note_number = note_to_play;
@@ -73,35 +64,6 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
         output_bar->add(selector);
         menu->add(output_bar);
 
-        // add controls for the max/min note values for random generation
-        // cribbed from Nexus6 -- we might want to make a more generic "range control" menu item at some point, since this kind of thing is likely to come up a lot in different contexts
-        SubMenuItemBar *transposition_bar = new SubMenuItemBar("Transpose");
-        LambdaScaleNoteMenuItem<int8_t> *lowest_note_control = new LambdaScaleNoteMenuItem<int8_t>(
-            "Lowest",
-            [=](int8_t v) -> void { this->setLowestNote(v); },
-            [=]() -> int8_t { return this->getLowestNote(); },
-            nullptr,
-            (int8_t)MIDI_MIN_NOTE,
-            (int8_t)MIDI_MAX_NOTE,
-            true,
-            true
-        );
-        transposition_bar->add(lowest_note_control);
-
-        LambdaScaleNoteMenuItem<int8_t> *highest_note_control = new LambdaScaleNoteMenuItem<int8_t>(
-            "Highest",
-            [=](int8_t v) -> void { this->setHighestNote(v); },
-            [=]() -> int8_t { return this->getHighestNote(); },
-            nullptr,
-            (int8_t)MIDI_MIN_NOTE,
-            (int8_t)MIDI_MAX_NOTE,
-            true,
-            true
-        );
-        transposition_bar->add(highest_note_control);
-        menu->add(transposition_bar);
-
-
         // add parameter modulation controls -- we can choose to combine these on the same page as the main pattern controls, or put them on a separate page with a link from the main one
         if (combine_setting & COMBINE_MODULATION_WITH_MAIN) {
             menu->add(new SeparatorMenuItem("Modulation"));
@@ -155,26 +117,6 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 &this->effective_duration,
                 1, 
                 PPQN/4
-            ));
-
-        snprintf(label, MAX_LABEL, "TM %i lowest note", i);
-        parameters->add(
-            new ProxyParameter<int8_t>(
-                label, 
-                &this->lowest_note,
-                &this->effective_lowest_note,
-                MIDI_MIN_NOTE, 
-                MIDI_MAX_NOTE
-            ));
-
-        snprintf(label, MAX_LABEL, "TM %i highest note", i);
-        parameters->add(
-            new ProxyParameter<int8_t>(
-                label, 
-                &this->highest_note,
-                &this->effective_highest_note,
-                MIDI_MIN_NOTE, 
-                MIDI_MAX_NOTE
             ));
 
         snprintf(label, MAX_LABEL, "TM %i mutlock amt", i);
