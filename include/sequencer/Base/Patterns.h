@@ -220,12 +220,6 @@ class BasePattern
 
 class SimplePattern : public BasePattern {
     public:
-    struct event {
-        byte note = NOTE_OFF;
-        byte velocity = DEFAULT_VELOCITY;
-        byte channel = 0;
-    };
-
     // Override get_velocity() to apply accent scaling.
     virtual int8_t get_velocity() override {
         #ifdef ENABLE_ACCENTS
@@ -242,10 +236,10 @@ class SimplePattern : public BasePattern {
     uint32_t triggered_on_tick = -1;
     int16_t current_duration = PPQN;
 
-    event *events = nullptr;
+    midi_note_event_t *events = nullptr;
 
     SimplePattern(LinkedList<BaseOutput*> *available_outputs) : BasePattern(available_outputs) {
-        this->events = (event*)CALLOC_FUNC(sizeof(event), steps);
+        this->events = (midi_note_event_t*)CALLOC_FUNC(sizeof(midi_note_event_t), steps);
     }
 
     // get the step number for this pattern for given tick number

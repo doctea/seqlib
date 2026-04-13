@@ -19,6 +19,10 @@
     #include "parameter_inputs/AnalogParameterInputBase.h"
 #endif
 
+#ifdef ENABLE_STORAGE
+    #include "outputs/SeqlibSaveableSettings.h"
+#endif
+
 namespace TuringMachine {    
     enum CombinePageOption {
         COMBINE_NONE = 0,
@@ -153,6 +157,21 @@ class TuringMachinePattern : public SimplePattern
 
             register_setting(new LSaveableSetting<bool>("mutation_lock_active", "TuringMachinePattern", &this->mutation_lock_active), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
             register_setting(new LSaveableSetting<int>("mutation_lock_count", "TuringMachinePattern", &this->mutation_lock_count), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+
+            register_setting(new SaveableByteArraySetting<uint8_t>(
+                "mutation_locks", 
+                "TuringMachinePattern", 
+                this->mutation_locks, 
+                TIME_SIG_MAX_STEPS_PER_BAR
+            ), SL_SCOPE_SNAPSHOT);
+            //register_setting(new SaveableMIDINoteArraySetting("sequencer_pattern", "TuringMachinePattern", &this->events, TIME_SIG_MAX_STEPS_PER_BAR), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+
+            register_setting(new SaveableMIDINoteArraySetting(
+                "events", 
+                "TuringMachinePattern", 
+                this->events, 
+                TIME_SIG_MAX_STEPS_PER_BAR
+            ), SL_SCOPE_SNAPSHOT);
         }
     #endif
 

@@ -66,3 +66,62 @@ class LOutputSaveableSetting : public SaveableSettingBase {
     }
 
 };
+
+
+#include "sequencer/Base/Patterns.h"
+
+// Saves/loads a BasePattern's midi_note_event_t array.
+// Each event is encoded as 6 hex chars: NNVVCC (note, velocity, channel),
+// where each byte is stored as its uint8_t bit-pattern so that NOTE_OFF (-1)
+// round-trips correctly as 0xff.
+// Line format: key=NNVVCCNNVVCC...  (one 6-char group per event)
+class SaveableMIDINoteArraySetting : public SaveableSettingBase {
+    public:
+    //BasePattern *pattern;
+    midi_note_event_t *events;
+    uint16_t array_size;
+
+    SaveableMIDINoteArraySetting(const char *label, const char *category, midi_note_event_t *pattern, uint16_t array_size)
+        : SaveableSettingBase() {
+        this->set_label(label);
+        this->set_category(category ? category : "");
+        //this->pattern = nullptr;
+        this->events = pattern;
+        this->array_size = array_size;
+    }
+
+    const char *get_line() override {
+        int pos = snprintf(linebuf, SL_MAX_LINE, "%s=", label);
+        for (uint16_t i = 0; i < array_size && pos < SL_MAX_LINE - 6; i++) {
+            uint8_t n = (uint8_t)events[i].note;
+            uint8_t v = (uint8_t)events[i].velocity;
+            uint8_t c = (uint8_t)events[i].channel;
+            pos += snprintf(linebuf + pos, SL_MAX_LINE - pos, "%02x%02x%02x", n, v, c);
+        }
+        linebuf[pos] = '\0';
+        return linebuf;
+    }
+
+    bool parse_key_value(const char *key, const char *value) override {
+        if (strcmp(key, label) != 0) return false;
+        // re-read live pointer in case pattern allocated events after construction
+        //events = pattern->events;
+        for (uint16_t i = 0; i < array_size && value[i*6] && value[i*6+1] && value[i*6+2]
+                                                && value[i*6+3] && value[i*6+4] && value[i*6+5]; i++) {
+            char byte_str[3];
+            byte_str[2] = '\0';
+
+            byte_str[0] = value[i*6];     byte_str[1] = value[i*6+1];
+            events[i].note     = (int8_t)(uint8_t)strtol(byte_str, nullptr, 16);
+
+            byte_str[0] = value[i*6+2];   byte_str[1] = value[i*6+3];
+            events[i].velocity = (int8_t)(uint8_t)strtol(byte_str, nullptr, 16);
+
+            byte_str[0] = value[i*6+4];   byte_str[1] = value[i*6+5];
+            events[i].channel  = (int8_t)(uint8_t)strtol(byte_str, nullptr, 16);
+        }
+        return true;
+    }
+
+    virtual size_t heap_size() const override { return sizeof(SaveableMIDINoteArraySetting); }
+};
