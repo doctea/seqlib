@@ -95,6 +95,10 @@ class BaseSequencer
 
     virtual void configure_pattern_output(int index, BaseOutput *output);
 
+    // Called from loop() to perform any pending pattern recomputes (e.g. make_euclid()) outside the ISR.
+    // Base implementation is a no-op; override in concrete sequencers that have deferred work.
+    virtual void do_deferred_recomputes() {}
+
     #if defined(ENABLE_PARAMETERS)
         virtual LinkedList<FloatParameter*> *getParameters();
         virtual FloatParameter* getParameterByName(const char *name);   // UNTESTED!!

@@ -174,11 +174,14 @@ class EuclidianSequencer : public BaseSequencer
         EuclidianPattern *p = (EuclidianPattern*)this->get_pattern(i);
         if (force || !p->is_locked()) {
             p->restore_default_arguments();
-            p->make_euclid();
+            // Defer the recompute; pattern data will be updated from loop().
+            p->mark_dirty();
         }
     }
 
-    virtual void on_loop(int tick) override {};
+    virtual void on_loop(int tick) override {
+        this->do_deferred_recomputes();
+    };
     virtual void on_tick(int tick) override {
         #ifdef SEQLIB_MUTATE_EVERY_TICK
             if (is_mutate_enabled()) {
@@ -187,7 +190,8 @@ class EuclidianSequencer : public BaseSequencer
                     for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
                         if (!this->get_pattern(i)->is_locked()) {
                             //if (Serial) Serial.println("mutate every tick!");
-                            ((EuclidianPattern*)this->get_pattern(i))->make_euclid();
+                            // Mark dirty so make_euclid() runs in loop() rather than the ISR.
+                            ((EuclidianPattern*)this->get_pattern(i))->mark_dirty();
                         }
                     }
                 }
@@ -288,7 +292,7 @@ class EuclidianSequencer : public BaseSequencer
             );
             if (!this->get_pattern(ran)->is_locked()) {
                 ((EuclidianPattern*)this->get_pattern(ran))->set_rotation(((EuclidianPattern*)this->get_pattern(ran))->get_rotation() + 2);
-                ((EuclidianPattern*)this->get_pattern(ran))->make_euclid();
+                ((EuclidianPattern*)this->get_pattern(ran))->mark_dirty();
             }
         }
         for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
@@ -300,7 +304,7 @@ class EuclidianSequencer : public BaseSequencer
                 ((EuclidianPattern*)this->get_pattern(ran))->set_rotation(((EuclidianPattern*)this->get_pattern(ran))->get_rotation() * 2);
                 if (((EuclidianPattern*)this->get_pattern(ran))->get_pulses() > ((EuclidianPattern*)this->get_pattern(ran))->get_steps())
                     ((EuclidianPattern*)this->get_pattern(ran))->set_pulses(((EuclidianPattern*)this->get_pattern(ran))->get_pulses() / 8);
-                ((EuclidianPattern*)this->get_pattern(ran))->make_euclid();
+                ((EuclidianPattern*)this->get_pattern(ran))->mark_dirty();
             }
         }
     }
@@ -310,6 +314,13 @@ class EuclidianSequencer : public BaseSequencer
     #if defined(ENABLE_PARAMETERS)
         virtual LinkedList<FloatParameter*> *getParameters() override;
     #endif
+
+    // Call from loop() (never from ISR) to perform any pending make_euclid() recomputes.
+    virtual void do_deferred_recomputes() override {
+        for (uint_fast8_t i = 0; i < this->get_number_patterns(); i++) {
+            ((EuclidianPattern*)this->get_pattern(i))->do_deferred_recompute();
+        }
+    }
 
     #if defined(ENABLE_SCREEN)
         // FLASHMEM

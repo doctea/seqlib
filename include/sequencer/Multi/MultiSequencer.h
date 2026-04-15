@@ -77,6 +77,12 @@ class MultiSequencer : public SimpleSequencer {
         }
     }
 
+    virtual void do_deferred_recomputes() override {
+        for (unsigned int i = 0; i < this->sequencers->size(); i++) {
+            this->sequencers->get(i)->do_deferred_recomputes();
+        }
+    }
+
     virtual void on_step(int step) override {
         for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
             this->sequencers->get(i)->on_step(step);

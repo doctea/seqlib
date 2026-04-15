@@ -291,16 +291,16 @@ class SimplePattern : public BasePattern {
         }
     }
     virtual void process_tick(int ticks) override { 
+        // Early-out: most ticks have no note held — skip the modulo division entirely.
+        if (!this->note_held) return;
+
         // check if note is held and duration has passed...
         int step = BPM_GLOBAL_STEP_FROM_TICKS(ticks) % steps;
 
         //Serial.printf("SimplePattern::process_tick: step_of_song=%i, step_of_pattern=%i, ticks=%6u, triggered_on_tick=%6u, current_duration=%u\n", BPM_CURRENT_STEP_OF_SONG, step, ticks, triggered_on_tick, current_duration); Serial.flush();
         //Serial.printf("SimplePattern::process_tick: ticks=%i, step_of_song=%i, step_of_pattern=%i\n", ticks, BPM_GLOBAL_STEP_FROM_TICKS(ticks), step);
 
-        if (
-            this->note_held && 
-            ((uint32_t)ticks >= triggered_on_tick + this->current_duration || (uint32_t)ticks < triggered_on_tick)
-        ) {
+        if ((uint32_t)ticks >= triggered_on_tick + this->current_duration || (uint32_t)ticks < triggered_on_tick) {
             this->trigger_off_for_step(step);
         }
     }

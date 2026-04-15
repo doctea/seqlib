@@ -11,6 +11,7 @@ class EuclidianPattern : public SimplePattern
 
     bool locked = false;
     bool initialised = false;
+    volatile bool needs_recompute = false;
 
     arguments_t arguments;
     arguments_t last_arguments;
@@ -71,6 +72,19 @@ class EuclidianPattern : public SimplePattern
     }
     virtual void set_global_density_group(int8_t channel) {
         this->global_density_group = channel % NUM_GLOBAL_DENSITY_GROUPS;
+    }
+
+    // Mark this pattern as needing a make_euclid() call, to be serviced later from loop() rather than the ISR.
+    void mark_dirty() {
+        needs_recompute = true;
+    }
+
+    // Call from loop() (outside the ISR) to apply any pending make_euclid() recompute.
+    void do_deferred_recompute() {
+        if (needs_recompute) {
+            needs_recompute = false;
+            make_euclid();
+        }
     }
 
     FLASHMEM
@@ -153,7 +167,8 @@ class EuclidianPattern : public SimplePattern
         }
         //r = random(this->steps/2, this->maximum_steps);
         //this->arguments.steps = r;
-        this->make_euclid();
+        // Defer make_euclid() to loop() so it doesn't block the ISR.
+        this->mark_dirty();
     }
 
     virtual int8_t get_effective_steps() override {
