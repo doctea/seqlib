@@ -179,9 +179,6 @@ class EuclidianSequencer : public BaseSequencer
         }
     }
 
-    virtual void on_loop(int tick) override {
-        this->do_deferred_recomputes();
-    };
     virtual void on_tick(int tick) override {
         #ifdef SEQLIB_MUTATE_EVERY_TICK
             if (is_mutate_enabled()) {

@@ -1,3 +1,4 @@
+#ifdef ENABLE_STORAGE
 // SaveableParameter implementations for handling special things like Pattern outputs which aren't just simple variables
 
 #pragma once
@@ -125,3 +126,5 @@ class SaveableMIDINoteArraySetting : public SaveableSettingBase {
 
     virtual size_t heap_size() const override { return sizeof(SaveableMIDINoteArraySetting); }
 };
+
+#endif

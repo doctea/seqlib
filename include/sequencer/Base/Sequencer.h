@@ -52,7 +52,6 @@ class BaseSequencer
         this->running = state;
     }
 
-
     // called every tick, call the appropriate callbacks for the current tick, step, beat, bar, and phrase
     //virtual void on_tick(int tick) = 0;
     virtual void on_tick(int tick) {
@@ -73,7 +72,7 @@ class BaseSequencer
         }
     }
 
-    virtual void on_loop(int tick) = 0;
+    virtual void on_loop(int tick) { this->do_deferred_recomputes(); }
     virtual void on_beat(int beat) = 0;
     virtual void on_bar(int bar) = 0;
     virtual void on_phrase(int phrase) = 0;
