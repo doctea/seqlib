@@ -297,13 +297,34 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 if (!is_valid_note(note_to_play))
                     return NOTE_OFF;
 
-                // transpose the note to within the allowed range
-                while (note_to_play < get_effective_lowest_note()) {
-                    note_to_play += 12;
+                // todo: probably move this transpose and quantise logic somewhere else
+                // into Conductor maybe?
+                if (lowest_note_mode == NOTE_MODE::TRANSPOSE) {
+                    // transpose the note to within the allowed range
+                    while (is_valid_note(note_to_play) && note_to_play < get_effective_lowest_note()) {
+                        note_to_play += 12;
+                    }
+                } else if (lowest_note_mode == NOTE_MODE::IGNORE) {
+                    // if the note is below the allowed range, just ignore it
+                    if (is_valid_note(note_to_play) && note_to_play < get_effective_lowest_note()) {
+                        return NOTE_OFF;
+                    }
                 }
-                while (note_to_play > get_effective_highest_note()) {
-                    note_to_play -= 12;
+
+                if (highest_note_mode == NOTE_MODE::TRANSPOSE) {
+                    // transpose the note to within the allowed range
+                    while (is_valid_note(note_to_play) && note_to_play > get_effective_highest_note()) {
+                        note_to_play -= 12;
+                    }
+                } else if (highest_note_mode == NOTE_MODE::IGNORE) {
+                    // if the note is above the allowed range, just ignore it
+                    if (is_valid_note(note_to_play) && note_to_play > get_effective_highest_note()) {
+                        return NOTE_OFF;
+                    }
                 }
+
+                if (!is_valid_note(note_to_play))
+                    return NOTE_OFF;
 
                 if (!this->is_quantise())
                     return note_to_play;

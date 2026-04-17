@@ -40,27 +40,28 @@
         // todo: implement a CombinePageOptions-style mask, like we did with the sequencer menu items, 
         // to allow the programmer to choose whether to combine the scale/quantise stuff with the output toggles on the same page or not.
         
-        #ifdef ENABLE_SCALES
-            menu->add_page("Global key and scale");
+        // this now moved to the conductor menu, since it's more about global scale than about the output processor specifically
+        // #ifdef ENABLE_SCALES
+        //     menu->add_page("Global key and scale");
 
-            menu->add(new LambdaScaleMenuItemBar(
-                "Scale / Key", 
-                [=](scale_index_t scale) -> void { get_global_scale_identity()->scale_number = scale; }, 
-                [=]() -> scale_index_t { return get_global_scale_identity()->scale_number; },
-                [=](int_fast8_t scale_root) -> void { get_global_scale_identity()->root_note = scale_root; },
-                [=]() -> int_fast8_t { return get_global_scale_identity()->root_note; },
-                false,  // don't allow global, cos this IS the setting for global!
-                true,
-                false                
-            ));
+        //     menu->add(new LambdaScaleMenuItemBar(
+        //         "Scale / Key", 
+        //         [=](scale_index_t scale) -> void { get_global_scale_identity()->scale_number = scale; }, 
+        //         [=]() -> scale_index_t { return get_global_scale_identity()->scale_number; },
+        //         [=](int_fast8_t scale_root) -> void { get_global_scale_identity()->root_note = scale_root; },
+        //         [=]() -> int_fast8_t { return get_global_scale_identity()->root_note; },
+        //         false,  // don't allow global, cos this IS the setting for global!
+        //         true,
+        //         false                
+        //     ));
 
-            menu->add(new HarmonyDisplay(
-                "Output", 
-                get_global_scale_identity(),
-                nullptr, 
-                nullptr
-            ));
-        #endif
+        //     menu->add(new HarmonyDisplay(
+        //         "Output", 
+        //         get_global_scale_identity(),
+        //         nullptr, 
+        //         nullptr
+        //     ));
+        // #endif
 
     }
 #endif
