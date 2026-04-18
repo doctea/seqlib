@@ -2,7 +2,7 @@
 
 Library for handling multiple sequencer tracks, focused on generative sequencers.
 
-Used in Microlidian, Nexus6 and Compulidian.
+Used by [Microlidian](https://github.com/doctea/Microlidian), [Nexus6](https://github.com/doctea/usb_midi_clocker) and [Compulidian](https://github.com/doctea/Compulidian).
 
 Currently:-
  - Mutating, modulatable Euclidian sequencers
