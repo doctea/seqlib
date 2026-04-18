@@ -47,15 +47,33 @@ class EuclidianPatternControl : public SubMenuItemBar {
         #ifdef ENABLE_OTHER_CONTROLS
             //SubMenuItemBar *bar = new SubMenuItemBar("Arguments");
             //Menu *bar = menu;
-            // todo: convert to LambdaNumberControl etc
-            this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Steps",    pattern, &EuclidianPattern::set_steps,      &EuclidianPattern::get_steps,    nullptr, 1, TIME_SIG_MAX_STEPS_PER_BAR, true, true));
-            this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Pulses",   pattern, &EuclidianPattern::set_pulses,     &EuclidianPattern::get_pulses,   nullptr, 1, STEPS_PER_BAR, true, true));
-            this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Rotation", pattern, &EuclidianPattern::set_rotation,   &EuclidianPattern::get_rotation, nullptr, 1, TIME_SIG_MAX_STEPS_PER_BAR, true, true));
-            this->add(new ObjectNumberControl<EuclidianPattern,int8_t> ("Duration", pattern, &EuclidianPattern::set_duration,   &EuclidianPattern::get_duration, nullptr, MINIMUM_DURATION, TICKS_PER_BAR, true, true));  // minimum duration needs to be 2 , otherwise can end up with note on's getting missed by usb_teensy_clocker!
+            // Controls read/write default_arguments so that edits are immediately 'stored'.
+            // arguments is kept in sync so that the ProxyParameter modulation system has the correct base.
+            // The post-modulation effective values (last_arguments) are displayed in the circle center.
+            this->add(new LambdaNumberControl<int8_t> ("Steps",
+                [=](int8_t v) -> void { pattern->default_arguments.steps = v; pattern->arguments.steps = v; pattern->mark_dirty(); },
+                [=]() -> int8_t { return pattern->default_arguments.steps; },
+                nullptr, 1, TIME_SIG_MAX_STEPS_PER_BAR, true, true));
+            this->add(new LambdaNumberControl<int8_t> ("Pulses",
+                [=](int8_t v) -> void { pattern->default_arguments.pulses = v; pattern->arguments.pulses = v; pattern->mark_dirty(); },
+                [=]() -> int8_t { return pattern->default_arguments.pulses; },
+                nullptr, 1, STEPS_PER_BAR, true, true));
+            this->add(new LambdaNumberControl<int8_t> ("Rotation",
+                [=](int8_t v) -> void { pattern->default_arguments.rotation = v; pattern->arguments.rotation = v; pattern->mark_dirty(); },
+                [=]() -> int8_t { return pattern->default_arguments.rotation; },
+                nullptr, 1, TIME_SIG_MAX_STEPS_PER_BAR, true, true));
+            this->add(new LambdaNumberControl<int8_t> ("Duration",  // minimum duration needs to be 2, otherwise can end up with note ons getting missed by usb_teensy_clocker!
+                [=](int8_t v) -> void { pattern->default_arguments.duration = v; pattern->arguments.duration = v; pattern->mark_dirty(); },
+                [=]() -> int8_t { return pattern->default_arguments.duration; },
+                nullptr, MINIMUM_DURATION, TICKS_PER_BAR, true, true));
 
             // choose global density channel to use
             this->add(new LambdaNumberControl<int8_t> ("Density group", [=](int8_t v) -> int8_t { pattern->set_global_density_group(v); return pattern->get_global_density_group(); }, [=]() -> int8_t { return pattern->get_global_density_group(); }, nullptr, 0, NUM_GLOBAL_DENSITY_GROUPS-1, true, true));
 
+            //menu->debug = true;
+            this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
+
+            // Shuffle # is last so it overflows to the under-circle (-1 column) position
             #ifdef ENABLE_SHUFFLE
                 this->add(new LambdaNumberControl<int8_t> (
                     "Shuffle #", 
@@ -64,10 +82,6 @@ class EuclidianPatternControl : public SubMenuItemBar {
                     nullptr, 0, shuffle_pattern_wrapper.getCount()-1, true, true
                 ));
             #endif
-            
-            //menu->debug = true;
-            this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
-            this->add(new ObjectActionConfirmItem<EuclidianPattern> ("Store" /*"Store as default"*/, pattern, &EuclidianPattern::store_current_arguments_as_default));
         #endif
     }
 
@@ -114,27 +128,24 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 //|| item_index==items_size-1    // last item forced to first column?
             ) column = 0;
 
+            // When shuffle is enabled, the last item (Shuffle #) overflows under the circle
             #ifdef ENABLE_SHUFFLE
-                static const unsigned int last_item_index = items_size-2;
-            #else
-                static const unsigned int last_item_index = items_size-1;
+                if (item_index >= items_size-1) {
+                    column = -1;
+                }
             #endif
-            if (item_index >= last_item_index) {
-                column = -1;   // last item forced to first column
-            }
 
             if (column==0)
                 start_x = tft->width()/2;
             else if (column==-1) {
-                // put last items under the circle display
+                // put last item under the circle display
                 if (item_index < items_size-1) {
                     start_x = 0;
                     start_y = start_y - widget_height;
                 } else {
                     start_x = tft->width()/4;
-                    //start_y = start_y - widget_height;
                 }
-            } else 
+            } else
                 start_x = (tft->width()/2)  + (tft->width()/4);
 
             bool wrap = item_index==0   // first item moves cursor to next row
@@ -169,8 +180,32 @@ class EuclidianPatternControl : public SubMenuItemBar {
         }
 
         #ifdef ENABLE_STEP_DISPLAYS
-            if (this->circle_display!=nullptr)
+            if (this->circle_display!=nullptr) {
                 this->circle_display->display(pos, selected, opened);
+                // Overlay the current effective (post-modulation) values in the circle center
+                if (this->pattern != nullptr) {
+                    const uint_fast16_t cx = tft->width()/4;
+                    const uint_fast16_t cy = this->circle_display->circle_center_y;
+                    const int char_w = tft->currentCharacterWidth();
+                    const int char_h = tft->getSingleRowHeight();
+                    // format: "S:XX P:XX R:XX" showing effective steps/pulses/rotation from last make_euclid()
+                    char eff_buf[16];
+                    snprintf(eff_buf, sizeof(eff_buf), "%d/%d+%d",
+                        (int)this->pattern->last_arguments.steps,
+                        (int)this->pattern->last_arguments.pulses,
+                        (int)this->pattern->last_arguments.rotation);
+                    const int text_w = strlen(eff_buf) * char_w;
+                    const int tx = cx - text_w / 2;
+                    const int ty = cy - char_h / 2;
+                    tft->fillRect(tx - 1, ty - 1, text_w + 2, char_h + 2, BLACK);
+                    tft->setTextColor(this->pattern->last_arguments.steps != this->pattern->default_arguments.steps
+                        || this->pattern->last_arguments.pulses != this->pattern->default_arguments.pulses
+                        || this->pattern->last_arguments.rotation != this->pattern->default_arguments.rotation
+                        ? YELLOW : C_WHITE, BLACK);
+                    tft->setCursor(tx, ty);
+                    tft->printf("%s", eff_buf);
+                }
+            }
         #endif
 
         return finish_y;

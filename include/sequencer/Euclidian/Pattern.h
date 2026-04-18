@@ -89,6 +89,10 @@ class EuclidianPattern : public SimplePattern
 
     FLASHMEM
     virtual void make_euclid() {
+        if (this->is_locked()) {
+            //if (Serial) { Serial.println("pattern is locked, skipping make_euclid"); Serial.flush(); }
+            return;
+        }
         //if (Serial) Serial.println("make_euclid.."); Serial.flush();
         //Serial.printf("used_arguments is %p, global_density points to %p\n", &used_arguments, global_density);
         this->used_arguments.effective_euclidian_density = this->get_global_density();
@@ -147,6 +151,10 @@ class EuclidianPattern : public SimplePattern
     }*/
 
     void mutate() {
+        if (this->is_locked()) {
+            //if (Serial) { Serial.println("pattern is locked, skipping mutate"); Serial.flush(); }
+            return;
+        }
         //if (Serial) Serial.println("mutate the pattern!");
         int r = random(0, 100);
         if (r > 50) {
@@ -172,7 +180,9 @@ class EuclidianPattern : public SimplePattern
     }
 
     virtual int8_t get_effective_steps() override {
-        return this->used_arguments.steps;
+        // When locked, return the step count that make_euclid() last actually computed,
+        // not the (possibly modulation-modified) used_arguments.steps.
+        return this->is_locked() ? this->last_arguments.steps : this->used_arguments.steps;
     }
     virtual int8_t get_steps() override {
         return this->arguments.steps;
@@ -204,7 +214,9 @@ class EuclidianPattern : public SimplePattern
     }
 
     virtual int8_t get_tick_duration() override {
-        return this->used_arguments.duration 
+        // When locked, use the duration that was last actually applied by make_euclid().
+        const int8_t dur = this->is_locked() ? this->last_arguments.duration : this->used_arguments.duration;
+        return dur
         #ifdef ENABLE_SHUFFLE 
             + this->get_shuffle_length()
         #endif
@@ -242,13 +254,26 @@ class EuclidianPattern : public SimplePattern
         virtual void add_saveable_settings(int pattern_index) override {
             SimplePattern::add_saveable_settings(pattern_index);
 
-            register_setting(new LSaveableSetting<int_fast8_t>("steps", "EuclidianPattern", &this->arguments.steps), SL_SCOPE_SCENE | SL_SCOPE_PROJECT, true);
+            // Setter lambdas keep default_arguments in sync with arguments on load, so the
+            // menu controls (which now read/write default_arguments) show the correct values
+            // after a project/scene is loaded.
+            register_setting(new LSaveableSetting<int_fast8_t>("steps", "EuclidianPattern", &this->arguments.steps,
+                [this](int_fast8_t v) { this->arguments.steps = v; this->default_arguments.steps = v; }
+            ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT, true);
             register_setting(new LSaveableSetting<int8_t>("global_density_group", "EuclidianPattern", &this->global_density_group), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-            register_setting(new LSaveableSetting<int_fast8_t>("pulses", "EuclidianPattern", &this->arguments.pulses), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-            register_setting(new LSaveableSetting<int_fast8_t>("rotation", "EuclidianPattern", &this->arguments.rotation), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-            register_setting(new LSaveableSetting<int_fast8_t>("duration", "EuclidianPattern", &this->arguments.duration), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new LSaveableSetting<int_fast8_t>("pulses", "EuclidianPattern", &this->arguments.pulses,
+                [this](int_fast8_t v) { this->arguments.pulses = v; this->default_arguments.pulses = v; }
+            ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new LSaveableSetting<int_fast8_t>("rotation", "EuclidianPattern", &this->arguments.rotation,
+                [this](int_fast8_t v) { this->arguments.rotation = v; this->default_arguments.rotation = v; }
+            ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new LSaveableSetting<int_fast8_t>("duration", "EuclidianPattern", &this->arguments.duration,
+                [this](int_fast8_t v) { this->arguments.duration = v; this->default_arguments.duration = v; }
+            ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
             //register_setting(new LSaveableSetting<float>(String(prefix) + String("effective_euclidian_density"), "EuclidianPattern", &this->arguments.effective_euclidian_density));
-            register_setting(new LSaveableSetting<int_fast8_t>("tie_on", "EuclidianPattern", &this->arguments.tie_on), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new LSaveableSetting<int_fast8_t>("tie_on", "EuclidianPattern", &this->arguments.tie_on,
+                [this](int_fast8_t v) { this->arguments.tie_on = v; this->default_arguments.tie_on = v; }
+            ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
         }
     #endif
 
