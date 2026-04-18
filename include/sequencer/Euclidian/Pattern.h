@@ -65,7 +65,7 @@ class EuclidianPattern : public SimplePattern
     }
 
     virtual float get_global_density() {
-        return all_global_density[this->global_density_group];
+        return all_effective_global_density[this->global_density_group];
     }
     virtual int8_t get_global_density_group() {
         return this->global_density_group;

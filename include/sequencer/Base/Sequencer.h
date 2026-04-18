@@ -35,9 +35,11 @@ class BaseSequencer
         #ifdef ENABLE_STORAGE
             this->set_path_segment("BaseSequencer");
         #endif
-        conductor->register_time_sig_change_callback(
-            [this](time_sig_t time_sig) { this->notify_time_sig_changed(time_sig); }
-        );
+        #ifdef ENABLE_TIME_SIGNATURE
+            conductor->register_time_sig_change_callback(
+                [this](time_sig_t time_sig) { this->notify_time_sig_changed(time_sig); }
+            );
+        #endif
     }
     virtual ~BaseSequencer() = default;
 
@@ -85,12 +87,15 @@ class BaseSequencer
     virtual void on_step(int step) = 0;
     virtual void on_step_end(int step) = 0;
 
-    virtual void notify_time_sig_changed(time_sig_t time_sig) {
-        // default implementation is a no-op; override in sequencers that need to know about time signature changes
+    #ifdef ENABLE_TIME_SIGNATURE
+            // callback for when time signature changes; default implementation is a no-op, but sequencers that need to know about time signature changes can override this to be notified whenever the time signature changes
+        virtual void notify_time_sig_changed(time_sig_t time_sig) {
+            // default implementation is a no-op; override in sequencers that need to know about time signature changes
 
-        // loop over the patterns and notify them of the time signature change
-        // eg if numerator has changed then proportionately alter the steps, pulses and rotation?
-    }
+            // loop over the patterns and notify them of the time signature change
+            // eg if numerator has changed then proportionately alter the steps, pulses and rotation?
+        }
+    #endif
     
     #ifdef ENABLE_SHUFFLE
         virtual void on_step_shuffled(int8_t track, int step) = 0;

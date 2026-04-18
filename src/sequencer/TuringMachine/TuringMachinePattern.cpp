@@ -116,7 +116,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 &this->default_duration,
                 &this->effective_duration,
                 1, 
-                PPQN/4
+                PPQN    // /4
             ));
 
         snprintf(label, MAX_LABEL, "TM %i mutlock amt", i);

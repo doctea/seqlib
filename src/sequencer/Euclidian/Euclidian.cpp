@@ -110,6 +110,15 @@ float all_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
         , DEFAULT_DENSITY
     #endif
 };
+float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
+    DEFAULT_DENSITY, DEFAULT_DENSITY
+    #if NUM_GLOBAL_DENSITY_GROUPS > 2
+        , DEFAULT_DENSITY
+    #endif
+    #if NUM_GLOBAL_DENSITY_GROUPS > 3
+        , DEFAULT_DENSITY
+    #endif
+};
 
 #if defined(ENABLE_PARAMETERS)
     #include "parameters/Parameter.h"
@@ -146,13 +155,20 @@ float all_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
 
         // multiple global density parameters
         for (int i = 0  ; i < NUM_GLOBAL_DENSITY_GROUPS ; i++) {
-            parameters->add(new LDataParameter<float>(
+            parameters->add(new ProxyParameter<float>(
                 (String("Global density ") + String(i)).c_str(),
-                [=] (float v) { all_global_density[i] = v; },
-                [=] () -> float { return all_global_density[i]; },                
+                &all_global_density[i],
+                &all_effective_global_density[i],
                 MINIMUM_DENSITY,
                 MAXIMUM_DENSITY
             ));
+            // parameters->add(new LDataParameter<float>(
+            //     (String("Global density ") + String(i)).c_str(),
+            //     [=] (float v) { all_global_density[i] = v; },
+            //     [=] () -> float { return all_global_density[i]; },                
+            //     MINIMUM_DENSITY,
+            //     MAXIMUM_DENSITY
+            // ));
         }
 
         parameters->add(new ProxyParameter<uint_fast8_t>(
