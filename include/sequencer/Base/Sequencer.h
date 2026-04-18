@@ -79,6 +79,10 @@ class BaseSequencer
 
     virtual void on_step(int step) = 0;
     virtual void on_step_end(int step) = 0;
+
+    virtual void notify_time_sig_changed(uint8_t numerator, uint8_t denominator) {
+        // default implementation is a no-op; override in sequencers that need to know about time signature changes
+    }
     
     #ifdef ENABLE_SHUFFLE
         virtual void on_step_shuffled(int8_t track, int step) = 0;

@@ -29,11 +29,9 @@
 
 #include <atomic>
 
-// for transpose mode
-enum NOTE_MODE {
-    IGNORE, TRANSPOSE
-};
-
+// for transpose mode; TODO: should actually probably move this to midihelpers library instead and add some 
+// helper functions for processing notes
+// moved to midi_helpers.h and renamed to NOTE_LIMIT_MODE
 
 int8_t get_muso_note_for_drum(int8_t drum_note);
 
@@ -211,8 +209,8 @@ class MIDIDrumOutput : public MIDIBaseOutput {
         int_fast8_t scale_root = SCALE_GLOBAL_ROOT;
         scale_index_t scale_number = SCALE_GLOBAL;
 
-        int8_t lowest_note_mode = NOTE_MODE::IGNORE;
-        int8_t highest_note_mode = NOTE_MODE::IGNORE;
+        int8_t lowest_note_mode = NOTE_LIMIT_MODE::IGNORE;
+        int8_t highest_note_mode = NOTE_LIMIT_MODE::IGNORE;
         int8_t lowest_note = MIDI_MIN_NOTE;
         int8_t highest_note = MIDI_MAX_NOTE;
         int8_t effective_lowest_note = MIDI_MIN_NOTE;
@@ -240,7 +238,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
         virtual int8_t getLowestNoteMode() {
             return lowest_note_mode;
         }
-        // mode from NOTE_MODE enum (IGNORE or TRANSPOSE)
+        // mode from NOTE_LIMIT_MODE enum (IGNORE or TRANSPOSE)
         virtual void setLowestNoteMode(int8_t mode) {
             this->lowest_note_mode = mode;
         }
@@ -259,7 +257,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
         virtual int8_t getHighestNoteMode() {
             return this->highest_note_mode;
         }
-        // mode from NOTE_MODE enum (IGNORE or TRANSPOSE)
+        // mode from NOTE_LIMIT_MODE enum (IGNORE or TRANSPOSE)
         virtual void setHighestNoteMode(int8_t mode) {
             this->highest_note_mode = mode;
         }
@@ -299,24 +297,24 @@ class MIDIDrumOutput : public MIDIBaseOutput {
 
                 // todo: probably move this transpose and quantise logic somewhere else
                 // into Conductor maybe?
-                if (lowest_note_mode == NOTE_MODE::TRANSPOSE) {
+                if (lowest_note_mode == NOTE_LIMIT_MODE::TRANSPOSE) {
                     // transpose the note to within the allowed range
                     while (is_valid_note(note_to_play) && note_to_play < get_effective_lowest_note()) {
                         note_to_play += 12;
                     }
-                } else if (lowest_note_mode == NOTE_MODE::IGNORE) {
+                } else if (lowest_note_mode == NOTE_LIMIT_MODE::IGNORE) {
                     // if the note is below the allowed range, just ignore it
                     if (is_valid_note(note_to_play) && note_to_play < get_effective_lowest_note()) {
                         return NOTE_OFF;
                     }
                 }
 
-                if (highest_note_mode == NOTE_MODE::TRANSPOSE) {
+                if (highest_note_mode == NOTE_LIMIT_MODE::TRANSPOSE) {
                     // transpose the note to within the allowed range
                     while (is_valid_note(note_to_play) && note_to_play > get_effective_highest_note()) {
                         note_to_play -= 12;
                     }
-                } else if (highest_note_mode == NOTE_MODE::IGNORE) {
+                } else if (highest_note_mode == NOTE_LIMIT_MODE::IGNORE) {
                     // if the note is above the allowed range, just ignore it
                     if (is_valid_note(note_to_play) && note_to_play > get_effective_highest_note()) {
                         return NOTE_OFF;
