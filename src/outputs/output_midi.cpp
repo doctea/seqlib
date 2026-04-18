@@ -39,7 +39,22 @@
                     false
                 );
 
-                scale_menu->add(new ObjectToggleControl<MIDINoteOutput>("Quantise", this, &MIDINoteOutput::set_quantise, &MIDINoteOutput::is_quantise));
+                LambdaSelectorControl<int8_t> *quant_mode = new LambdaSelectorControl<int8_t>(
+                    "Quant",
+                    [=](int8_t v) -> void {
+                        this->set_quantise_mode((quantise_mode_t)constrain((int)v, (int)quantise_mode_t::QUANTISE_MODE_NONE, (int)quantise_mode_t::QUANTISE_MODE_CHORD));
+                    },
+                    [=]() -> int8_t {
+                        return (int8_t)this->get_quantise_mode();
+                    },
+                    nullptr,
+                    true,
+                    true
+                );
+                quant_mode->add_available_value((int8_t)quantise_mode_t::QUANTISE_MODE_NONE, "Off");
+                quant_mode->add_available_value((int8_t)quantise_mode_t::QUANTISE_MODE_SCALE, "Scale");
+                quant_mode->add_available_value((int8_t)quantise_mode_t::QUANTISE_MODE_CHORD, "Chord");
+                scale_menu->add(quant_mode);
 
                 menu->add(scale_menu);
 
@@ -99,7 +114,15 @@
             menu->add(midi_settings_bar);
 
             #ifdef ENABLE_SCALES
-                menu->add(new HarmonyDisplay("Output", &this->scale_number, &this->scale_root, &this->last_note_number, &this->quantise, false));
+                menu->add(new HarmonyDisplay(
+                    "Output", 
+                    &this->scale_number,
+                    &this->scale_root,
+                    &this->last_note_number, 
+                    &this->quantise_mode,
+                    &conductor->global_chord_identity,
+                    false
+                ));
             #endif
         //#endif
     }

@@ -205,6 +205,23 @@ class EuclidianSequencer : public BaseSequencer
 
     virtual void on_step(int step) override {
         //Serial.printf("EuclidianSequencer::do_step(%i)\n", step);
+
+        // At bar/phrase boundaries, on_bar() and on_phrase() fire before on_step() within the same
+        // ISR call (see BaseSequencer::on_tick).  Those callbacks call mutate()/do_bar_fill() which
+        // only mark_dirty() rather than calling make_euclid() immediately (the deferral-to-loop()
+        // optimisation).  Without this flush the first step of the new bar fires events against the
+        // stale pattern, producing incorrect notes/kicks.
+        //
+        // We therefore flush any pending recomputes here at bar boundaries so patterns are up-to-date
+        // before process_step() consults them.  The cost is identical to what was accepted before the
+        // deferral was introduced: one make_euclid() per dirty pattern, once per bar.
+        //
+        // To revert to fully-deferred behaviour (never in ISR): remove this block and accept that
+        // bar-boundary mutations will take effect one loop() iteration late.
+        if (step % STEPS_PER_BAR == 0) {
+            do_deferred_recomputes();
+        }
+
         for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
             #ifdef ENABLE_SHUFFLE
                 if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->get_pattern(i)->is_shuffled())) {

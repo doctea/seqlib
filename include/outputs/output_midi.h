@@ -268,6 +268,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
         #endif
 
         public:
+
             //MIDINoteOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t channel = 1, int_fast8_t scale_root = SCALE_ROOT_A, scale_index_t scale_number = SCALE_MAJOR, int_fast8_t octave = 3) 
             MIDINoteOutput(
                 const char *label, 
@@ -287,7 +288,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 return this->event_value_3;
             }
 
-            bool quantise = false;
+            quantise_mode_t quantise_mode = QUANTISE_MODE_NONE;
             virtual int_fast8_t get_note_number() override {
 
                 int8_t note_to_play = this->get_note_to_play();
@@ -308,12 +309,23 @@ class MIDIDrumOutput : public MIDIBaseOutput {
 
                 if (!this->is_quantise())
                     return note_to_play;
-                else
-                    return quantise_pitch_to_scale(
-                        note_to_play/*+ BPM_CURRENT_BEAT_OF_PHRASE*/, 
-                        this->get_effective_scale_root(), 
-                        this->get_effective_scale_number()
+
+                if (this->quantise_mode == QUANTISE_MODE_CHORD) {
+                    int8_t quantised = quantise_pitch_to_chord(
+                        note_to_play,
+                        12, // nearest chord tone within an octave
+                        this->get_effective_scale_root(),
+                        this->get_effective_scale_number(),
+                        get_global_chord_identity()
                     );
+                    return is_valid_note(quantised) ? quantised : note_to_play;
+                }
+
+                return quantise_pitch_to_scale(
+                    note_to_play/*+ BPM_CURRENT_BEAT_OF_PHRASE*/,
+                    this->get_effective_scale_root(),
+                    this->get_effective_scale_number()
+                );
             }
 
             scale_index_t get_scale_number() {
@@ -344,19 +356,26 @@ class MIDIDrumOutput : public MIDIBaseOutput {
 
             void set_note_mode(NOTE_LIMIT_MODE mode) {
                 //this->note_mode = mode;
-                this->quantise = mode == NOTE_LIMIT_MODE::TRANSPOSE;
+                this->set_quantise(mode == NOTE_LIMIT_MODE::TRANSPOSE);
             }
             NOTE_LIMIT_MODE get_note_mode() {
                 //return this->note_mode;
-                return this->quantise ? NOTE_LIMIT_MODE::TRANSPOSE : NOTE_LIMIT_MODE::IGNORE;
+                return this->is_quantise() ? NOTE_LIMIT_MODE::TRANSPOSE : NOTE_LIMIT_MODE::IGNORE;
+            }
+
+            void set_quantise_mode(quantise_mode_t mode) {
+                this->quantise_mode = mode;
+            }
+            quantise_mode_t get_quantise_mode() const {
+                return this->quantise_mode;
             }
             void set_quantise(bool v) {
-                //this->note_mode = v ? 1 : 0;
-                this->quantise = v;
+                // Legacy API: true means scale-quantise.
+                this->set_quantise_mode(v ? QUANTISE_MODE_SCALE : QUANTISE_MODE_NONE);
             }
             bool is_quantise() {
                 //return this->note_mode==1;
-                return this->quantise;
+                return this->quantise_mode != QUANTISE_MODE_NONE;
             }
 
             #ifdef ENABLE_SCREEN
@@ -401,15 +420,29 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                     MIDIBaseOutput::setup_saveable_settings();
 
                     register_setting(
+                        new LSaveableSetting<int8_t>(
+                            "Quantise Mode",
+                            "MIDINoteOutput",
+                            nullptr,
+                            [=](int8_t value) -> void {
+                                this->set_quantise_mode((quantise_mode_t)constrain((int)value, (int)QUANTISE_MODE_NONE, (int)QUANTISE_MODE_CHORD));
+                            },
+                            [=](void) -> int8_t {
+                                return (int8_t)this->get_quantise_mode();
+                            }
+                        ), SL_SCOPE_SCENE
+                    );
+
+                    register_setting(
                         new LSaveableSetting<bool>(
                             "Quantise",
                             "MIDINoteOutput",
-                            &this->quantise,
+                            nullptr,
                             [=](bool value) -> void {
                                 this->set_quantise(value);
                             },
                             [=](void) -> bool {
-                                return this->is_quantise();
+                                return this->get_quantise_mode() != QUANTISE_MODE_NONE;
                             }
                         ), SL_SCOPE_SCENE  // allow quantise state to be saved at scene level, since it's more of a performance setting than a preference setting
                     );
