@@ -209,8 +209,8 @@ class MIDIDrumOutput : public MIDIBaseOutput {
         int_fast8_t scale_root = SCALE_GLOBAL_ROOT;
         scale_index_t scale_number = SCALE_GLOBAL;
 
-        int8_t lowest_note_mode = NOTE_LIMIT_MODE::IGNORE;
-        int8_t highest_note_mode = NOTE_LIMIT_MODE::IGNORE;
+        NOTE_LIMIT_MODE lowest_note_mode = NOTE_LIMIT_MODE::IGNORE;
+        NOTE_LIMIT_MODE highest_note_mode = NOTE_LIMIT_MODE::IGNORE;
         int8_t lowest_note = MIDI_MIN_NOTE;
         int8_t highest_note = MIDI_MAX_NOTE;
         int8_t effective_lowest_note = MIDI_MIN_NOTE;
@@ -235,11 +235,11 @@ class MIDIDrumOutput : public MIDIBaseOutput {
         virtual int8_t getLowestNote() {
             return this->lowest_note;
         }
-        virtual int8_t getLowestNoteMode() {
+        virtual NOTE_LIMIT_MODE getLowestNoteMode() {
             return lowest_note_mode;
         }
         // mode from NOTE_LIMIT_MODE enum (IGNORE or TRANSPOSE)
-        virtual void setLowestNoteMode(int8_t mode) {
+        virtual void setLowestNoteMode(NOTE_LIMIT_MODE mode) {
             this->lowest_note_mode = mode;
         }
 
@@ -254,11 +254,11 @@ class MIDIDrumOutput : public MIDIBaseOutput {
         virtual int8_t getHighestNote() {
             return this->highest_note;
         }
-        virtual int8_t getHighestNoteMode() {
+        virtual NOTE_LIMIT_MODE getHighestNoteMode() {
             return this->highest_note_mode;
         }
         // mode from NOTE_LIMIT_MODE enum (IGNORE or TRANSPOSE)
-        virtual void setHighestNoteMode(int8_t mode) {
+        virtual void setHighestNoteMode(NOTE_LIMIT_MODE mode) {
             this->highest_note_mode = mode;
         }
 
@@ -274,7 +274,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 IMIDINoteAndCCTarget *output_wrapper, 
                 int_fast8_t channel = 1, 
                 int_fast8_t scale_root = SCALE_GLOBAL_ROOT, 
-                scale_index_t scale_number = SCALE_GLOBAL, 
+                scale_index_t scale_number = SCALE_GLOBAL,
                 int_fast8_t octave = 3
             ) : MIDIBaseOutput(label, output_wrapper, NOTE_OFF, channel) 
             {
@@ -295,31 +295,13 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 if (!is_valid_note(note_to_play))
                     return NOTE_OFF;
 
-                // todo: probably move this transpose and quantise logic somewhere else
-                // into Conductor maybe?
-                if (lowest_note_mode == NOTE_LIMIT_MODE::TRANSPOSE) {
-                    // transpose the note to within the allowed range
-                    while (is_valid_note(note_to_play) && note_to_play < get_effective_lowest_note()) {
-                        note_to_play += 12;
-                    }
-                } else if (lowest_note_mode == NOTE_LIMIT_MODE::IGNORE) {
-                    // if the note is below the allowed range, just ignore it
-                    if (is_valid_note(note_to_play) && note_to_play < get_effective_lowest_note()) {
-                        return NOTE_OFF;
-                    }
-                }
-
-                if (highest_note_mode == NOTE_LIMIT_MODE::TRANSPOSE) {
-                    // transpose the note to within the allowed range
-                    while (is_valid_note(note_to_play) && note_to_play > get_effective_highest_note()) {
-                        note_to_play -= 12;
-                    }
-                } else if (highest_note_mode == NOTE_LIMIT_MODE::IGNORE) {
-                    // if the note is above the allowed range, just ignore it
-                    if (is_valid_note(note_to_play) && note_to_play > get_effective_highest_note()) {
-                        return NOTE_OFF;
-                    }
-                }
+                note_to_play = note_limit_to(
+                    note_to_play, 
+                    lowest_note_mode, 
+                    highest_note_mode, 
+                    get_effective_lowest_note(), 
+                    get_effective_highest_note()
+                );
 
                 if (!is_valid_note(note_to_play))
                     return NOTE_OFF;
@@ -360,13 +342,13 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 //base_note = scale_root * octave;
             }
 
-            void set_note_mode(int8_t mode) {
+            void set_note_mode(NOTE_LIMIT_MODE mode) {
                 //this->note_mode = mode;
-                this->quantise = mode == 1;
+                this->quantise = mode == NOTE_LIMIT_MODE::TRANSPOSE;
             }
-            int get_note_mode() {
+            NOTE_LIMIT_MODE get_note_mode() {
                 //return this->note_mode;
-                return this->quantise ? 1 : 0;
+                return this->quantise ? NOTE_LIMIT_MODE::TRANSPOSE : NOTE_LIMIT_MODE::IGNORE;
             }
             void set_quantise(bool v) {
                 //this->note_mode = v ? 1 : 0;
@@ -503,28 +485,28 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                     );
 
                     register_setting(
-                        new LSaveableSetting<int8_t>(
+                        new LSaveableSetting<NOTE_LIMIT_MODE>(
                             "Lowest note mode",
                             "MIDINoteOutput",
                             &this->lowest_note_mode,
-                            [=](int8_t value) -> void {
+                            [=](NOTE_LIMIT_MODE value) -> void {
                                 this->lowest_note_mode = value;
                             },
-                            [=](void) -> int8_t {
+                            [=](void) -> NOTE_LIMIT_MODE {
                                 return this->lowest_note_mode;
                             }
                         ), SL_SCOPE_SCENE  // allow lowest note mode to be saved at scene level, since it's more of a performance setting than a preference setting
                     );
 
                     register_setting(
-                        new LSaveableSetting<int8_t>(
+                        new LSaveableSetting<NOTE_LIMIT_MODE>(
                             "Highest note mode",
                             "MIDINoteOutput",
                             &this->highest_note_mode,
-                            [=](int8_t value) -> void {
+                            [=](NOTE_LIMIT_MODE value) -> void {
                                 this->highest_note_mode = value;
                             },
-                            [=](void) -> int8_t {
+                            [=](void) -> NOTE_LIMIT_MODE {
                                 return this->highest_note_mode;
                             }
                         ), SL_SCOPE_SCENE  // allow highest note mode to be saved at scene level, since it's more of a performance setting than a preference setting

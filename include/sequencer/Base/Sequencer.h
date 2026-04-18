@@ -2,6 +2,9 @@
 
 #include <Arduino.h>
 
+#include "conductor.h"
+#include <bpm.h>
+
 #if defined(ENABLE_PARAMETERS)
     #include <LinkedList.h>
 #endif
@@ -14,7 +17,6 @@
     #include "../shuffle.h"
 #endif
 
-#include <bpm.h>
 
 class BasePattern;
 class SimplePattern;
@@ -33,6 +35,9 @@ class BaseSequencer
         #ifdef ENABLE_STORAGE
             this->set_path_segment("BaseSequencer");
         #endif
+        conductor->register_time_sig_change_callback(
+            [this](time_sig_t time_sig) { this->notify_time_sig_changed(time_sig); }
+        );
     }
     virtual ~BaseSequencer() = default;
 
@@ -80,8 +85,11 @@ class BaseSequencer
     virtual void on_step(int step) = 0;
     virtual void on_step_end(int step) = 0;
 
-    virtual void notify_time_sig_changed(uint8_t numerator, uint8_t denominator) {
+    virtual void notify_time_sig_changed(time_sig_t time_sig) {
         // default implementation is a no-op; override in sequencers that need to know about time signature changes
+
+        // loop over the patterns and notify them of the time signature change
+        // eg if numerator has changed then proportionately alter the steps, pulses and rotation?
     }
     
     #ifdef ENABLE_SHUFFLE

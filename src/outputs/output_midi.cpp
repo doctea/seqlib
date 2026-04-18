@@ -70,10 +70,10 @@
             );
             transposition_bar->add(highest_note_control);
 
-            LambdaSelectorControl<int8_t> *lowest_note_mode_control = new LambdaSelectorControl<int8_t>(
+            LambdaSelectorControl<NOTE_LIMIT_MODE> *lowest_note_mode_control = new LambdaSelectorControl<NOTE_LIMIT_MODE>(
                 "Lo Mode",
-                [=](int8_t v) -> void { this->setLowestNoteMode(v); },
-                [=]() -> int8_t { return this->getLowestNoteMode(); },
+                [=](NOTE_LIMIT_MODE v) -> void { this->setLowestNoteMode(v); },
+                [=]() -> NOTE_LIMIT_MODE { return this->getLowestNoteMode(); },
                 nullptr,
                 true
             );
@@ -81,10 +81,10 @@
             lowest_note_mode_control->add_available_value(NOTE_LIMIT_MODE::TRANSPOSE, "Move");
             transposition_bar->add(lowest_note_mode_control);
 
-            LambdaSelectorControl<int8_t> *highest_note_mode_control = new LambdaSelectorControl<int8_t>(
+            LambdaSelectorControl<NOTE_LIMIT_MODE> *highest_note_mode_control = new LambdaSelectorControl<NOTE_LIMIT_MODE>(
                 "Hi Mode",
-                [=](int8_t v) -> void { this->setHighestNoteMode(v); },
-                [=]() -> int8_t { return this->getHighestNoteMode(); },
+                [=](NOTE_LIMIT_MODE v) -> void { this->setHighestNoteMode(v); },
+                [=]() -> NOTE_LIMIT_MODE { return this->getHighestNoteMode(); },
                 nullptr,
                 true
             );
