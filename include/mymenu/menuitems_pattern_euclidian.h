@@ -103,7 +103,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
     virtual int display(Coord pos, bool selected, bool opened) override {
         //pos.y = header(label, pos, selected, opened);
         tft->setCursor(pos.x, pos.y);
-        colours(selected || opened, opened ? GREEN : this->default_fg, this->default_bg);
+        colours(opened, opened ? GREEN : this->default_fg, this->default_bg);
 
         #ifdef ENABLE_STEP_DISPLAYS
             if (this->step_display!=nullptr)
@@ -163,9 +163,9 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 start_x, 
                 start_y, 
                 width, //width_per_item, 
-                (!opened && selected) || this->currently_selected==(int)item_index, 
+                this->currently_selected==(int)item_index, 
                 this->currently_opened==(int)item_index,
-                !opened && selected
+                false
             );
 
             widget_height = temp_y - start_y;
