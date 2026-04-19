@@ -2,6 +2,7 @@
 
 #include "output_midi.h"
 #include "chord_player.h"
+#include "chord_modulation_parameters.h"
 
 // Output that consumes note events and renders full chords.
 #ifdef ENABLE_SCALES
@@ -9,6 +10,7 @@ class MIDIChordGeneratorOutput : public MIDINoteOutput {
     public:
     int8_t source_to_output_note[MIDI_NUM_NOTES];
     uint8_t output_note_refcount[MIDI_NUM_NOTES];
+    bool chord_modulation_parameters_added = false;
 
     void reset_note_mappings() {
         for (size_t i = 0; i < MIDI_NUM_NOTES; i++) {
@@ -134,6 +136,17 @@ class MIDIChordGeneratorOutput : public MIDINoteOutput {
         for (size_t i = 0; i < items->size(); i++) {
             menu->add(items->get(i));
         }
+    }
+    #endif
+
+    #ifdef ENABLE_PARAMETERS
+    virtual LinkedList<FloatParameter*> *get_parameters() override {
+        LinkedList<FloatParameter*> *parameters = MIDINoteOutput::get_parameters();
+        if (!this->chord_modulation_parameters_added && parameters != nullptr) {
+            add_chord_modulation_parameters(parameters, &this->chord_player);
+            this->chord_modulation_parameters_added = true;
+        }
+        return parameters;
     }
     #endif
 
