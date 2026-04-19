@@ -83,7 +83,7 @@
             true
         );
         lowest_note_mode_control->add_available_value(NOTE_LIMIT_MODE::IGNORE, "Drop");
-        lowest_note_mode_control->add_available_value(NOTE_LIMIT_MODE::TRANSPOSE, "Move");
+        lowest_note_mode_control->add_available_value(NOTE_LIMIT_MODE::TRANSPOSE, "Wrap");
         transposition_bar->add(lowest_note_mode_control);
 
         LambdaSelectorControl<NOTE_LIMIT_MODE> *highest_note_mode_control = new LambdaSelectorControl<NOTE_LIMIT_MODE>(

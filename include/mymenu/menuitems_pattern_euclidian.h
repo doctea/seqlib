@@ -179,6 +179,15 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 finish_y = temp_y;
         }
 
+        // Match SubMenuItemBar behavior: defer opened overlay draw until end of frame.
+        if (opened && this->currently_opened>=0 && this->currently_opened < (int)this->items->size()) {
+            MenuItem *opened_item = this->items->get(this->currently_opened);
+            if (opened_item!=nullptr && opened_item->wants_fullscreen_overlay_when_opened_in_bar() && menu!=nullptr) {
+                menu->pending_overlay_item = opened_item;
+                menu->pending_overlay_y = pos.y;
+            }
+        }
+
         #ifdef ENABLE_STEP_DISPLAYS
             if (this->circle_display!=nullptr) {
                 this->circle_display->display(pos, selected, opened);
