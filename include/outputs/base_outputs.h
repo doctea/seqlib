@@ -10,6 +10,10 @@
 #ifdef ENABLE_STORAGE
     #include "saveload_settings.h"
 #endif
+
+#ifdef ENABLE_SCALES
+    #include "scales.h"
+#endif
 class ISequencerEventReceiver {
     public:
     virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3, int_fast8_t event_value_4) = 0;
@@ -36,10 +40,6 @@ class BaseOutput : public ISequencerEventReceiver
         #endif
     }
     
-    // event_value_1 = send a note on
-    // event_value_2 = send a note off
-    // event_value_3 = note value (0-127)
-    // event_value_4 = velocity value (0-127)
     //virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3, int_fast8_t event_value_4) = 0;
     virtual void reset() = 0;
     virtual bool matches_label(const char *compare) {
@@ -59,13 +59,19 @@ class BaseOutput : public ISequencerEventReceiver
 
     virtual void loop() {};
 
-    void set_enabled(bool state) {
+    virtual void set_enabled(bool state) {
         this->enabled = state;
         // todo: should probably ensure we go off?
     }
-    bool is_enabled() {
+    virtual bool is_enabled() {
         return this->enabled;
     }
+
+    #ifdef ENABLE_SCALES
+        virtual void notify_harmony_changed(const scale_identity_t&scale, const chord_identity_t& chord) {
+            // do something with the knowledge that harmony has changed
+        }
+    #endif
 
     #ifdef ENABLE_SCREEN
         //FLASHMEM

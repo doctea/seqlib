@@ -75,6 +75,10 @@ class MIDIBaseOutput : public BaseOutput {
     int8_t note_number = NOTE_OFF, last_note_number = NOTE_OFF;
     int_fast8_t channel = 1;
     int_fast8_t event_value_1, event_value_2, event_value_3, event_value_4;
+    // event_value_1 = send a note on
+    // event_value_2 = send a note off
+    // event_value_3 = note value (0-127)
+    // event_value_4 = velocity value (0-127)
 
     IMIDINoteAndCCTarget *output_wrapper; // = nullptr;
 
@@ -381,6 +385,16 @@ class MIDIDrumOutput : public MIDIBaseOutput {
             #ifdef ENABLE_SCREEN
                 //FLASHMEM
                 virtual void make_menu_items(Menu *menu, int index) override;
+
+                virtual const char* get_menu_type_name() const { return "MIDINoteOutput"; }
+                virtual bool is_menu_scrollable() const { return false; }
+
+                #ifdef ENABLE_SCALES
+                    virtual void add_scale_menu_items(Menu *menu);
+                    virtual void add_status_menu_items(Menu *menu);
+                #endif
+                virtual void add_note_limit_menu_items(Menu *menu);
+                virtual void add_midi_settings_menu_items(Menu *menu);
             #endif
 
             #ifdef ENABLE_PARAMETERS
@@ -415,6 +429,64 @@ class MIDIDrumOutput : public MIDIBaseOutput {
             #endif
 
             #ifdef ENABLE_STORAGE
+                virtual void add_note_limit_saveable_settings() {
+                    register_setting(
+                        new LSaveableSetting<int8_t>(
+                            "Lowest note",
+                            "MIDINoteOutput",
+                            &this->lowest_note,
+                            [=](int8_t value) -> void {
+                                this->lowest_note = value;
+                            },
+                            [=](void) -> int8_t {
+                                return this->lowest_note;
+                            }
+                        ), SL_SCOPE_SCENE
+                    );
+
+                    register_setting(
+                        new LSaveableSetting<int8_t>(
+                            "Highest note",
+                            "MIDINoteOutput",
+                            &this->highest_note,
+                            [=](int8_t value) -> void {
+                                this->highest_note = value;
+                            },
+                            [=](void) -> int8_t {
+                                return this->highest_note;
+                            }
+                        ), SL_SCOPE_SCENE
+                    );
+
+                    register_setting(
+                        new LSaveableSetting<NOTE_LIMIT_MODE>(
+                            "Lowest note mode",
+                            "MIDINoteOutput",
+                            &this->lowest_note_mode,
+                            [=](NOTE_LIMIT_MODE value) -> void {
+                                this->lowest_note_mode = value;
+                            },
+                            [=](void) -> NOTE_LIMIT_MODE {
+                                return this->lowest_note_mode;
+                            }
+                        ), SL_SCOPE_SCENE
+                    );
+
+                    register_setting(
+                        new LSaveableSetting<NOTE_LIMIT_MODE>(
+                            "Highest note mode",
+                            "MIDINoteOutput",
+                            &this->highest_note_mode,
+                            [=](NOTE_LIMIT_MODE value) -> void {
+                                this->highest_note_mode = value;
+                            },
+                            [=](void) -> NOTE_LIMIT_MODE {
+                                return this->highest_note_mode;
+                            }
+                        ), SL_SCOPE_SCENE
+                    );
+                }
+
                 virtual void setup_saveable_settings() override {
                     // inherit parent's settings
                     MIDIBaseOutput::setup_saveable_settings();
@@ -489,61 +561,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                         ), SL_SCOPE_SCENE  // allow scale to be saved at scene level, since it's more of a performance setting than a preference setting
                     );
 
-                    register_setting(
-                        new LSaveableSetting<int8_t>(
-                            "Lowest note",
-                            "MIDINoteOutput",
-                            &this->lowest_note,
-                            [=](int8_t value) -> void {
-                                this->lowest_note = value;
-                            },
-                            [=](void) -> int8_t {
-                                return this->lowest_note;
-                            }
-                        ), SL_SCOPE_SCENE  // allow lowest note to be saved at scene level, since it's more of a performance setting than a preference setting
-                    );
-
-                    register_setting(
-                        new LSaveableSetting<int8_t>(
-                            "Highest note",
-                            "MIDINoteOutput",
-                            &this->highest_note,
-                            [=](int8_t value) -> void {
-                                this->highest_note = value;
-                            },
-                            [=](void) -> int8_t {
-                                return this->highest_note;
-                            }
-                        ), SL_SCOPE_SCENE  // allow highest note to be saved at scene level, since it's more of a performance setting than a preference setting
-                    );
-
-                    register_setting(
-                        new LSaveableSetting<NOTE_LIMIT_MODE>(
-                            "Lowest note mode",
-                            "MIDINoteOutput",
-                            &this->lowest_note_mode,
-                            [=](NOTE_LIMIT_MODE value) -> void {
-                                this->lowest_note_mode = value;
-                            },
-                            [=](void) -> NOTE_LIMIT_MODE {
-                                return this->lowest_note_mode;
-                            }
-                        ), SL_SCOPE_SCENE  // allow lowest note mode to be saved at scene level, since it's more of a performance setting than a preference setting
-                    );
-
-                    register_setting(
-                        new LSaveableSetting<NOTE_LIMIT_MODE>(
-                            "Highest note mode",
-                            "MIDINoteOutput",
-                            &this->highest_note_mode,
-                            [=](NOTE_LIMIT_MODE value) -> void {
-                                this->highest_note_mode = value;
-                            },
-                            [=](void) -> NOTE_LIMIT_MODE {
-                                return this->highest_note_mode;
-                            }
-                        ), SL_SCOPE_SCENE  // allow highest note mode to be saved at scene level, since it's more of a performance setting than a preference setting
-                    );
+                    this->add_note_limit_saveable_settings();
                 }
             #endif
     };

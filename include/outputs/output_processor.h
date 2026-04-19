@@ -5,6 +5,10 @@
 #include "output.h"
 #include "envelopes.h"
 
+#ifdef ENABLE_SCALES
+    #include "scales.h"
+#endif
+
 // holds individual output nodes and processes them (eg queries them for the pitch and sends note on/offs)
 class BaseOutputProcessor 
     #ifdef ENABLE_STORAGE
@@ -35,6 +39,8 @@ class BaseOutputProcessor
                 );
             }
         #endif
+
+        virtual void notify_harmony_changed(const scale_identity_t&scale, const chord_identity_t& chord) = 0;
 
         virtual BaseOutput *get_output_for_label(const char *label) = 0;
         virtual LinkedList<BaseOutput*> *get_available_outputs() = 0;
@@ -122,6 +128,17 @@ class MIDIOutputProcessor : public BaseOutputProcessor
             Debug_println();
         }
     }
+
+    #ifdef ENABLE_SCALES
+        virtual void notify_harmony_changed(const scale_identity_t&scale, const chord_identity_t& chord) {
+            const uint_fast8_t size = this->nodes->size();
+            for (uint_fast8_t i = 0 ; i < size ; i++) {
+                BaseOutput *o = this->nodes->get(i);
+                if (o!=nullptr)
+                    o->notify_harmony_changed(scale, chord);
+            }
+        }
+    #endif
 
     // configure target sequencer to use the output nodes held by this OutputProcessor
     // requires patterns and nodes to have already been created?
@@ -268,8 +285,7 @@ class FullDrumKitMIDIOutputProcessor : public MIDIOutputProcessor {
                     )
                 );
                 this->addNode(
-                    // todo: write a MIDIPolyOutput .. or do we actually want to make a MIDIChordOutput that uses the chord_player itself?  yes, probably!
-                    new MIDINoteOutput(
+                    new MIDIChordGeneratorOutput(
                         "Chords",
                         output_target,
                         2
@@ -297,8 +313,7 @@ class FullDrumKitMIDIOutputProcessor : public MIDIOutputProcessor {
                     )
                 );
                 this->addNode(
-                    // todo: write a MIDIPolyOutput .. or do we actually want to make a MIDIChordOutput that uses the chord_player itself?  yes, probably!
-                    new MIDINoteOutput(
+                    new MIDIChordGeneratorOutput(
                         "Chords",
                         output_target,
                         3

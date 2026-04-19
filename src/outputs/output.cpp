@@ -74,6 +74,9 @@ void setup_output(IMIDINoteAndCCTarget *output_target, MIDIOutputProcessor *proc
     #ifdef ENABLE_STORAGE
         output_processor->set_path_segment("MIDIOutputProcessor");
     #endif
+    conductor->register_harmony_change_callback([=](const scale_identity_t&scale, const chord_identity_t& chord) {
+        output_processor->notify_harmony_changed(scale, chord);
+    });
     if (Serial) { Serial.println("exiting setup_output"); Serial_flush(); }
 }
 
