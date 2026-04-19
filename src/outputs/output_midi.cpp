@@ -106,11 +106,11 @@
             highest_note_mode_control->set_available_values(lowest_note_mode_control->available_values);
             transposition_bar->add(highest_note_mode_control);
 
-            transposition_bar->add(new DirectNumberControl<int_fast8_t>("Octave", &this->octave, this->octave, (int_fast8_t)0, (int_fast8_t)10));
             menu->add(transposition_bar);
-
+            
             SubMenuItemBar *midi_settings_bar = new SubMenuItemBar("MIDI settings", true, false);
             midi_settings_bar->add(new DirectNumberControl<int_fast8_t>("MIDI Channel", &this->channel, this->channel, (int_fast8_t)1, (int_fast8_t)16));
+            midi_settings_bar->add(new DirectNumberControl<int_fast8_t>("Octave", &this->octave, this->octave, (int_fast8_t)0, (int_fast8_t)10));
             menu->add(midi_settings_bar);
 
             #ifdef ENABLE_SCALES

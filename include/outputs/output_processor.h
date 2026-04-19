@@ -8,7 +8,7 @@
 // holds individual output nodes and processes them (eg queries them for the pitch and sends note on/offs)
 class BaseOutputProcessor 
     #ifdef ENABLE_STORAGE
-        : virtual public SHDynamic<4, 12>  // 1-2 output children; 8+ settings
+        : virtual public SHDynamic<4, 6>  // 1-2 output children; 8+ settings
     #endif
     {
     bool enabled = true;

@@ -4,7 +4,7 @@
 
 class EuclidianPattern : public SimplePattern
     #ifdef ENABLE_STORAGE
-        , virtual public SHDynamic<20, 12>
+        , virtual public SHDynamic<4, 8>
     #endif
     {
     public:

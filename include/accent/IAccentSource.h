@@ -33,7 +33,7 @@ class Menu;
 // ---------------------------------------------------------------------------
 class IAccentSource
     #ifdef ENABLE_STORAGE
-        : virtual public SHDynamic<0, 8>
+        : virtual public SHDynamic<0, 4>
     #endif
 {
 public:

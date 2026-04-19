@@ -20,7 +20,7 @@ class ISequencerEventReceiver {
 // class to receive triggers from a sequencer and return values to the owner Processor
 class BaseOutput : public ISequencerEventReceiver
     #ifdef ENABLE_STORAGE
-        , virtual public SHDynamic<8, 8> // parameter children; own settings
+        , virtual public SHDynamic<2, 2> // parameter children; own settings
     #endif
     {
     public:

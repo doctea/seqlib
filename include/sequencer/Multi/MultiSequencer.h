@@ -4,7 +4,11 @@
 
 #include "../Base/Sequencer.h"
 
-class MultiSequencer : public SimpleSequencer {
+class MultiSequencer : public SimpleSequencer 
+    #ifdef ENABLE_STORAGE
+        , virtual public SHDynamic<2, 4>   // up to 16 pattern + parameter children; few own settings
+    #endif
+{
     public:
     LinkedList<BaseSequencer*> *sequencers = nullptr;
     int number_patterns = 0;
