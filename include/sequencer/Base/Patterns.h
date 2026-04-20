@@ -203,8 +203,15 @@ class BasePattern
                 );
             #endif
 
-            // add the output pattern..
-            register_setting(new PatternOutputSaveableSetting("output", "BasePattern", this), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);  // allow pattern output to be saved at scene level, since it's more of a performance setting than a preference setting
+            register_setting(
+                new LOutputSaveableSetting(
+                    "output",
+                    "BasePattern",
+                    [this](const char *output_label) -> void { this->set_output_by_name(output_label); },
+                    [this]() -> const char * { return this->get_output_label(); }
+                ),
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow pattern output to be saved at scene level, since it's more of a performance setting than a preference setting
+            );
             
             // register parameters for this pattern
             LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);

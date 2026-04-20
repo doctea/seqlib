@@ -63,11 +63,6 @@ const output_type_t available_output_types[] = {
     { OUTPUT_TYPE::PITCHED,         "Pitched",          nullptr }
 };
 
-
-#if defined(ARDUINO_ARCH_RP2040)
-    #include "midi_usb/midi_usb_rp2040.h"
-#endif
-
 // track basic monophonic MIDI output
 class MIDIBaseOutput : public BaseOutput {
     public:
@@ -300,7 +295,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 if (!is_valid_note(note_to_play))
                     return NOTE_OFF;
 
-                note_to_play = note_limit_to(
+                note_to_play = apply_note_limits(
                     note_to_play, 
                     lowest_note_mode, 
                     highest_note_mode, 

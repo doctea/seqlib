@@ -10,23 +10,6 @@
 
 #include "saveloadlib.h"
 
-/********* example of how to use this for a pattern output, which is a bit more complex than just saving a variable *********/
-class PatternOutputSaveableSetting : public SaveableSettingBase {
-    BasePattern *target = nullptr;
-    public:
-
-    // SaveableSettingBase overrides - defined in cpp due to circular dependency issues
-    virtual const char* get_line() override;
-    virtual bool parse_key_value(const char* key, const char* value) override;
-
-    PatternOutputSaveableSetting(const char *label, const char *category_name, BasePattern *target)
-        : target(target)
-    {
-        set_label(label);
-        set_category(category_name);
-    }
-};
-
 #include "functional-vlpp.h"
 class LOutputSaveableSetting : public SaveableSettingBase {
     public:
@@ -46,6 +29,11 @@ class LOutputSaveableSetting : public SaveableSettingBase {
 
     virtual const char* get_line() override {
         static char buf[128];
+        if (!sl_callable_valid(getter_func)) {
+            snprintf(buf, sizeof(buf), "; %s%s", this->label, warning_label);
+            return buf;
+        }
+
         const char *current_output = getter_func();
         if (current_output != nullptr) {
             snprintf(buf, sizeof(buf), "%s=%s", this->label, current_output);
@@ -55,15 +43,15 @@ class LOutputSaveableSetting : public SaveableSettingBase {
         return buf;
     }
     virtual bool parse_key_value(const char* key, const char* value) override {
+        if (strcmp(key, this->label) != 0) {
+            return false;
+        }
         if (!sl_callable_valid(setter_func)) {
             // Serial.printf("WARNING!!! LOutputSaveableSetting::parse_key_value called, but setter_func is not valid! (key=%s, value=%s)\n", key, value);
             return false;
         }
-        if (strcmp(key, this->label) == 0) {
-            setter_func(value);
-            return true;
-        }
-        return false;
+        setter_func(value);
+        return true;
     }
 
 };
@@ -105,20 +93,24 @@ class SaveableMIDINoteArraySetting : public SaveableSettingBase {
 
     bool parse_key_value(const char *key, const char *value) override {
         if (strcmp(key, label) != 0) return false;
+        if (events == nullptr || value == nullptr) return false;
+
+        size_t value_len = strlen(value);
         // re-read live pointer in case pattern allocated events after construction
         //events = pattern->events;
-        for (uint16_t i = 0; i < array_size && value[i*6] && value[i*6+1] && value[i*6+2]
-                                                && value[i*6+3] && value[i*6+4] && value[i*6+5]; i++) {
+        for (uint16_t i = 0; i < array_size; i++) {
+            size_t base = (size_t)i * 6u;
+            if (base + 5u >= value_len) break;
             char byte_str[3];
             byte_str[2] = '\0';
 
-            byte_str[0] = value[i*6];     byte_str[1] = value[i*6+1];
+            byte_str[0] = value[base];     byte_str[1] = value[base + 1u];
             events[i].note     = (int8_t)(uint8_t)strtol(byte_str, nullptr, 16);
 
-            byte_str[0] = value[i*6+2];   byte_str[1] = value[i*6+3];
+            byte_str[0] = value[base + 2u];   byte_str[1] = value[base + 3u];
             events[i].velocity = (int8_t)(uint8_t)strtol(byte_str, nullptr, 16);
 
-            byte_str[0] = value[i*6+4];   byte_str[1] = value[i*6+5];
+            byte_str[0] = value[base + 4u];   byte_str[1] = value[base + 5u];
             events[i].channel  = (int8_t)(uint8_t)strtol(byte_str, nullptr, 16);
         }
         return true;

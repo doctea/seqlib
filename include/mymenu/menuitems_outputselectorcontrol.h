@@ -7,7 +7,7 @@
 
 #include <LinkedList.h>
 
-static constexpr int OUTPUT_SELECTOR_MAX_OPTIONS = 32;
+static constexpr int OUTPUT_SELECTOR_MAX_OPTIONS = 64;
 static constexpr int OUTPUT_SELECTOR_MAX_SNAPSHOTS = 8;
 
 struct OutputSelectorSnapshotEntry {

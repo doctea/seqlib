@@ -24,7 +24,7 @@ class MIDIChordGeneratorOutput : public MIDINoteOutput {
             return NOTE_OFF;
         }
 
-        int8_t mapped_note = note_limit_to(
+        int8_t mapped_note = apply_note_limits(
             source_note,
             this->lowest_note_mode,
             this->highest_note_mode,
