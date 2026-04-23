@@ -53,7 +53,7 @@
 void setup_flexiarp_outputs(MIDIOutputProcessor *output_processor, IMIDINoteAndCCTarget *target_wrapper, int num_outputs, int midi_channel) {
     for (int i = 0 ; i < num_outputs ; i++) {
         char label[MENU_C_MAX];
-        snprintf(label, MENU_C_MAX, "FlexiArp: Degree %i", i+1);
+        snprintf(label, MENU_C_MAX, "FlexiArp %i", i+1);
         FlexiArpOutput *output = new FlexiArpOutput(
             label,
             target_wrapper,

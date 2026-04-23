@@ -17,6 +17,7 @@ class EuclidianPattern : public SimplePattern
     arguments_t last_arguments;
     arguments_t default_arguments;
     arguments_t used_arguments;
+    arguments_t last_post_arguments;
     int maximum_steps = TIME_SIG_MAX_STEPS_PER_BAR;
 
     int8_t global_density_group = 0;
@@ -57,7 +58,7 @@ class EuclidianPattern : public SimplePattern
     virtual const char *get_summary() override {
         static char summary[32];
         snprintf(summary, 32, 
-            "%-2i %-2i %-2i", // [%c]",
+            "%-2i/%-2i+%-2i", // [%c]",
             last_arguments.steps, last_arguments.pulses, last_arguments.rotation
             //this->query_note_on_for_step(BPM_CURRENT_STEP_OF_BAR) ? 'X' : ' '
         );
@@ -103,6 +104,8 @@ class EuclidianPattern : public SimplePattern
             return;
         }
 
+        // todo: we actually need to store the post-density 'effective' values too so that the UI can display them?
+
         int_fast8_t original_pulses = this->used_arguments.pulses;
         float multiplier = 1.5f*(MINIMUM_DENSITY + this->used_arguments.effective_euclidian_density);
         int_fast8_t temp_pulses = 0.5f + (((float)original_pulses) * multiplier);
@@ -112,6 +115,18 @@ class EuclidianPattern : public SimplePattern
             //messages_log_add(String("arguments.steps (") + String(arguments.steps) + String(") is more than maximum steps (") + String(maximum_steps) + String(")"));
             maximum_steps = used_arguments.steps;
         }
+
+        this->last_post_arguments = {
+            .steps = used_arguments.steps,
+            .pulses = temp_pulses,
+            .rotation = used_arguments.rotation,
+            .duration = used_arguments.duration,
+            .effective_euclidian_density = used_arguments.effective_euclidian_density,
+            .tie_on = used_arguments.tie_on
+        };
+
+        // limit the number of pulses to the current number of steps
+        temp_pulses = constrain(temp_pulses, 0, this->used_arguments.steps);
 
         int bucket = 0;
         for (int_fast8_t i = 0 ; i < this->used_arguments.steps ; i++) {

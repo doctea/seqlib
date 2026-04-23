@@ -243,6 +243,11 @@ class SimplePattern : public BasePattern {
     uint32_t triggered_on_tick = -1;
     int16_t current_duration = PPQN;
 
+    // todo: can probably save some RAM if we allow subclassed patterns to choose their storage format
+    // eg EuclidianPatterns only actually need to store on/off for each step so we could easily reduce memory usage by a third
+    // and we could go even further and just store it as a bitfield, which would reduce it by a factor of 8 i think? 
+    // would need to benchmark whether the extra bit-twiddling adds too much CPU overhead though
+    // and the saveloadlib integration would need to be different for each struct type too
     midi_note_event_t *events = nullptr;
 
     SimplePattern(LinkedList<BaseOutput*> *available_outputs) : BasePattern(available_outputs) {

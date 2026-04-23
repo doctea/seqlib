@@ -57,7 +57,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
             this->add(new LambdaNumberControl<int8_t> ("Pulses",
                 [=](int8_t v) -> void { pattern->default_arguments.pulses = v; pattern->arguments.pulses = v; pattern->mark_dirty(); },
                 [=]() -> int8_t { return pattern->default_arguments.pulses; },
-                nullptr, 1, STEPS_PER_BAR, true, true));
+                nullptr, 1, TIME_SIG_MAX_STEPS_PER_BAR, true, true));
             this->add(new LambdaNumberControl<int8_t> ("Rotation",
                 [=](int8_t v) -> void { pattern->default_arguments.rotation = v; pattern->arguments.rotation = v; pattern->mark_dirty(); },
                 [=]() -> int8_t { return pattern->default_arguments.rotation; },
@@ -200,16 +200,16 @@ class EuclidianPatternControl : public SubMenuItemBar {
                     // format: "S:XX P:XX R:XX" showing effective steps/pulses/rotation from last make_euclid()
                     char eff_buf[16];
                     snprintf(eff_buf, sizeof(eff_buf), "%d/%d+%d",
-                        (int)this->pattern->last_arguments.steps,
-                        (int)this->pattern->last_arguments.pulses,
-                        (int)this->pattern->last_arguments.rotation);
+                        (int)this->pattern->last_post_arguments.steps,
+                        (int)this->pattern->last_post_arguments.pulses,
+                        (int)this->pattern->last_post_arguments.rotation);
                     const int text_w = strlen(eff_buf) * char_w;
                     const int tx = cx - text_w / 2;
                     const int ty = cy - char_h / 2;
                     tft->fillRect(tx - 1, ty - 1, text_w + 2, char_h + 2, BLACK);
-                    tft->setTextColor(this->pattern->last_arguments.steps != this->pattern->default_arguments.steps
-                        || this->pattern->last_arguments.pulses != this->pattern->default_arguments.pulses
-                        || this->pattern->last_arguments.rotation != this->pattern->default_arguments.rotation
+                    tft->setTextColor(this->pattern->last_post_arguments.steps != this->pattern->default_arguments.steps
+                        || this->pattern->last_post_arguments.pulses != this->pattern->default_arguments.pulses
+                        || this->pattern->last_post_arguments.rotation != this->pattern->default_arguments.rotation
                         ? YELLOW : C_WHITE, BLACK);
                     tft->setCursor(tx, ty);
                     tft->printf("%s", eff_buf);
