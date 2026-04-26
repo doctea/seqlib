@@ -182,6 +182,18 @@ class TuringMachinePattern : public SimplePattern
 
         virtual void read() override {
             this->currentValue = (float)this->current_note_number / 127.0f;
+
+            #ifdef PARAMETER_INPUTS_USE_CALLBACKS
+                float normal = get_normal_value(currentValue, UNIPOLAR);
+                this->on_value_read(currentValue);
+                if (callback != NULL) {
+                Debug_print(this->name);
+                Debug_print(F(": calling callback("));
+                Debug_print(normal);
+                Debug_println(')');
+                callback(normal);
+                }
+            #endif
         }
 
         virtual const char *getExtra() override {

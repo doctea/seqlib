@@ -116,14 +116,12 @@ class EuclidianPattern : public SimplePattern
             maximum_steps = used_arguments.steps;
         }
 
-        this->last_post_arguments = {
-            .steps = used_arguments.steps,
-            .pulses = temp_pulses,
-            .rotation = used_arguments.rotation,
-            .duration = used_arguments.duration,
-            .effective_euclidian_density = used_arguments.effective_euclidian_density,
-            .tie_on = used_arguments.tie_on
-        };
+        this->last_post_arguments.steps = used_arguments.steps;
+        this->last_post_arguments.pulses = temp_pulses;
+        this->last_post_arguments.rotation = used_arguments.rotation;
+        this->last_post_arguments.duration = used_arguments.duration;
+        this->last_post_arguments.effective_euclidian_density = used_arguments.effective_euclidian_density;
+        this->last_post_arguments.tie_on = used_arguments.tie_on;
 
         // limit the number of pulses to the current number of steps
         temp_pulses = constrain(temp_pulses, 0, this->used_arguments.steps);
