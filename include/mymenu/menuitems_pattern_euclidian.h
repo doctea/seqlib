@@ -68,7 +68,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 nullptr, MINIMUM_DURATION, TICKS_PER_BAR, true, true));
 
             // choose global density channel to use
-            this->add(new LambdaNumberControl<int8_t> ("Density group", [=](int8_t v) -> int8_t { pattern->set_global_density_group(v); return pattern->get_global_density_group(); }, [=]() -> int8_t { return pattern->get_global_density_group(); }, nullptr, 0, NUM_GLOBAL_DENSITY_GROUPS-1, true, true));
+            this->add(new LambdaNumberControl<int8_t> ("Density #", [=](int8_t v) -> int8_t { pattern->set_global_density_group(v); return pattern->get_global_density_group(); }, [=]() -> int8_t { return pattern->get_global_density_group(); }, nullptr, 0, NUM_GLOBAL_DENSITY_GROUPS-1, true, true));
 
             //menu->debug = true;
             this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
@@ -105,6 +105,8 @@ class EuclidianPatternControl : public SubMenuItemBar {
         tft->setCursor(pos.x, pos.y);
         colours(selected || opened, opened ? GREEN : this->default_fg, this->default_bg);
 
+        tft->setTextWrap(false);    // bit of a bodge to prevent the label text from wrapping weirdly
+
         #ifdef ENABLE_STEP_DISPLAYS
             if (this->step_display!=nullptr)
                 pos.y = this->step_display->display(pos, selected, opened); // display the step sequencer across the top
@@ -140,10 +142,11 @@ class EuclidianPatternControl : public SubMenuItemBar {
             else if (column==-1) {
                 // put last item under the circle display
                 if (item_index < items_size-1) {
-                    start_x = 0;
-                    start_y = start_y - widget_height;
+                    start_x = 0;        // start from left edge, but move up to under the circle display
+                    start_y = start_y - widget_height;  // move up by one row from the current row (which is just under the header)
                 } else {
-                    start_x = tft->width()/4;
+                    start_x = tft->width()/4;   // start from the middle of the left half, and move up to under the circle display
+                    start_y = start_y - widget_height;  // move up by one row from the current row (which is just under the header)
                 }
             } else
                 start_x = (tft->width()/2)  + (tft->width()/4);
@@ -163,9 +166,9 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 start_x, 
                 start_y, 
                 width, //width_per_item, 
-                this->currently_selected==(int)item_index, 
+                (selected && !opened) || this->currently_selected==(int)item_index, 
                 this->currently_opened==(int)item_index,
-                false
+                selected
             );
 
             widget_height = temp_y - start_y;
@@ -216,6 +219,8 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 }
             }
         #endif
+
+        tft->setTextWrap(true); // re-enable textwrap - bit of a bodge to prevent the label text from wrapping weirdly
 
         return finish_y;
     }
