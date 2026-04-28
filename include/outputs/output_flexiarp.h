@@ -96,6 +96,7 @@ class FlexiArpOutput : public MIDINoteOutput {
     #ifdef ENABLE_SCREEN
         // need to add a menuitem for the degree setting
         virtual void make_menu_items(Menu *menu, int index) override;
+        virtual const char* get_menu_type_name() const { return "FlexiArp"; }
     #endif
 
     // need to add a saveable setting for the degree setting
@@ -107,7 +108,7 @@ class FlexiArpOutput : public MIDINoteOutput {
             register_setting(
                 new LSaveableSetting<int8_t>(
                     "Degree",
-                    "OutputFlexiArp",
+                    "FlexiArpOutput",
                     &this->degree,
                     [=](int8_t value) -> void {
                         this->degree = value;

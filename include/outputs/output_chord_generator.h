@@ -36,6 +36,9 @@ class MIDIChordGeneratorOutput : public MIDINoteOutput {
     }
 
     void emit_limited_note_off(int8_t source_note, uint8_t velocity) {
+
+        source_note += this->octave * 12;
+
         if (!is_valid_note(source_note)) {
             return;
         }
@@ -57,6 +60,9 @@ class MIDIChordGeneratorOutput : public MIDINoteOutput {
     }
 
     void emit_limited_note_on(int8_t source_note, uint8_t velocity) {
+
+        source_note += this->octave * 12;
+
         if (!is_valid_note(source_note) || !this->enabled) {
             return;
         }
@@ -115,7 +121,8 @@ class MIDIChordGeneratorOutput : public MIDINoteOutput {
             return;
         }
 
-        const int8_t note = this->event_value_3;
+        // todo: should probably move this logic into get_note_number?
+        const int8_t note = is_valid_note(this->event_value_3) ? this->event_value_3 : conductor->get_chord_root();
         const int8_t velocity = constrain((int)this->event_value_4, 0, MIDI_MAX_VELOCITY);
 
         if (this->event_value_2 > 0) {

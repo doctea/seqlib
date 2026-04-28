@@ -69,7 +69,7 @@ class MIDIBaseOutput : public BaseOutput {
     
     int8_t note_number = NOTE_OFF, last_note_number = NOTE_OFF;
     int_fast8_t channel = 1;
-    int_fast8_t event_value_1, event_value_2, event_value_3, event_value_4;
+    int_fast8_t event_value_1, event_value_2, event_value_3, event_value_4 = -1;
     // event_value_1 = send a note on
     // event_value_2 = send a note off
     // event_value_3 = note value (0-127)
@@ -295,6 +295,8 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 if (!is_valid_note(note_to_play))
                     return NOTE_OFF;
 
+                note_to_play += this->octave * 12;
+
                 note_to_play = apply_note_limits(
                     note_to_play, 
                     lowest_note_mode, 
@@ -381,7 +383,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 //FLASHMEM
                 virtual void make_menu_items(Menu *menu, int index) override;
 
-                virtual const char* get_menu_type_name() const { return "MIDINoteOutput"; }
+                virtual const char* get_menu_type_name() const { return "NoteOutput"; }
                 virtual bool is_menu_scrollable() const { return false; }
 
                 #ifdef ENABLE_SCALES

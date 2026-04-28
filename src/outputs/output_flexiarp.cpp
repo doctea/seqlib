@@ -1,3 +1,5 @@
+#ifdef ENABLE_SCALES
+
 #include "outputs/output_flexiarp.h"
 #include "outputs/output_processor.h"
 
@@ -63,3 +65,5 @@ void setup_flexiarp_outputs(MIDIOutputProcessor *output_processor, IMIDINoteAndC
         output_processor->addNode(output);
     }
 }
+
+#endif

@@ -40,7 +40,9 @@ class BaseOutputProcessor
             }
         #endif
 
+        #ifdef ENABLE_SCALES
         virtual void notify_harmony_changed(const scale_identity_t&scale, const chord_identity_t& chord) = 0;
+        #endif
 
         virtual BaseOutput *get_output_for_label(const char *label) = 0;
         virtual LinkedList<BaseOutput*> *get_available_outputs() = 0;
