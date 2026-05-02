@@ -87,6 +87,7 @@
             if (!found_assignment) {
                 Serial.printf("WARNING: initialise_patterns for pattern[% 2i]: no matching label found in initial_arguments[]\n", i);
                 // todo: maybe we should assign the corresponding default arguments to the pattern here?
+                ((EuclidianPattern*)this->get_pattern(i))->set_default_arguments();
             }
 
             if (this->debug) Serial.flush();

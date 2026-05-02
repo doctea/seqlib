@@ -46,6 +46,21 @@ class EuclidianPattern : public SimplePattern
         set_default_arguments(&this->arguments);
     }
 
+    virtual void set_default_arguments(
+        int_fast8_t steps = SEQUENCE_LENGTH_STEPS,
+        int_fast8_t pulses = 0,
+        int_fast8_t rotation = 1,
+        int_fast8_t duration = 2,
+        int_fast8_t tie_on = -1
+    ) {
+        default_arguments.steps = steps;
+        default_arguments.pulses = pulses;
+        default_arguments.rotation = rotation;
+        default_arguments.duration = duration;
+        default_arguments.tie_on = tie_on;
+
+        set_default_arguments(&default_arguments);
+    }
     virtual void set_default_arguments(arguments_t *default_arguments_to_use) {
         memcpy(&this->default_arguments, default_arguments_to_use, sizeof(arguments_t));
         set_arguments(&this->default_arguments);

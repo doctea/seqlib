@@ -57,7 +57,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
             this->add(new LambdaNumberControl<int8_t> ("Pulses",
                 [=](int8_t v) -> void { pattern->default_arguments.pulses = v; pattern->arguments.pulses = v; pattern->mark_dirty(); },
                 [=]() -> int8_t { return pattern->default_arguments.pulses; },
-                nullptr, 1, TIME_SIG_MAX_STEPS_PER_BAR, true, true));
+                nullptr, 0, TIME_SIG_MAX_STEPS_PER_BAR, true, true));
             this->add(new LambdaNumberControl<int8_t> ("Rotation",
                 [=](int8_t v) -> void { pattern->default_arguments.rotation = v; pattern->arguments.rotation = v; pattern->mark_dirty(); },
                 [=]() -> int8_t { return pattern->default_arguments.rotation; },

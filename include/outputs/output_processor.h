@@ -270,7 +270,10 @@ class FullDrumKitMIDIOutputProcessor : public MIDIOutputProcessor {
                         "Bass", 
                         output_target, 
                         this->nodes,
-                        3
+                        3,      // midi channel
+                        0,      // start_count_at 
+                        -1,     // finish_count_at 
+                        1       // octave shift of 1
                     )
                 );
             }
