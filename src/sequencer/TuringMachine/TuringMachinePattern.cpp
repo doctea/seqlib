@@ -64,6 +64,22 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
         output_bar->add(selector);
         menu->add(output_bar);
 
+        SubMenuItemBar *lock_bar = new SubMenuItemBar("Pattern settings", true, false);
+
+        lock_bar->add(new LambdaToggleControl(
+            "Lock pattern",
+            [=](bool value) { this->set_locked(value); },
+            [=]() -> bool { return this->is_locked(); }
+        ));
+
+        lock_bar->add(new LambdaNumberControl<int8_t> ("Steps",
+            [=](int8_t v) -> void { this->set_steps(v); },
+            [=]() -> int8_t { return this->get_steps(); },
+            nullptr, 1, TIME_SIG_MAX_STEPS_PER_BAR, true, true
+        ));
+
+        menu->add(lock_bar);
+
         // add parameter modulation controls -- we can choose to combine these on the same page as the main pattern controls, or put them on a separate page with a link from the main one
         if (combine_setting & COMBINE_MODULATION_WITH_MAIN) {
             menu->add(new SeparatorMenuItem("Modulation"));

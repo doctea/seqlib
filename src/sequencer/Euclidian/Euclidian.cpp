@@ -428,7 +428,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
             // add controls for the global euclidian mutation settings
             SubMenuItemColumns *submenu = new SubMenuItemColumns("Euclidian Mutations", 3, true, false);
             // todo: convert to LambdaNumberControl etc
-            submenu->add(new ObjectToggleControl<EuclidianSequencer>("Mutate", this, &EuclidianSequencer::set_mutated_enabled,       &EuclidianSequencer::is_mutate_enabled));
+            submenu->add(new ObjectToggleControl<EuclidianSequencer>("Mutate", this, &EuclidianSequencer::set_mutate_enabled,       &EuclidianSequencer::is_mutate_enabled));
             submenu->add(new ObjectToggleControl<EuclidianSequencer>("Reset", this,  &EuclidianSequencer::set_reset_before_mutate,   &EuclidianSequencer::should_reset_before_mutate));
             submenu->add(new ObjectToggleControl<EuclidianSequencer>("Add phrase", this, &EuclidianSequencer::set_add_phrase_enabled,&EuclidianSequencer::is_add_phrase_enabled));
             submenu->add(new ObjectToggleControl<EuclidianSequencer>("Fills", this,  &EuclidianSequencer::set_fills_enabled,         &EuclidianSequencer::is_fills_enabled));

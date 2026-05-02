@@ -85,7 +85,7 @@ class MIDINoteTriggerCountOutput : public MIDINoteOutput {
         }
 
         #ifdef ENABLE_SCREEN
-            virtual const char* get_menu_type_name() const { return "TriggerCountOutput"; }
+            virtual const char* get_menu_type_name() const { return "Count"; }
         #endif
 
 

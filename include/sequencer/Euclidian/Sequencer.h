@@ -106,8 +106,12 @@ class EuclidianSequencer : public BaseSequencer
     bool is_mutate_enabled() {
         return this->mutate_enabled;
     }
-    void set_mutated_enabled(bool v = true) {
+    void set_mutate_enabled(bool v = true) {
         this->mutate_enabled = v;
+    }
+    bool toggle_mutate_enabled() {
+        set_mutate_enabled(!is_mutate_enabled());
+        return is_mutate_enabled();
     }
 
     int_fast8_t get_effective_mutation_count() {

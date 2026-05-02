@@ -93,7 +93,7 @@ class TuringMachinePattern : public SimplePattern
         this->mutation_lock_count = count;
     }
     inline virtual bool is_step_locked(int step) {
-        return (mutation_locks[step % this->get_effective_steps()] > 0);
+        return this->is_locked() || (mutation_locks[step % this->get_effective_steps()] > 0);
     }
     inline virtual void lock_step(int step, int number_locks_to_add = -1) {
         if (number_locks_to_add < 0) {
@@ -102,9 +102,15 @@ class TuringMachinePattern : public SimplePattern
         mutation_locks[step % this->get_effective_steps()] = number_locks_to_add;
     }
     inline virtual void unlock_step(int step, int number_locks_to_remove = 1) {
-        mutation_locks[step % this->get_effective_steps()] = 0;
+        if (this->is_locked()) return; // if the pattern is locked, dont allow unlocking individual steps
+        if (mutation_locks[step % this->get_effective_steps()] <= number_locks_to_remove) {
+            mutation_locks[step % this->get_effective_steps()] = 0;
+        } else {
+            mutation_locks[step % this->get_effective_steps()] -= number_locks_to_remove;
+        }
     }
     inline virtual void unlock_step_completely(int step) {
+        if (this->is_locked()) return; // if the pattern is locked, dont allow unlocking individual steps
         mutation_locks[step % this->get_effective_steps()] = 0;
     }
 

@@ -112,7 +112,7 @@ void setup_output(IMIDINoteAndCCTarget *output_target, MIDIOutputProcessor *proc
             } else {
                 // create page
                 char label[40];
-                snprintf(label, 40, "Modulation %i: %s", index, this->label);
+                snprintf(label, 40, "%s Modx", this->label);
                 menu->add_page(label, C_WHITE, false);
             }
 

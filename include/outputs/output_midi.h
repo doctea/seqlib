@@ -383,7 +383,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 //FLASHMEM
                 virtual void make_menu_items(Menu *menu, int index) override;
 
-                virtual const char* get_menu_type_name() const { return "NoteOutput"; }
+                virtual const char* get_menu_type_name() const { return "Note"; }
                 virtual bool is_menu_scrollable() const { return false; }
 
                 #ifdef ENABLE_SCALES

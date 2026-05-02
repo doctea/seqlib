@@ -155,6 +155,10 @@ class BasePattern
     virtual bool is_locked() {
         return this->locked;
     }
+    virtual bool toggle_locked() {
+        set_locked(!is_locked());
+        return is_locked();
+    }
 
     #ifdef ENABLE_SHUFFLE
         virtual void set_shuffle_track(uint8_t v) {

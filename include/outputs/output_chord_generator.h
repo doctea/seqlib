@@ -108,7 +108,7 @@ class MIDIChordGeneratorOutput : public MIDINoteOutput {
         BaseOutput::set_enabled(state);
     }
 
-    virtual const char* get_menu_type_name() const override { return "ChordOutput"; }
+    virtual const char* get_menu_type_name() const override { return "Chord"; }
     virtual bool is_menu_scrollable() const override { return true; }
     virtual void add_scale_menu_items(Menu *menu) override { (void)menu; }
     virtual void add_status_menu_items(Menu *menu) override { (void)menu; }
