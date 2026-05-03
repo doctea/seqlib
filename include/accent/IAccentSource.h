@@ -98,7 +98,7 @@ public:
         virtual void setup_saveable_settings() override {
             IAccentSource::setup_saveable_settings();
             register_setting(
-                new LSaveableSetting<float>(
+                new VarSetting<float>(
                     "Accent Level", "ConstantAccent",
                     &this->value
                 ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT

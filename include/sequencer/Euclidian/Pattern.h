@@ -288,7 +288,7 @@ class EuclidianPattern : public SimplePattern
             register_setting(new LSaveableSetting<int_fast8_t>("steps", "EuclidianPattern", &this->arguments.steps,
                 [this](int_fast8_t v) { this->arguments.steps = v; this->default_arguments.steps = v; }
             ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT, true);
-            register_setting(new LSaveableSetting<int8_t>("global_density_group", "EuclidianPattern", &this->global_density_group), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new VarSetting<int8_t>("global_density_group", "EuclidianPattern", &this->global_density_group), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
             register_setting(new LSaveableSetting<int_fast8_t>("pulses", "EuclidianPattern", &this->arguments.pulses,
                 [this](int_fast8_t v) { this->arguments.pulses = v; this->default_arguments.pulses = v; }
             ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);

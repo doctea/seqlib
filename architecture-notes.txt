@@ -1,0 +1,239 @@
+Now I'll create a comprehensive architectural report based on my analysis.
+
+## **SeqLib Architecture Report**
+
+### Overview
+
+SeqLib is a hierarchical pattern sequencing library for Arduino/Teensy that orchestrates the interaction between **Sequencers**, **Patterns**, **Output Processors**, and **Output Nodes**. The architecture emphasizes composition, event-driven processing, and optional feature integration via compile-time switches. It supports multiple sequencer types (Euclidian, Turing Machine, Ant Trail), pattern mutations, parameter modulation, shuffle patterns, and hierarchical MIDI output routing.
+
+---
+
+### Key Types and Relationships
+
+#### **Sequencer Hierarchy**
+- **[BaseSequencer](seqlib/include/sequencer/Base/Sequencer.h)** (abstract base)
+  - `on_tick(int tick)` → dispatches to `on_step()`, `on_beat()`, `on_bar()`, `on_phrase()` based on BPM timing
+  - Manages pattern array and coordinates sequencing lifecycle
+  - Optional shuffle, time signature, and storage integration
+  
+- **[SimpleSequencer](seqlib/include/sequencer/Base/Sequencer.h)** → flexible LinkedList-based pattern container
+- **[EuclidianSequencer](seqlib/include/sequencer/Euclidian/Sequencer.h)** → specialized for Euclidian patterns with mutation, density groups, seed locking
+- **[MultiSequencer](seqlib/include/sequencer/Multi/MultiSequencer.h)** → composition wrapper; aggregates multiple sequencers and flattens their patterns
+
+#### **Pattern Hierarchy**
+- **[BasePattern](seqlib/include/sequencer/Base/Patterns.h)** (abstract)
+  - Owns single `BaseOutput*` reference (not owned)
+  - Tracks `steps`, `locked`, `shuffle_track`
+  - Virtual: `query_note_on_for_tick()`, `query_note_off_for_tick()`, `set_event_for_tick()`
+
+- **[SimplePattern](seqlib/include/sequencer/Base/Patterns.h)** → concrete with `midi_note_event_t *events[steps]` backing store
+  - `trigger_on_for_step()` / `trigger_off_for_step()` → pattern-specific note triggering
+  - Accent source integration: `get_velocity()` applies per-step accent multiplier
+  
+- **[EuclidianPattern](seqlib/include/sequencer/Euclidian/Pattern.h)** → Euclidian rhythm algorithm
+  - `make_euclid()` → deferred recompute (marked dirty, executed in loop to avoid ISR blocking)
+  - Supports mutations, step locking, global density groups
+  
+- **[TuringMachinePattern](seqlib/include/sequencer/TuringMachine/TuringMachinePattern.h)** → stochastic sequencer with mutation locks
+- **[AntTrailPattern](seqlib/include/sequencer/Insects/AntTrailPattern.h)** → evolving probability grid
+
+#### **Output Hierarchy**
+- **[BaseOutput](seqlib/include/outputs/base_outputs.h)** (ISequencerEventReceiver)
+  - Core interface: `receive_event(event_value_1/2/3/4)`, `should_go_on()`, `should_go_off()`, `process()`
+  - State: `enabled`, `has_gone_on`, `label[MAX_LABEL]`
+
+- **[NullOutput](seqlib/include/outputs/base_outputs.h)** → dummy placeholder for "no output"
+- **[MIDIBaseOutput](seqlib/include/outputs/output_midi.h)** → core MIDI note tracker
+  - Holds `IMIDINoteAndCCTarget *output_wrapper` (dependency injection for MIDI send)
+  - Tracks `note_number`, `last_note_number`, `channel`, event counters
+  
+- **[MIDIDrumOutput](seqlib/include/outputs/output_midi.h)** → fixed drum note trigger
+- **[MIDINoteOutput](seqlib/include/outputs/output_midi.h)** → pitched note with optional scales (when `ENABLE_SCALES`)
+- **[EnvelopeOutput](seqlib/include/outputs/envelopes.h)** → MIDI drum + CC envelope trigger (when `ENABLE_ENVELOPES`)
+- **[FlexiArpOutput](seqlib/include/outputs/output_flexiarp.h)** → flexible arpeggiator wrapper
+- **[MIDIChordGeneratorOutput](seqlib/include/outputs/output_chord_generator.h)** → chord generation
+- **[MIDINoteTriggerCountOutput](seqlib/include/outputs/output_midi_triggercount.h)** → trigger counting (custom logic)
+
+#### **Output Processor Hierarchy**
+- **[BaseOutputProcessor](seqlib/include/outputs/output_processor.h)** (abstract)
+  - Core: `process()`, `get_available_outputs()`, `get_output_for_label()`
+  - Optional harmony notifications when scales change
+  
+- **[MIDIOutputProcessor](seqlib/include/outputs/output_processor.h)** → container for BaseOutput nodes
+  - Holds `LinkedList<BaseOutput*> *nodes`
+  - `addNode()`, `addDrumNode()` factory methods
+  - `process()` → iterates nodes, then calls `reset()` on all
+  
+- **Preset Processors** (all inherit MIDIOutputProcessor):
+  - `HalfDrumKitMIDIOutputProcessor`
+  - `FullDrumKitMIDIOutputProcessor`
+  - `FullDrumKitAndBassMIDIOutputProcessor`
+  - `FullDrumKitAndBassAndChordsMIDIOutputProcessor`
+  - `BassAndChordsAndMelodyMIDIOutputProcessor`
+
+#### **Supporting Types**
+- **[IAccentSource](seqlib/include/accent/IAccentSource.h)** → per-step velocity scaling interface
+  - `get_accent(local_step, global_step) → [0.0..∞)`
+  - Implementations: `ConstantAccentSource`, `StepAccentSource`
+  - Global: `extern IAccentSource* global_accent_source`
+  
+- **[ShufflePatternWrapper](seqlib/include/sequencer/shuffle.h)** → adapter for shuffle track data
+  - `set_steps()`, `set_step()`, `update_target()` → syncs to uClock shuffle engine
+  - Managed by `ShufflePatternWrapperManager` (array-based)
+
+---
+
+### Important Files
+
+| File | Role |
+|------|------|
+| [Sequencer.h](seqlib/include/sequencer/Base/Sequencer.h) | BaseSequencer/SimpleSequencer base contract, tick dispatch logic |
+| [Patterns.h](seqlib/include/sequencer/Base/Patterns.h) | BasePattern/SimplePattern event storage, velocity/accent integration |
+| [Pattern.h](seqlib/include/sequencer/Euclidian/Pattern.h) | EuclidianPattern algorithm, deferred recompute, mutations |
+| [Sequencer.h (Euclidian)](seqlib/include/sequencer/Euclidian/Sequencer.h) | EuclidianSequencer mutation controller, global density groups |
+| [base_outputs.h](seqlib/include/outputs/base_outputs.h) | BaseOutput interface, NullOutput, ISequencerEventReceiver |
+| [output_midi.h](seqlib/include/outputs/output_midi.h) | MIDIBaseOutput, MIDIDrumOutput, MIDINoteOutput, note/velocity logic |
+| [output_processor.h](seqlib/include/outputs/output_processor.h) | BaseOutputProcessor, MIDIOutputProcessor, preset kits |
+| [shuffle.h](seqlib/include/sequencer/shuffle.h) | ShufflePatternWrapper, wrapper manager, uClock integration |
+| [IAccentSource.h](seqlib/include/accent/IAccentSource.h) | Accent interface, ConstantAccentSource, global source |
+| [MultiSequencer.h](seqlib/include/sequencer/Multi/MultiSequencer.h) | Composition pattern wrapping multiple sequencers |
+| [menuitems_sequencer.h](seqlib/include/mymenu/menuitems_sequencer.h) | UI/menu integration for pattern display |
+
+---
+
+### Current Composition Flow
+
+```
+User/Application Layer
+    ↓
+MultiSequencer (optional wrapper) OR direct BaseSequencer
+    ├─ BaseSequencer::on_tick(tick)
+    │   ├─→ on_step(), on_beat(), on_bar(), on_phrase()
+    │   └─→ SimpleSequencer::on_step(step)
+    │       └─→ for each pattern: pattern->process_step(step)
+    │           └─→ if query_note_on_for_step():
+    │               └─→ pattern->trigger_on_for_step(step)
+    │                   ├─ Query current output: pattern->get_output()
+    │                   └─ output->receive_event(+1, 0, note, velocity)
+    │
+    ├─ OutputProcessor::process()
+    │   └─→ for each node in nodes:
+    │       ├─ node->process()
+    │       │  ├─ if should_go_on(): output_wrapper->sendNoteOn(...)
+    │       │  └─ if should_go_off(): output_wrapper->sendNoteOff(...)
+    │       └─ node->reset()  [clears event counters]
+    │
+    └─ (Optional) loop() phase
+        ├─ SimpleSequencer::on_loop()
+        ├─ EuclidianPattern::do_deferred_recompute()
+        │   └─ make_euclid() [if marked dirty]
+        └─ Optional: ShufflePatternWrapper::update_target()
+```
+
+**Key flow characteristics:**
+- **ISR context** (on_tick): Lightweight event creation via `receive_event()` accumulation
+- **Main loop context**: Deferred recomputes (mutations, make_euclid), accent calculations
+- **Event accumulation**: Multiple patterns can target same output node; `event_value_1/2/3/4` counters aggregate
+- **Velocity derivation**: SimplePattern applies accent multiplier at trigger time
+
+---
+
+### Friction Points & Accidental Complexity
+
+1. **Dense Compile-Time Feature Coupling**
+   - 7+ `#ifdef` guards (ENABLE_STORAGE, ENABLE_PARAMETERS, ENABLE_SCREEN, ENABLE_ACCENTS, ENABLE_SCALES, ENABLE_SHUFFLE, ENABLE_ENVELOPES)
+   - Each feature adds virtual inheritance, member functions, menu items
+   - Makes API contracts unclear without reading each variant
+   - **Impact**: Hard to understand minimal viable use case; testing complexity explodes
+
+2. **Virtual Storage Inheritance Chains**
+   - All storage-aware classes inherit `virtual public SHDynamic<N, M>` alongside primary inheritance
+   - Multiple inheritance with virtual paths creates complex object layouts
+   - Difficult to reason about object identity and pointer arithmetic
+   - **Impact**: Fragile to refactor; memory layout bugs hard to diagnose
+
+3. **Pattern Event Storage Model**
+   - SimplePattern allocates `midi_note_event_t[steps]` for every step
+   - Could use bitfield or run-length encoding for Euclidian (which is sparse)
+   - Current model wastes RAM on dense patterns; no flexibility for different pattern types
+   - **Comment in code**: "EuclidianPatterns only need on/off...could reduce by 1/3"
+   - **Impact**: Tight memory budget on embedded systems
+
+4. **Deferred Recompute Pattern Incomplete**
+   - EuclidianPattern uses `mark_dirty()` / `do_deferred_recompute()` to avoid ISR blocking
+   - But not all state changes flow through this (e.g., some parameter updates might bypass it)
+   - Shuffle wrapper uses synchronous `update_target()` direct to uClock
+   - **Impact**: Race conditions possible if deferred patterns don't coordinate
+
+5. **Output Assignment is Implicit**
+   - Pattern holds single `BaseOutput* output` reference
+   - No validation that output is in OutputProcessor's node list
+   - Assigning wrong output silently succeeds
+   - **Impact**: Runtime errors hard to debug; no compile-time guarantees
+
+6. **Accent Source Fallback Chain**
+   - Pattern accent → global accent → constant (1.0)
+   - No clear "enabled/disabled" state; relies on nullptr checks scattered across code
+   - **Impact**: Subtle bugs if anyone forgets nullptr check
+
+7. **Preset OutputProcessor Proliferation**
+   - 5+ hardcoded drum kit variants (Half, Full, Full+Bass, Full+Bass+Chords, Bass+Chords+Melody)
+   - Each is a separate class with duplicated node initialization
+   - No factory or builder pattern to reduce duplication
+   - **Impact**: Adding new kit requires new class; hard to customize at runtime
+
+8. **Event Accumulation Logic Fragile**
+   - MIDI outputs accumulate event counters: `event_value_1 += event_value_1`
+   - If pattern sends two note-ons to same output in one tick, counter += 2
+   - But if two patterns target same output, counters accumulate without tracking source
+   - **Impact**: Unclear semantics; hard to debug multi-pattern conflicts
+
+9. **Shuffle Wrapper Manager is Stateful Array**
+   - Fixed-size array `shuffle_patterns[number_shuffle_wrappers]`
+   - Owned by global `shuffle_pattern_wrapper` singleton (not in a class)
+   - Tightly coupled to uClock library
+   - **Impact**: Hard to test in isolation; not suitable for multiple independent sequencer instances
+
+10. **Missing Lifecycle Clarity**
+    - Unclear when Patterns are destroyed (leaked? manual delete?)
+    - OutputProcessor owns nodes, but Sequencers don't own OutputProcessor
+    - MIDI wrapper lifetime not managed
+    - **Impact**: Potential memory leaks; dangling pointers in shared global state
+
+---
+
+### Reuse Candidates
+
+1. **Pattern Base Classes** → Exportable as library interface for custom pattern types
+   - `SimplePattern` + `BasePattern` provide good extension points
+   - `trigger_on_for_step()` / `trigger_off_for_step()` are overridable hooks
+   - Candidates: rhythm generators, random markov chains, file-based loaders
+
+2. **OutputProcessor Composition** → Adaptable to other MIDI systems
+   - `BaseOutputProcessor` + `MIDIOutputProcessor` are reasonably decoupled
+   - `addNode()` factory is extensible
+   - Candidates: CV outputs, light triggers, OSC routing, hardware synth parameter targets
+
+3. **Accent Source System** → Reusable velocity controller
+   - `IAccentSource` interface + `ConstantAccentSource` / `StepAccentSource` implementations
+   - Could be extracted to standalone parameters library
+   - Candidates: envelope followers, LFO modulation, randomizers
+
+4. **ShufflePatternWrapper** → Generalize beyond uClock
+   - Currently tightly coupled to uClock; abstract into `IShuffleBackend`
+   - Would allow other timing engines (Teensy, generic MIDI clock)
+   - Candidates: DAW sync, hardware groove boxes, custom groove libraries
+
+5. **Menu Integration** ([menuitems_*.h](seqlib/include/mymenu))
+   - PatternDisplay, EuclidianPatternMenuItems, etc. are tied to mymenu library
+   - Could extract pattern rendering logic into display-agnostic contract
+   - Candidates: web UI, OLED screens, hardware encoders
+
+6. **SaveableSettings Hierarchy** → Storage patterns library
+   - `BasePattern`, `BaseOutput`, `EuclidianPattern` all inherit `SHDynamic`
+   - Could be documented as reusable pattern for serialization
+   - Candidates: project/scene/performance data structure templates
+
+---
+
+This completes the architectural survey. The library exhibits strong **composition** (OutputProcessor → Outputs, MultiSequencer → Sequencers) but suffers from **tight coupling** via compile-time switches and **implicit contracts** (output assignment, accent fallback, event accumulation). Major pain points center on **RAM efficiency** (event storage), **feature flag explosion**, and **lifecycle management** in global state.

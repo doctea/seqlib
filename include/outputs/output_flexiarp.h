@@ -106,16 +106,10 @@ class FlexiArpOutput : public MIDINoteOutput {
             MIDINoteOutput::setup_saveable_settings();
 
             register_setting(
-                new LSaveableSetting<int8_t>(
+                new VarSetting<int8_t>(
                     "Degree",
                     "FlexiArpOutput",
-                    &this->degree,
-                    [=](int8_t value) -> void {
-                        this->degree = value;
-                    }, 
-                    [=](void) -> int8_t {
-                        return this->degree;
-                    }
+                    &this->degree
                 ), SL_SCOPE_PROJECT | SL_SCOPE_SCENE // allow degree to be saved at scene or project level, since it's more of a performance setting than a preference setting
             );
         }

@@ -158,11 +158,11 @@ class TuringMachinePattern : public SimplePattern
         virtual void add_saveable_settings(int pattern_index) override {
             SimplePattern::add_saveable_settings(pattern_index);
             
-            register_setting(new LSaveableSetting<int16_t>("duration", "TuringMachinePattern", &this->current_duration), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-            register_setting(new LSaveableSetting<float>("probability", "TuringMachinePattern", &this->probability), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new VarSetting<int16_t>("duration", "TuringMachinePattern", &this->current_duration), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new VarSetting<float>("probability", "TuringMachinePattern", &this->probability), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
 
-            register_setting(new LSaveableSetting<bool>("mutation_lock_active", "TuringMachinePattern", &this->mutation_lock_active), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
-            register_setting(new LSaveableSetting<int>("mutation_lock_count", "TuringMachinePattern", &this->mutation_lock_count), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new VarSetting<bool>("mutation_lock_active", "TuringMachinePattern", &this->mutation_lock_active), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
+            register_setting(new VarSetting<int>("mutation_lock_count", "TuringMachinePattern", &this->mutation_lock_count), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);
 
             register_setting(new SaveableByteArraySetting<uint8_t>(
                 "mutation_locks", 

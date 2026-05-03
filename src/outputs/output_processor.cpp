@@ -40,7 +40,7 @@
 
         menu->add_page("Enable outputs", C_WHITE);
 
-        ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Enable outputs", true);
+        ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Enable outputs", true, 3);
         for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
             BaseOutput *output = this->nodes->get(i);
 

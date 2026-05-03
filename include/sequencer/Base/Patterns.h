@@ -192,17 +192,17 @@ class BasePattern
         virtual void add_saveable_settings(int pattern_index) {
 
             register_setting(
-                new LSaveableSetting<uint8_t>("steps", "BasePattern", &this->steps), 
+                new VarSetting<uint8_t>("steps", "BasePattern", &this->steps), 
                 SL_SCOPE_SCENE  // allow pattern length to be saved at scene level, since it's more of a performance setting than a preference setting
             );
             register_setting(
-                new LSaveableSetting<bool>("locked", "BasePattern", &this->locked), 
+                new VarSetting<bool>("locked", "BasePattern", &this->locked), 
                 SL_SCOPE_SCENE  // allow locked state to be saved at scene level, since it's more of a performance setting than a preference setting
             );
 
             #ifdef ENABLE_SHUFFLE
                 register_setting(
-                    new LSaveableSetting<uint8_t>("shuffle_track", "BasePattern", &this->shuffle_track), 
+                    new VarSetting<uint8_t>("shuffle_track", "BasePattern", &this->shuffle_track), 
                     SL_SCOPE_SCENE  // allow shuffle track to be saved at scene level, since it's more of a performance setting than a preference setting
                 );
             #endif
