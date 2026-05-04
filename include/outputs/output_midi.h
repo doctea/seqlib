@@ -517,16 +517,10 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                     );
 
                     register_setting(
-                        new LSaveableSetting<int_fast8_t>(
+                        new VarSetting<int_fast8_t>(
                             "Octave",
                             "MIDINoteOutput",
-                            &this->octave,
-                            [=](int_fast8_t value) -> void {
-                                this->octave = value;
-                            },
-                            [=](void) -> int_fast8_t {
-                                return this->octave;
-                            }
+                            &this->octave
                         ), SL_SCOPE_SCENE  // allow octave to be saved at scene level, since it's more of a performance setting than a preference setting
                     );
 
