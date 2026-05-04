@@ -458,6 +458,8 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
                 //Serial.printf("about to call create_low_memory_parameter_controls() for sequencer_parameters, freeRam is %i\n", freeRam()); Serial_flush();
                 create_low_memory_parameter_controls("Mutation Parameters", sequencer_parameters);
             #endif
+
+            menu->add(new LambdaActionItem("Re-initialise patterns", [=]() -> void { this->initialise_patterns(); }));
         }
     #endif
 #endif

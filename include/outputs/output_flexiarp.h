@@ -13,7 +13,11 @@
 
 class MIDIOutputProcessor;
 
-class FlexiArpOutput : public MIDINoteOutput {
+class FlexiArpOutput : public MIDINoteOutput 
+    #ifdef ENABLE_STORAGE
+        , virtual public SHDynamic<2, 12> // parameter children; own settings
+    #endif
+{
 
     int8_t degree = 1;
 
