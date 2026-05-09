@@ -29,8 +29,7 @@ class MultiSequencer : public SimpleSequencer
     virtual SimplePattern *get_pattern(unsigned int pattern) override {
         int offset = 0;
 
-        for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-            BaseSequencer *s = this->sequencers->get(i);
+        for (auto* s : *this->sequencers) {
             if (s!=nullptr) {
                 if (pattern < offset + s->get_number_patterns()) {
                     return s->get_pattern(pattern - offset);
@@ -55,58 +54,58 @@ class MultiSequencer : public SimpleSequencer
     }
 
     virtual void on_tick(int tick) override {
-        for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-            this->sequencers->get(i)->on_tick(tick);
+        for (auto* s : *this->sequencers) {
+            s->on_tick(tick);
         }
     }
 
     virtual void on_loop(int tick) override {
-        for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-            this->sequencers->get(i)->on_loop(tick);
+        for (auto* s : *this->sequencers) {
+            s->on_loop(tick);
         }
     }
     virtual void on_beat(int beat) override {
-        for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-            this->sequencers->get(i)->on_beat(beat);
+        for (auto* s : *this->sequencers) {
+            s->on_beat(beat);
         }
     };
     virtual void on_bar(int bar) override {
-        for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-            this->sequencers->get(i)->on_bar(bar);
+        for (auto* s : *this->sequencers) {
+            s->on_bar(bar);
         }
     };
     virtual void on_phrase(int phrase) override {
-        for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-            this->sequencers->get(i)->on_phrase(phrase);
+        for (auto* s : *this->sequencers) {
+            s->on_phrase(phrase);
         }
     }
 
     virtual void do_deferred_recomputes() override {
-        for (unsigned int i = 0; i < this->sequencers->size(); i++) {
-            this->sequencers->get(i)->do_deferred_recomputes();
+        for (auto* s : *this->sequencers) {
+            s->do_deferred_recomputes();
         }
     }
 
     virtual void on_step(int step) override {
-        for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-            this->sequencers->get(i)->on_step(step);
+        for (auto* s : *this->sequencers) {
+            s->on_step(step);
         }
     };
     virtual void on_step_end(int step) {
-        for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-            this->sequencers->get(i)->on_step_end(step);
+        for (auto* s : *this->sequencers) {
+            s->on_step_end(step);
         }
     }
 
     #ifdef ENABLE_SHUFFLE
         virtual void on_step_shuffled(int8_t track, int step) override {
-            for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-                this->sequencers->get(i)->on_step_shuffled(track, step);
+            for (auto* s : *this->sequencers) {
+                s->on_step_shuffled(track, step);
             }
         };
         virtual void on_step_end_shuffled(int8_t track, int step) override {
-            for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-                this->sequencers->get(i)->on_step_end_shuffled(track, step);
+            for (auto* s : *this->sequencers) {
+                s->on_step_end_shuffled(track, step);
             }
         };
         
@@ -115,8 +114,8 @@ class MultiSequencer : public SimpleSequencer
         }
         virtual void set_shuffle_enabled(bool state = true) override {
             this->shuffle_enabled = state;
-            for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-                this->sequencers->get(i)->set_shuffle_enabled(state);
+            for (auto* s : *this->sequencers) {
+                s->set_shuffle_enabled(state);
             }
         }
     #endif
@@ -130,12 +129,10 @@ class MultiSequencer : public SimpleSequencer
                 return this->parameters;
 
             LinkedList<FloatParameter*> *params = new LinkedList<FloatParameter*>();
-            for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-                BaseSequencer *s = this->sequencers->get(i);
+            for (auto* s : *this->sequencers) {
                 LinkedList<FloatParameter*> *sub_params = s->getParameters();
                 if (sub_params!=nullptr) {
-                    for (unsigned int j = 0 ; j < sub_params->size() ; j++) {
-                        FloatParameter *p = sub_params->get(j);
+                    for (auto* p : *sub_params) {
                         if (p!=nullptr)
                             params->add(p);
                     }
@@ -148,8 +145,7 @@ class MultiSequencer : public SimpleSequencer
 
     #if defined(ENABLE_SCREEN)
         virtual void make_menu_items(Menu *menu, int combine_pages) override {
-            for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-                BaseSequencer *s = this->sequencers->get(i);
+            for (auto* s : *this->sequencers) {
                 if (s!=nullptr)
                     s->make_menu_items(menu, combine_pages);
             }
@@ -167,8 +163,7 @@ class MultiSequencer : public SimpleSequencer
             // todo: remove rp2040-specify code
 
             Serial.printf("\n=== MultiSequencer::setup_saveable_settings() for sequencer %p with %i child sequencers...\n", this, this->sequencers->size()); Serial.flush();
-            for (unsigned int i = 0 ; i < this->sequencers->size() ; i++) {
-                BaseSequencer *s = this->sequencers->get(i);
+            for (auto* s : *this->sequencers) {
                 if (s==nullptr) continue;
                 register_child(s);
             }

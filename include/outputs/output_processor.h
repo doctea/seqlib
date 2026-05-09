@@ -77,9 +77,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor
     }
 
     virtual BaseOutput *get_output_for_label(const char *label) override {
-        const uint_fast8_t size = this->nodes->size();
-        for (uint_fast8_t i = 0 ; i < size ; i++) {
-            BaseOutput *o = this->nodes->get(i);
+        for (auto* o : *this->nodes) {
             if (o->matches_label(label))
                 return o;
         }
@@ -100,12 +98,12 @@ class MIDIOutputProcessor : public BaseOutputProcessor
             n->stop();
         }*/
         //count = 0;
-        const uint_fast8_t size = this->nodes->size();
-        for (uint_fast8_t i = 0 ; i < size ; i++) {
-            BaseOutput *o = this->nodes->get(i);
-            Debug_printf("\tnode %i\n", i);
+        unsigned _i = 0;
+        for (auto* o : *this->nodes) {
+            Debug_printf("\tnode %i\n", _i);
             o->process();
             Debug_println();
+            ++_i;
         }
         /*if (count>0) {
             Serial.printf("sending combo note %i\n", count);
@@ -113,18 +111,16 @@ class MIDIOutputProcessor : public BaseOutputProcessor
             //count = 35;
         }*/
 
-        for (uint_fast8_t i = 0 ; i < size ; i++) {
-            this->nodes->get(i)->reset();
+        for (auto* node : *this->nodes) {
+            node->reset();
         }
 
         Debug_println(".end.");
     }
 
     virtual void loop() {
-        const uint_fast8_t size = this->nodes->size();
-        for (uint_fast8_t i = 0 ; i < size ; i++) {
-            BaseOutput *o = this->nodes->get(i);
-            Debug_printf("\tnode %i\n", i);
+        for (auto* o : *this->nodes) {
+            Debug_printf("\tnode\n");
             if (o!=nullptr)
                 o->loop();
             Debug_println();
@@ -133,9 +129,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor
 
     #ifdef ENABLE_SCALES
         virtual void notify_harmony_changed(const scale_identity_t&scale, const chord_identity_t& chord) {
-            const uint_fast8_t size = this->nodes->size();
-            for (uint_fast8_t i = 0 ; i < size ; i++) {
-                BaseOutput *o = this->nodes->get(i);
+            for (auto* o : *this->nodes) {
                 if (o!=nullptr)
                     o->notify_harmony_changed(scale, chord);
             }
@@ -149,9 +143,10 @@ class MIDIOutputProcessor : public BaseOutputProcessor
         #ifdef DEBUG_ENVELOPES
             sequencer->configure_pattern_output(11, this->nodes->get(11));
         #else
-            const uint_fast8_t size = this->nodes->size();
-            for (uint_fast8_t i = 0 ; i < size ; i++) {
-                sequencer->configure_pattern_output(i, this->nodes->get(i));
+            unsigned _i = 0;
+            for (auto* node : *this->nodes) {
+                sequencer->configure_pattern_output(_i, node);
+                ++_i;
             }
         #endif
     }
@@ -159,10 +154,10 @@ class MIDIOutputProcessor : public BaseOutputProcessor
     #ifdef ENABLE_PARAMETERS
         FLASHMEM
         virtual void setup_parameters() {
-            for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
-                //Serial.printf("MIDIOutputProcessor#setup_parameters processing item [%i/%i]\n", i+1, this->nodes->size());
+            for (auto* node : *this->nodes) {
+                //Serial.printf("MIDIOutputProcessor#setup_parameters processing item...\n");
                 //Serial_flush();
-                parameter_manager->addParameters(this->nodes->get(i)->get_parameters());
+                parameter_manager->addParameters(node->get_parameters());
             }
         }
     #endif
@@ -178,11 +173,8 @@ class MIDIOutputProcessor : public BaseOutputProcessor
             BaseOutputProcessor::setup_saveable_settings();
 
             // register all of the output nodes
-            const uint_fast8_t size = this->nodes->size();
-            for (uint_fast8_t i = 0 ; i < size ; i++) {
-                BaseOutput *o = this->nodes->get(i);
+            for (auto* o : *this->nodes) {
                 if (o==nullptr) continue;
-
                 register_child(o);
             }
         }

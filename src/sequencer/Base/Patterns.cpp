@@ -5,8 +5,7 @@
 
 void BasePattern::set_output_by_name(const char *output_name) {
     if (this->available_outputs!=nullptr) {
-        for (size_t i = 0 ; i < this->available_outputs->size() ; i++) {
-            BaseOutput *o = this->available_outputs->get(i);
+        for (auto* o : *this->available_outputs) {
             if (o->matches_label(output_name)) {
                 this->set_output(o);
                 return;

@@ -60,8 +60,11 @@ class MIDINoteTriggerCountOutput : public MIDINoteOutput {
             int number_of_active_nodes = 0;
             int_fast16_t size = this->nodes->size();
             //Serial.printf("get_note_number_count in MIDINoteTriggerCountOutput: size is %i, start_count_at is %i, finish_count_at is %i\n", size, start_count_at, finish_count_at);
-            for (int_fast16_t i = start_count_at ; i < finish_count_at+1 && i < size ; i++) {
-                BaseOutput *o = this->nodes->get(i);
+            auto it = this->nodes->begin();
+            const auto end_it = this->nodes->end();
+            for (int_fast16_t s = 0; s < start_count_at && it != end_it; ++s, ++it) {}
+            for (int_fast16_t i = start_count_at ; it != end_it && i <= finish_count_at && i < size ; ++it, ++i) {
+                BaseOutput *o = *it;
                 if (o==nullptr) continue;
                 if (o==this) continue;
                 count += o->has_gone_on_this_time() ? (i%12) : 0;

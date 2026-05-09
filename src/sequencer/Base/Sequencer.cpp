@@ -62,8 +62,7 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
         LinkedList<FloatParameter*> *params = this->getParameters();
         if (params==nullptr)
             return nullptr;
-        for (size_t i = 0 ; i < params->size() ; i++) {
-            FloatParameter *p = params->get(i);
+        for (auto* p : *params) {
             if (p!=nullptr && strcmp(p->label, name)==0)
                 return p;
         }
@@ -76,7 +75,7 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
         ISaveableSettingHost::setup_saveable_settings();
 
         if (Serial) Serial.printf("\n=== BaseSequencer::setup_saveable_settings() for sequencer %p aka %s with %i patterns, free ram is %u ...\n", this, this->get_path_segment(), this->get_number_patterns(), freeRam()); Serial.flush();
-        size_t pattern_count = this->get_number_patterns();
+        const size_t pattern_count = this->get_number_patterns();
         for (uint_fast8_t i = 0 ; i < pattern_count ; i++) {
             //if (Serial) Serial.printf("BaseSequencer::setup_saveable_settings() for pattern [%i/%i]...\n", i+1, pattern_count); Serial.flush();
             BasePattern *p = this->get_pattern(i);
@@ -85,7 +84,7 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
                 continue;
             }
             register_child(p);
-            p->add_saveable_settings(i);   
+            p->add_saveable_settings(i);
         }
         
         if (Serial) 
@@ -94,8 +93,7 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
         // register parameters for this output
         LinkedList<FloatParameter*> *parameters = this->getParameters();
         if (parameters!=nullptr) {
-            for (size_t i = 0 ; i < parameters->size() ; i++) {
-                FloatParameter *param = parameters->get(i);
+            for (auto* param : *parameters) {
                 register_child(param);
             }
         }
@@ -106,13 +104,12 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
 #endif
 
 void SimpleSequencer::on_step(int step) {
-    for (uint_fast8_t i = 0 ; i < get_number_patterns() ; i++) {
+    for (auto* p : *this->patterns) {
         #ifdef ENABLE_SHUFFLE
-            if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->patterns->get(i)->is_shuffled())) {
-                this->patterns->get(i)->process_step(step);
+            if (!is_shuffle_enabled() || !p->is_shuffled()) {
+                p->process_step(step);
             }
         #else
-            SimplePattern *p = this->get_pattern(i);
             if (p!=nullptr)
                 p->process_step(step);
         #endif
@@ -120,15 +117,13 @@ void SimpleSequencer::on_step(int step) {
 };
 
 void SimpleSequencer::on_step_end(int step) {
-    for (uint_fast8_t i = 0 ; i < get_number_patterns() ; i++) {
+    for (auto* p : *this->patterns) {
         #ifdef ENABLE_SHUFFLE
-            if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->patterns->get(i)->is_shuffled())) {
-                SimplePattern *p = this->get_pattern(i);
+            if (!is_shuffle_enabled() || !p->is_shuffled()) {
                 if (p!=nullptr)
                     p->process_step_end(step);
             }
         #else
-            SimplePattern *p = this->get_pattern(i);
             if (p!=nullptr)
                 p->process_step_end(step);
         #endif
@@ -139,10 +134,10 @@ void SimpleSequencer::on_step_end(int step) {
     void SimpleSequencer::on_step_shuffled(int8_t track, int step) {
         if (!is_shuffle_enabled()) return;
 
-        for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
-            if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
+        for (auto* p : *this->patterns) {
+            if (p!=nullptr && p->is_shuffled() && p->get_shuffle_track()==track) {
                 //if (Serial) Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
-                this->get_pattern(i)->process_step(step);
+                p->process_step(step);
             }
         }
     };
@@ -150,9 +145,9 @@ void SimpleSequencer::on_step_end(int step) {
     void SimpleSequencer::on_step_end_shuffled(int8_t track, int step) {
         if (!is_shuffle_enabled()) return;
 
-        for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
-            if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
-                this->get_pattern(i)->process_step_end(step);
+        for (auto* p : *this->patterns) {
+            if (p!=nullptr && p->is_shuffled() && p->get_shuffle_track()==track) {
+                p->process_step_end(step);
             }
         }
     }

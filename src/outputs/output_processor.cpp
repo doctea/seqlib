@@ -21,8 +21,8 @@
         page_t *started_page = menu->get_selected_page();   // for remembering what page the quickjump menu itself is
         menu->remember_opened_page(menu->get_page_index_for_name(menu->get_selected_page()->title));
 
-        for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
-            BaseOutput *node = this->nodes->get(i);
+        unsigned int i = 0;
+        for (auto* node : *this->nodes) {
             node->make_menu_items(menu, i);
             #ifdef ENABLE_PARAMETERS
                 node->make_parameter_menu_items(menu, i, C_WHITE, combine_pages);
@@ -36,14 +36,13 @@
                     quickjump->add_page(menu->get_previous_page());
                 quickjump->add_page(menu->get_selected_page());
             }
+            ++i;
         }
 
         menu->add_page("Enable outputs", C_WHITE);
 
         ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Enable outputs", true, 3);
-        for (unsigned int i = 0 ; i < this->nodes->size() ; i++) {
-            BaseOutput *output = this->nodes->get(i);
-
+        for (auto* output : *this->nodes) {
             MultiToggleItemClass<BaseOutput> *option = new MultiToggleItemClass<BaseOutput> (
                 output->label,
                 output,

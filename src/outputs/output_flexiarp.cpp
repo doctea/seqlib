@@ -15,8 +15,7 @@
         LinkedList<MenuItem*> *items = menu->get_page(menu->get_number_pages()-1)->items;
         SubMenuItemBar *midi_settings_bar = nullptr;
 
-        for (size_t i = 0 ; i < items->size() ; i++) {
-            MenuItem *item = items->get(i);
+        for (auto* item : *items) {
             if (strcmp(item->label, "MIDI settings")==0) {
                 midi_settings_bar = static_cast<SubMenuItemBar*>(item);
                 break;

@@ -111,8 +111,7 @@ class BaseOutput : public ISequencerEventReceiver
             // save parameters for this output
             LinkedList<FloatParameter*> *parameters = this->get_parameters();
             if (parameters!=nullptr) {
-                for (size_t i = 0 ; i < parameters->size() ; i++) {
-                    FloatParameter *param = parameters->get(i);
+                for (auto* param : *parameters) {
                     register_child(param);
                 }
             }
