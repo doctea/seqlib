@@ -16,10 +16,13 @@
 
         // make a QuickJump page for the outputs
         menu->add_page("QuickJumpOutputs", C_WHITE);
-        CustomQuickPagesMenuItem *quickjump = new CustomQuickPagesMenuItem("QuickJump to Overviews");
+        CustomQuickPagesMenuItem *quickjump = new CustomQuickPagesMenuItem("QuickJump to Outputs");
         menu->add(quickjump);
         page_t *started_page = menu->get_selected_page();   // for remembering what page the quickjump menu itself is
-        menu->remember_opened_page(menu->get_page_index_for_name(menu->get_selected_page()->title));
+        menu->remember_opened_page(
+            menu->get_page_index_for_name(menu->get_selected_page()->title), 
+            true
+        );
 
         unsigned int i = 0;
         for (auto* node : *this->nodes) {
