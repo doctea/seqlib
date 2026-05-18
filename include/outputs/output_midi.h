@@ -405,7 +405,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                     }
                     this->parameters = parameters;
 
-                    parameters->add(new ProxyParameter<int8_t>(
+                    parameters->add(new ProxyNoteParameter<int8_t>(
                         "Lowest note",
                         &this->lowest_note,
                         &this->effective_lowest_note,
@@ -413,7 +413,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                         MIDI_MAX_NOTE
                     ));
 
-                    parameters->add(new ProxyParameter<int8_t>(
+                    parameters->add(new ProxyNoteParameter<int8_t>(
                         "Highest note",
                         &this->highest_note,
                         &this->effective_highest_note,
