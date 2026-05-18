@@ -9,6 +9,8 @@
     #include "mymenu/menuitems_scale.h"
     #include "mymenu/menuitems_harmony.h"
 
+    #include "mymenu/menuitem_notelimit.h"
+
     #ifdef ENABLE_SCALES
     void MIDINoteOutput::add_scale_menu_items(Menu *menu) {
         LambdaScaleMenuItemBar *scale_menu = new LambdaScaleMenuItemBar(
@@ -75,26 +77,23 @@
         );
         transposition_bar->add(highest_note_control);
 
-        LambdaSelectorControl<NOTE_LIMIT_MODE> *lowest_note_mode_control = new LambdaSelectorControl<NOTE_LIMIT_MODE>(
+        transposition_bar->add(new NoteLimitModeControl<>(
             "Lo Mode",
             [=](NOTE_LIMIT_MODE v) -> void { this->setLowestNoteMode(v); },
             [=]() -> NOTE_LIMIT_MODE { return this->getLowestNoteMode(); },
             nullptr,
+            true,
             true
-        );
-        lowest_note_mode_control->add_available_value(NOTE_LIMIT_MODE::IGNORE, "Drop");
-        lowest_note_mode_control->add_available_value(NOTE_LIMIT_MODE::TRANSPOSE, "Wrap");
-        transposition_bar->add(lowest_note_mode_control);
+        ));
 
-        LambdaSelectorControl<NOTE_LIMIT_MODE> *highest_note_mode_control = new LambdaSelectorControl<NOTE_LIMIT_MODE>(
+        transposition_bar->add(new NoteLimitModeControl<>(
             "Hi Mode",
             [=](NOTE_LIMIT_MODE v) -> void { this->setHighestNoteMode(v); },
             [=]() -> NOTE_LIMIT_MODE { return this->getHighestNoteMode(); },
             nullptr,
+            true,
             true
-        );
-        highest_note_mode_control->set_available_values(lowest_note_mode_control->available_values);
-        transposition_bar->add(highest_note_mode_control);
+        ));
 
         menu->add(transposition_bar);
     }
