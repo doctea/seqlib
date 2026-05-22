@@ -413,7 +413,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
             } else {
                 Serial.printf("EuclidianSequencer::create_menu_euclidian_mutation(): ADDING PAGE (not combining) adding mutation controls to 'Pattern locks' page, combine_setting bitmask = %i\n", combine_setting);
                 decode_combine_page_option(combine_setting);
-                menu->add_page("Mutation");
+                menu->add_page("Mutation", YELLOW, false);
             }
             menu->add(new SeparatorMenuItem("Euclidian Mutations"));
 
