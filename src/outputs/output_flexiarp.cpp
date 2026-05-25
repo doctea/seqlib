@@ -11,8 +11,7 @@
         // cheat a little bit and get the last added menu item, which should be the 
         // midi settings bar?
 
-
-        LinkedList<MenuItem*> *items = menu->get_page(menu->get_number_pages()-1)->items;
+        MenuItemList *items = menu->get_page(menu->get_number_pages()-1)->items;
         SubMenuItemBar *midi_settings_bar = nullptr;
 
         for (auto* item : *items) {

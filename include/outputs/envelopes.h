@@ -22,7 +22,7 @@
     #include "parameter_inputs/EnvelopeParameterInput.h"
 #endif
 
-class EnvelopeOutput : public MIDIDrumOutput {
+class EnvelopeOutput : public MIDIDrumOutput, virtual public SHDynamic<1, 2> {
     public:
 
     byte midi_cc = -1;
