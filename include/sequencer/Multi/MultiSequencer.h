@@ -123,14 +123,14 @@ class MultiSequencer : public SimpleSequencer
     //virtual void configure_pattern_output(int index, BaseOutput *output);
     
     #if defined(ENABLE_PARAMETERS)
-        LinkedList<FloatParameter*> *parameters = nullptr;
-        virtual LinkedList<FloatParameter*> *getParameters() {
+        ParameterList *parameters = nullptr;
+        virtual ParameterList *getParameters() override {
             if (this->parameters!=nullptr) 
                 return this->parameters;
 
-            LinkedList<FloatParameter*> *params = new LinkedList<FloatParameter*>();
+            ParameterList *params = new ParameterList();
             for (auto* s : *this->sequencers) {
-                LinkedList<FloatParameter*> *sub_params = s->getParameters();
+                ParameterList *sub_params = s->getParameters();
                 if (sub_params!=nullptr) {
                     for (auto* p : *sub_params) {
                         if (p!=nullptr)

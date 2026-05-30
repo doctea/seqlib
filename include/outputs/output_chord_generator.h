@@ -147,8 +147,8 @@ class MIDIChordGeneratorOutput : public MIDINoteOutput {
     #endif
 
     #ifdef ENABLE_PARAMETERS
-    virtual LinkedList<FloatParameter*> *get_parameters() override {
-        LinkedList<FloatParameter*> *parameters = MIDINoteOutput::get_parameters();
+    virtual ParameterList *get_parameters() override {
+        ParameterList *parameters = MIDINoteOutput::get_parameters();
         if (!this->chord_modulation_parameters_added && parameters != nullptr) {
             add_chord_modulation_parameters(parameters, &this->chord_player);
             this->chord_modulation_parameters_added = true;

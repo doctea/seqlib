@@ -7,6 +7,7 @@
 
 #if defined(ENABLE_PARAMETERS)
     #include <LinkedList.h>
+    #include "parameter_list.h"
 #endif
 
 #ifdef ENABLE_STORAGE
@@ -116,7 +117,7 @@ class BaseSequencer
     virtual void do_deferred_recomputes() {}
 
     #if defined(ENABLE_PARAMETERS)
-        virtual LinkedList<FloatParameter*> *getParameters();
+        virtual ParameterList *getParameters();
         virtual FloatParameter* getParameterByName(const char *name);   // UNTESTED!!
     #endif
 

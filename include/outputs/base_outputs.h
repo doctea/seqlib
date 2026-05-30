@@ -20,6 +20,7 @@ class ISequencerEventReceiver {
 };
 
 #include "parameters/Parameter.h"
+#include "parameter_list.h"
 
 // class to receive triggers from a sequencer and return values to the owner Processor
 class BaseOutput : public ISequencerEventReceiver
@@ -84,7 +85,7 @@ class BaseOutput : public ISequencerEventReceiver
     #endif
 
     #ifdef ENABLE_PARAMETERS
-        virtual LinkedList<FloatParameter*> *get_parameters() {
+        virtual ParameterList *get_parameters() {
             return nullptr;
         }
     #endif
@@ -109,7 +110,7 @@ class BaseOutput : public ISequencerEventReceiver
             );
 
             // save parameters for this output
-            LinkedList<FloatParameter*> *parameters = this->get_parameters();
+            ParameterList *parameters = this->get_parameters();
             if (parameters!=nullptr) {
                 for (auto* param : *parameters) {
                     register_child(param);

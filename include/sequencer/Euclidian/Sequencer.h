@@ -330,7 +330,7 @@ class EuclidianSequencer : public BaseSequencer
 
     
     #if defined(ENABLE_PARAMETERS)
-        virtual LinkedList<FloatParameter*> *getParameters() override;
+        virtual ParameterList *getParameters() override;
     #endif
 
     // Call from loop() (never from ISR) to perform any pending make_euclid() recomputes.

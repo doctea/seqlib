@@ -263,7 +263,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
 
 
         #ifdef ENABLE_PARAMETERS
-            LinkedList<FloatParameter*> *parameters = nullptr;
+            ParameterList *parameters = nullptr;
         #endif
 
         public:
@@ -395,13 +395,13 @@ class MIDIDrumOutput : public MIDIBaseOutput {
             #endif
 
             #ifdef ENABLE_PARAMETERS
-                virtual LinkedList<FloatParameter*> *get_parameters() override {
+                virtual ParameterList *get_parameters() override {
                     if (this->parameters!=nullptr)
                         return this->parameters;
 
-                    LinkedList<FloatParameter*> *parameters = MIDIBaseOutput::get_parameters();
+                    ParameterList *parameters = MIDIBaseOutput::get_parameters();
                     if (parameters == nullptr) {
-                        parameters = new LinkedList<FloatParameter*>();
+                        parameters = new ParameterList();
                     }
                     this->parameters = parameters;
 

@@ -22,7 +22,11 @@
     #include "parameter_inputs/EnvelopeParameterInput.h"
 #endif
 
-class EnvelopeOutput : public MIDIDrumOutput, virtual public SHDynamic<1, 2> {
+class EnvelopeOutput : public MIDIDrumOutput
+#ifdef ENABLE_STORAGE
+    , virtual public SHDynamic<1, 2> 
+#endif
+{
     public:
 
     byte midi_cc = -1;
@@ -84,7 +88,7 @@ class EnvelopeOutput : public MIDIDrumOutput, virtual public SHDynamic<1, 2> {
     #endif
 
     #ifdef ENABLE_PARAMETERS
-        virtual LinkedList<FloatParameter*> *get_parameters() override {
+        virtual ParameterList *get_parameters() override {
             return this->envelope->get_parameters();
         }
     #endif

@@ -20,6 +20,7 @@
 
 #ifdef ENABLE_PARAMETERS
     #include "parameters/Parameter.h"
+    #include "parameter_list.h"
 #endif
 
 #ifdef ENABLE_STORAGE
@@ -179,9 +180,9 @@ class BasePattern
     #endif
 
     #ifdef ENABLE_PARAMETERS
-        LinkedList<FloatParameter*> *parameters = nullptr;
+        ParameterList *parameters = nullptr;
         // instantiate parameters list if it doesn't exist, add it to parameter_manager, and return it
-        virtual LinkedList<FloatParameter*> *getParameters(unsigned int i);
+        virtual ParameterList *getParameters(unsigned int i);
     #endif
 
     #ifdef ENABLE_SCREEN
@@ -218,7 +219,7 @@ class BasePattern
             );
             
             // register parameters for this pattern
-            LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
+            ParameterList *parameters = this->getParameters(pattern_index);
             if (parameters!=nullptr) {
                 for (auto* param : *parameters) {
                     register_child(param);

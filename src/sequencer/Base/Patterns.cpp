@@ -42,9 +42,9 @@ void SimplePattern::trigger_off_for_step(int step) {
 };
 
 #ifdef ENABLE_PARAMETERS
-    LinkedList<FloatParameter*> *BasePattern::getParameters(unsigned int i) {
+    ParameterList *BasePattern::getParameters(unsigned int i) {
         if (this->parameters==nullptr)
-            this->parameters = new LinkedList<FloatParameter*>();
+            this->parameters = new ParameterList();
         return this->parameters;
     }
 #endif

@@ -87,7 +87,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
             snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
             menu->add_page(label, this->get_colour(), false);
         }
-        LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
+        ParameterList *parameters = this->getParameters(pattern_index);
         create_low_memory_parameter_controls(label, parameters, this->get_colour());
     }
 
@@ -98,7 +98,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
     #include "ParameterManager.h"
     #include "parameters/ProxyParameter.h"
 
-    LinkedList<FloatParameter*> *TuringMachinePattern::getParameters(unsigned int i) {
+    ParameterList *TuringMachinePattern::getParameters(unsigned int i) {
         if (parameters!=nullptr)
             return parameters;
 

@@ -54,12 +54,12 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
 #endif
 
 #ifdef ENABLE_PARAMETERS
-    LinkedList<FloatParameter*>* BaseSequencer::getParameters() {
+    ParameterList* BaseSequencer::getParameters() {
         return nullptr;
     }
     // todo: is this necessary?
     FloatParameter* BaseSequencer::getParameterByName(const char *name) {
-        LinkedList<FloatParameter*> *params = this->getParameters();
+        ParameterList *params = this->getParameters();
         if (params==nullptr)
             return nullptr;
         for (auto* p : *params) {
@@ -91,7 +91,7 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
             Serial.printf("... BaseSequencer::setup_saveable_settings() after doing settings, free ram is %u\n\n", freeRam()); Serial.flush();
 
         // register parameters for this output
-        LinkedList<FloatParameter*> *parameters = this->getParameters();
+        ParameterList *parameters = this->getParameters();
         if (parameters!=nullptr) {
             for (auto* param : *parameters) {
                 register_child(param);

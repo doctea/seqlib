@@ -103,7 +103,7 @@ void setup_output(IMIDINoteAndCCTarget *output_target, MIDIOutputProcessor *proc
         //FLASHMEM
         void BaseOutput::make_parameter_menu_items(Menu *menu, int index, uint16_t colour, bool combine_pages) {
             // don't make a menu page if no parameters to use
-            LinkedList<FloatParameter*> *parameters = this->get_parameters();
+            ParameterList *parameters = this->get_parameters();
             if (parameters==nullptr || parameters->size()==0)
                 return;
 

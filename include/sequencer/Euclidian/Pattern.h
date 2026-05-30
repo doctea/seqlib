@@ -275,7 +275,7 @@ class EuclidianPattern : public SimplePattern
     #endif
     
     #if defined(ENABLE_PARAMETERS)
-        virtual LinkedList<FloatParameter*> *getParameters(unsigned int i) override;
+        virtual ParameterList *getParameters(unsigned int i) override;
     #endif
 
     #ifdef ENABLE_STORAGE

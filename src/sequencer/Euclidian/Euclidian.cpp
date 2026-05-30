@@ -126,13 +126,13 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
     #include "parameters/ProxyParameter.h"
     #include "ParameterManager.h"
 
-    LinkedList<FloatParameter*> *EuclidianSequencer::getParameters() {
-        static LinkedList<FloatParameter*> *parameters = nullptr;
+    ParameterList *EuclidianSequencer::getParameters() {
+        static ParameterList *parameters = nullptr;
         
         if (parameters!=nullptr)
             return parameters;
             
-        parameters = new LinkedList<FloatParameter*>();
+        parameters = new ParameterList();
 
         #ifdef ENABLE_SHUFFLE
             for (size_t i = 0 ; i < shuffle_pattern_wrapper.getCount() ; i++) {
@@ -205,7 +205,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
     //#include "mymenu.h"
     //#include "mymenu/menuitems_pattern_euclidian.h"
 
-    LinkedList<FloatParameter*> *EuclidianPattern::getParameters(unsigned int i) {
+    ParameterList *EuclidianPattern::getParameters(unsigned int i) {
         if (parameters!=nullptr)
             return parameters;
 
@@ -282,7 +282,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
                 menu->add_page(label, this->get_colour(), false);
             }
 
-            LinkedList<FloatParameter*> *parameters = this->getParameters(pattern_index);
+            ParameterList *parameters = this->getParameters(pattern_index);
             
             create_low_memory_parameter_controls(label, parameters, this->get_colour());
 
@@ -454,7 +454,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
                 //   isn't RAM, must be that sequencer isn't initialised yet
                 //   TODO: i think this whole block of code (from add_page("Mutation") onwards) can be moved elsewhere anyway and run at a more appropriate time?
                 //Serial.printf("about to call sequencer->getParameters(), freeRam is %i\n", freeRam()); Serial_flush();
-                LinkedList<FloatParameter*> *sequencer_parameters = this->getParameters();
+                ParameterList *sequencer_parameters = this->getParameters();
                 //Serial.printf("about to call create_low_memory_parameter_controls() for sequencer_parameters, freeRam is %i\n", freeRam()); Serial_flush();
                 create_low_memory_parameter_controls("Mutation Parameters", sequencer_parameters);
             #endif
