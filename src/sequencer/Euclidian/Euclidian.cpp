@@ -136,8 +136,10 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
 
         #ifdef ENABLE_SHUFFLE
             for (size_t i = 0 ; i < shuffle_pattern_wrapper.getCount() ; i++) {
+                char label[32];
+                snprintf(label, sizeof(label), "Shuffle amount %u", (unsigned)i);
                 parameters->add(new LDataParameter<float>(
-                    (String("Shuffle amount ") + String(i)).c_str(),
+                    label,
                     [=] (float v) { 
                         //if (Serial) Serial.printf("Shuffle amount %i set to %f\n", i, v);
                         //ATOMIC() {
@@ -156,8 +158,10 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
 
         // multiple global density parameters
         for (int i = 0  ; i < NUM_GLOBAL_DENSITY_GROUPS ; i++) {
+            char label[32];
+            snprintf(label, sizeof(label), "Global density %i", i);
             parameters->add(new ProxyParameter<float>(
-                (String("Global density ") + String(i)).c_str(),
+                label,
                 &all_global_density[i],
                 &all_effective_global_density[i],
                 MINIMUM_DENSITY,
@@ -340,12 +344,12 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
             if (!(combine_setting & COMBINE_LOCKS_WITH_CIRCLE)) {
                 menu->add_page("Pattern locks", C_WHITE, false);
             }
-            ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Allow changes", true);
+            ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Allow changes", true, 2, false);
             for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
                 BasePattern *p = (BasePattern *)this->get_pattern(i);
 
                 PatternMultiToggleItem *option = new PatternMultiToggleItem(
-                    (new String(String("Pattern ") + String(i)))->c_str(),
+                    i,
                     //p->get_output_label(),  // todo: make class auto-update 
                     p,
                     &BasePattern::set_locked,

@@ -44,7 +44,7 @@
 
         menu->add_page("Enable outputs", C_WHITE);
 
-        ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Enable outputs", true, 3);
+        ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Enable outputs", true, 3, false);
         for (auto* output : *this->nodes) {
             MultiToggleItemClass<BaseOutput> *option = new MultiToggleItemClass<BaseOutput> (
                 output->label,

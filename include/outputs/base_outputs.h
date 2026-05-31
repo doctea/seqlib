@@ -35,6 +35,7 @@ class BaseOutput : public ISequencerEventReceiver
     char label[MAX_LABEL];
     BaseOutput (const char *label) {
         strncpy(this->label, label, MAX_LABEL);
+        this->label[MAX_LABEL - 1] = '\0';
 
         #ifdef ENABLE_STORAGE
             this->set_path_segment(label);

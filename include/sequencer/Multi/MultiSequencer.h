@@ -163,9 +163,13 @@ class MultiSequencer : public SimpleSequencer
             // todo: remove rp2040-specify code
 
             Serial.printf("\n=== MultiSequencer::setup_saveable_settings() for sequencer %p with %i child sequencers...\n", this, this->sequencers->size()); Serial.flush();
+            uint_fast8_t seq_idx = 0;
             for (auto* s : *this->sequencers) {
                 if (s==nullptr) continue;
+                if (Serial) Serial.printf("    register_child(child_sequencer[%u]) before: %u\n", (unsigned)seq_idx, rp2040.getFreeHeap());
                 register_child(s);
+                if (Serial) Serial.printf("    register_child(child_sequencer[%u]) after: %u\n", (unsigned)seq_idx, rp2040.getFreeHeap());
+                seq_idx++;
             }
             if (Serial) Serial.printf("=== MultiSequencer::setup_saveable_settings() done for sequencer %p, free ram is %u\n\n", this, rp2040.getFreeHeap()); Serial.flush();
             if (Serial) Serial.flush();

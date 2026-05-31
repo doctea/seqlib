@@ -83,8 +83,10 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
                 if (Serial) Serial.printf("\tWARN: pattern %i is nullptr!\n", i); Serial.flush();
                 continue;
             }
+            // if (Serial) Serial.printf("    register_child(pattern[%u]) before: %u\n", (unsigned)i, freeRam());
             register_child(p);
             p->add_saveable_settings(i);
+            // if (Serial) Serial.printf("    register_child(pattern[%u]) after: %u\n", (unsigned)i, freeRam());
         }
         
         if (Serial) 

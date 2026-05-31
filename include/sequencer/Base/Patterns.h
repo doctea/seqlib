@@ -339,15 +339,17 @@ class SimplePattern : public BasePattern {
     
     class PatternMultiToggleItem : public MultiToggleColourItemClass<BasePattern> {
         public:
-        PatternMultiToggleItem(const char *label, BasePattern *target, void(BasePattern::*setter)(bool), bool(BasePattern::*getter)(), bool invert_colours = false) 
-            : MultiToggleColourItemClass<BasePattern>(label, target, setter, getter, invert_colours) 
-            {}
+        PatternMultiToggleItem(unsigned int pattern_index, BasePattern *target, void(BasePattern::*setter)(bool), bool(BasePattern::*getter)(), bool invert_colours = false) 
+            : MultiToggleColourItemClass<BasePattern>("Pattern", target, setter, getter, invert_colours), pattern_index((uint8_t)pattern_index)
+            {
+            }
 
         BasePattern *last_known_output = nullptr;
+        uint8_t pattern_index = 0;
         char cached_label[MENU_C_MAX/2];
         virtual const char *get_label() override {
             if (last_known_output!=this->target) {
-                snprintf(cached_label, MENU_C_MAX/2, "%s: %s", this->label, this->target->get_output_label());
+                snprintf(cached_label, MENU_C_MAX/2, "#%u: %s", this->pattern_index, this->target->get_output_label());
                 //snprintf(cached_label, MENU_C_MAX/2, "%s", this->target->get_output_label()); // todo: hmm this seemed to be significantly faster to render - maybe because its twice the text to render?
                 last_known_output = this->target;
             }
