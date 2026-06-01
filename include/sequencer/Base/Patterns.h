@@ -218,13 +218,15 @@ class BasePattern
                 SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow pattern output to be saved at scene level, since it's more of a performance setting than a preference setting
             );
             
-            // register parameters for this pattern
-            ParameterList *parameters = this->getParameters(pattern_index);
-            if (parameters!=nullptr) {
-                for (auto* param : *parameters) {
-                    register_child(param);
+            #ifdef ENABLE_PARAMETERS
+                // register parameters for this pattern
+                ParameterList *parameters = this->getParameters(pattern_index);
+                if (parameters!=nullptr) {
+                    for (auto* param : *parameters) {
+                        register_child(param);
+                    }
                 }
-            }
+            #endif
         }
     #endif
 };

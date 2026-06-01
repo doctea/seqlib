@@ -80,15 +80,17 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
 
         menu->add(lock_bar);
 
-        // add parameter modulation controls -- we can choose to combine these on the same page as the main pattern controls, or put them on a separate page with a link from the main one
-        if (combine_setting & COMBINE_MODULATION_WITH_MAIN) {
-            menu->add(new SeparatorMenuItem("Modulation"));
-        } else {
-            snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
-            menu->add_page(label, this->get_colour(), false);
-        }
-        ParameterList *parameters = this->getParameters(pattern_index);
-        create_low_memory_parameter_controls(label, parameters, this->get_colour());
+        #ifdef ENABLE_PARAMETERS
+            // add parameter modulation controls -- we can choose to combine these on the same page as the main pattern controls, or put them on a separate page with a link from the main one
+            if (combine_setting & COMBINE_MODULATION_WITH_MAIN) {
+                menu->add(new SeparatorMenuItem("Modulation"));
+            } else {
+                snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
+                menu->add_page(label, this->get_colour(), false);
+            }
+            ParameterList *parameters = this->getParameters(pattern_index);
+            create_low_memory_parameter_controls(label, parameters, this->get_colour());
+        #endif
     }
 
 #endif

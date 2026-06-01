@@ -1,6 +1,6 @@
 #include "sequencer/Base/Sequencer.h"
 #include "sequencer/Base/Patterns.h"
-#include "debug.h"
+#include <debug.h>
 #include "menu_messages.h"
 
 #ifdef ENABLE_SHUFFLE
@@ -70,6 +70,8 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
     }
 #endif
 
+int freeRam();
+
 #ifdef ENABLE_STORAGE
     void BaseSequencer::setup_saveable_settings() {
         ISaveableSettingHost::setup_saveable_settings();
@@ -92,13 +94,15 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
         if (Serial) 
             Serial.printf("... BaseSequencer::setup_saveable_settings() after doing settings, free ram is %u\n\n", freeRam()); Serial.flush();
 
-        // register parameters for this output
-        ParameterList *parameters = this->getParameters();
-        if (parameters!=nullptr) {
-            for (auto* param : *parameters) {
-                register_child(param);
+        #ifdef ENABLE_PARAMETERS
+            // register parameters for this output
+            ParameterList *parameters = this->getParameters();
+            if (parameters!=nullptr) {
+                for (auto* param : *parameters) {
+                    register_child(param);
+                }
             }
-        }
+        #endif
         
         if (Serial) Serial.printf("=== BaseSequencer::setup_saveable_settings() done for sequencer  %p, free ram is %u\n\n", this, freeRam()); Serial.flush();
         if (Serial) Serial.flush();

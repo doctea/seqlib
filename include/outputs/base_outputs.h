@@ -110,13 +110,15 @@ class BaseOutput : public ISequencerEventReceiver
                 ), SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow enabled state to be saved at scene or project level, since it's more of a preference setting than a performance setting
             );
 
-            // save parameters for this output
-            ParameterList *parameters = this->get_parameters();
-            if (parameters!=nullptr) {
-                for (auto* param : *parameters) {
-                    register_child(param);
+            #ifdef ENABLE_PARAMETERS
+                // register parameters for this output
+                ParameterList *parameters = this->get_parameters();
+                if (parameters!=nullptr) {
+                    for (auto* param : *parameters) {
+                        register_child(param);
+                    }
                 }
-            }
+            #endif
         }
     #endif
 
