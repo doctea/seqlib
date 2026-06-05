@@ -23,6 +23,7 @@ class CircleDisplay : public MenuItem {
         int16_t coordinates_y[64];      // @@TODO: temporary
         CircleDisplay(const char *label, BaseSequencer *sequencer, bool show_header = false) : MenuItem(label, false, show_header) {
             this->set_sequencer(sequencer);
+            add_redraw_policy(REDRAW_ON_BPM_CLOCK_CHANGE | REDRAW_ON_TICK);
         }
 
         void on_add() override {
@@ -124,8 +125,6 @@ class CircleDisplay : public MenuItem {
                 );
             }
 
-            uint16_t max_height_reached = tft->getCursorY();
-
             // draw flashy blocks for every patterns
             #define NUMBER_ROWS 13
             //tft->setCursor((tft->width()/2)-8, ++initial_y);
@@ -134,7 +133,8 @@ class CircleDisplay : public MenuItem {
             tft->setCursor((tft->width()/2)-8, pos.y);
             static const uint_fast16_t middle_x = ((tft->width()/2)-8);
             static const uint_fast8_t column_width = (8*8)+1;
-            for (uint_fast8_t seq = 0 ; seq < target_sequencer->get_number_patterns() ; seq++) {
+            uint_fast8_t number_patterns = target_sequencer->get_number_patterns();
+            for (uint_fast8_t seq = 0 ; seq < number_patterns ; seq++) {
                 uint_fast8_t column = seq / NUMBER_ROWS;
                 uint_fast8_t row = (seq % NUMBER_ROWS);
                 tft->setCursor(middle_x + (column*column_width), initial_y + (row*8)); //tft->getCursorY());
@@ -155,9 +155,10 @@ class CircleDisplay : public MenuItem {
                 char label[10];
                 snprintf(label, 10, "%9s", (char*)pattern->get_output_label());
                 tft->print(label);
-                max_height_reached = max(max_height_reached, tft->getCursorY() + tft->getSingleRowHeight() + 2);
                 //tft->printf("%8s", (char*)pattern->get_output_label());
             }
+
+            uint16_t max_height_reached = circle_center_y + (dia/2) + 6;  // start with the lowest possible point on the circle, plus the radius of the circles we're about to draw for each step
 
             //tft->printf("dia = %3.3f, cursorY=%i\n\n", dia, tft->getCursorY());
             tft->setCursor(0, max_height_reached); //tft->getCursorY() + 16);

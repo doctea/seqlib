@@ -17,6 +17,7 @@ class SingleCircleDisplay : public MenuItem {
         int_fast16_t coordinates_y[TIME_SIG_MAX_STEPS_PER_BAR];  // 
         SingleCircleDisplay(const char *label, BasePattern *target_pattern, bool show_header = false) : MenuItem(label, false, show_header) {
             this->set_target(target_pattern);
+            add_redraw_policy(REDRAW_ON_BPM_CLOCK_CHANGE | REDRAW_ON_TICK);
         }
 
         void on_add() override {
@@ -85,6 +86,9 @@ class SingleCircleDisplay : public MenuItem {
             uint_fast16_t pattern_colour = target_pattern->get_colour();
             bool is_step_on = target_pattern->query_note_on_for_step(BPM_CURRENT_STEP_OF_PHRASE);
             if (!is_step_on) pattern_colour = tft->halfbright_565(pattern_colour);
+
+            uint16_t max_height_reached = circle_center_y + circle_size + 6;  // start with the lowest possible point on the circle, plus the radius of the circles we're about to draw for each step
+
             // todo: if STEPS_PER_PHRASE is a multiple of get_steps, should be able to limit number of loops we do here?
             for (int i = 0 ; i < STEPS_PER_PHRASE/*max(target_pattern->get_steps(),16*/ ; i++) {
                 const uint_fast16_t coord_x = circle_center_x + coordinates_x[i%STEPS_PER_BAR];
@@ -122,6 +126,6 @@ class SingleCircleDisplay : public MenuItem {
                 );
             }
 
-            return tft->height();
+            return max_height_reached;
         }
 };

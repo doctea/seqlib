@@ -192,8 +192,9 @@ class EuclidianPatternControl : public SubMenuItemBar {
         }
 
         #ifdef ENABLE_STEP_DISPLAYS
+            uint16_t circle_y = 0;
             if (this->circle_display!=nullptr) {
-                this->circle_display->display(pos, selected, opened);
+                circle_y = this->circle_display->display(pos, selected, opened);
                 // Overlay the current effective (post-modulation) values in the circle center
                 if (this->pattern != nullptr) {
                     const uint_fast16_t cx = tft->width()/4;
@@ -222,7 +223,11 @@ class EuclidianPatternControl : public SubMenuItemBar {
 
         tft->setTextWrap(true); // re-enable textwrap - bit of a bodge to prevent the label text from wrapping weirdly
 
-        return finish_y;
+        #ifdef ENABLE_STEP_DISPLAYS
+            return max(finish_y, circle_y);
+        #else
+            return finish_y;
+        #endif
     }
 
     virtual inline int get_max_pixel_width(uint_fast16_t item_number) {

@@ -9,11 +9,11 @@
 
 class PatternDisplay : public MenuItem {
     public:
-        //DeviceBehaviour_Beatstep *behaviour_beatstep = nullptr;
         SimplePattern *target_pattern = nullptr;
         PatternDisplay(const char *label, SimplePattern *target_pattern, bool selectable = true, bool show_header = true) : MenuItem(label, selectable) {
             this->set_pattern(target_pattern);
             this->show_header = show_header;
+            this->add_redraw_policy(REDRAW_ON_TICK | REDRAW_ON_STEP);
         }
 
         void set_pattern(SimplePattern *pattern) {
@@ -83,11 +83,12 @@ class PatternDisplay : public MenuItem {
                     //(actual_current_step == step ? RED      : BLUE) :     // current step active
                     (actual_current_step == step ? C_WHITE  : target_pattern->get_colour()) :     // current step active
                     (actual_current_step == step ? GREY     : tft->halfbright_565(target_pattern->get_colour()));      // current step inactive
+                const uint16_t colour_unset_step = (actual_current_step == step) ? C_WHITE : colour;
 
                 if (is_step_on) {  // yer twisting my melon, man
                     tft->fillRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
                 } else {        // call the cops
-                    tft->drawRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour);
+                    tft->drawRect(x, y, STEP_WIDTH, STEP_HEIGHT, colour_unset_step);
                     //actual->fillRect(x + 1, y + 1, STEP_WIDTH-2, STEP_HEIGHT-2, BLACK); // hollow out the center
                 }
             }
