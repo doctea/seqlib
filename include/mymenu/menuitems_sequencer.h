@@ -13,7 +13,7 @@ class PatternDisplay : public MenuItem {
         PatternDisplay(const char *label, SimplePattern *target_pattern, bool selectable = true, bool show_header = true) : MenuItem(label, selectable) {
             this->set_pattern(target_pattern);
             this->show_header = show_header;
-            this->add_redraw_policy(REDRAW_ON_TICK | REDRAW_ON_STEP);
+            IF_MENU_PERF_PARTIAL_UPDATES(this->add_redraw_policy(REDRAW_ON_TICK | REDRAW_ON_STEP);)
         }
 
         void set_pattern(SimplePattern *pattern) {

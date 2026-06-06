@@ -23,7 +23,7 @@ class CircleDisplay : public MenuItem {
         int16_t coordinates_y[64];      // @@TODO: temporary
         CircleDisplay(const char *label, BaseSequencer *sequencer, bool show_header = false) : MenuItem(label, false, show_header) {
             this->set_sequencer(sequencer);
-            add_redraw_policy(REDRAW_ON_BPM_CLOCK_CHANGE | REDRAW_ON_TICK);
+            IF_MENU_PERF_PARTIAL_UPDATES(add_redraw_policy(REDRAW_ON_BPM_CLOCK_CHANGE | REDRAW_ON_TICK);)
         }
 
         void on_add() override {

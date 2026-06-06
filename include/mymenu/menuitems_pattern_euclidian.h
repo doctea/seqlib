@@ -29,7 +29,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
             this->circle_display = new SingleCircleDisplay(label, pattern);     // circle display first - don't add this as a submenu item, because it isn't selectable
             this->step_display = new PatternDisplay(label, pattern, false, false);    // step sequence view next - not selectable, don't draw header
             this->target_sequencer = target_sequencer;
-            this->add_redraw_policy(REDRAW_ON_TICK);   // TODO: actually, only part of this control needs to be live-updated - the circle display and the step display.  the other elements can i think be redrawn only when edited or changed due to preset loading, etc
+            IF_MENU_PERF_PARTIAL_UPDATES(this->add_redraw_policy(REDRAW_ON_TICK);)   // TODO: actually, only part of this control needs to be live-updated - the circle display and the step display.  the other elements can i think be redrawn only when edited or changed due to preset loading, etc
             // ^^ we will be able to get better performance when we implement tiled updating, because then we can update just the step display and circle display tiles on every tick, and the rest of the control only when needed 
             // TODO: cleverer custom policy, e.g. we can probably get away with only rendering on steps, or if the pattern has actually changed, or we've gone on/off note since the last render, etc
         #endif
@@ -77,7 +77,8 @@ class EuclidianPatternControl : public SubMenuItemBar {
             this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
 
             // Shuffle # is last so it overflows to the under-circle (-1 column) position
-            #ifdef ENABLE_SHUFFLE
+            // only worth showing controls if more than 1 shuffle pattern, since everything is by default in that one pattern anyway!
+            #if defined(ENABLE_SHUFFLE) && NUMBER_SHUFFLE_PATTERNS > 1
                 this->add(new LambdaNumberControl<int8_t> (
                     "Shuffle #", 
                     [=](int8_t track) -> void { pattern->set_shuffle_track(track); }, 
@@ -102,19 +103,21 @@ class EuclidianPatternControl : public SubMenuItemBar {
         #endif
     }
 
-    virtual void post_event(MenuItem_RedrawPolicy reason) override {
-        SubMenuItemBar::post_event(reason);
-        this->circle_display->post_event(reason);
-        this->step_display->post_event(reason);
-    }
-
-    virtual bool needs_redraw(bool selected, bool opened) override {
-        if (SubMenuItemBar::needs_redraw(selected, opened)) return true;
-        if (this->circle_display!=nullptr && this->circle_display->needs_redraw(selected, opened)) return true;
-        if (this->step_display!=nullptr && this->step_display->needs_redraw(selected, opened)) return true;
-        return false;
-    }
-
+    #if MENU_PERF_PARTIAL_UPDATES
+        virtual void post_event(MenuItem_RedrawPolicy reason) override {
+            SubMenuItemBar::post_event(reason);
+            this->circle_display->post_event(reason);
+            this->step_display->post_event(reason);
+        }
+        
+        virtual bool needs_redraw(bool selected, bool opened) override {
+            if (SubMenuItemBar::needs_redraw(selected, opened)) return true;
+            if (this->circle_display!=nullptr && this->circle_display->needs_redraw(selected, opened)) return true;
+            if (this->step_display!=nullptr && this->step_display->needs_redraw(selected, opened)) return true;
+            return false;
+        }
+    #endif
+        
     virtual int display(Coord pos, bool selected, bool opened) override {
         //pos.y = header(label, pos, selected, opened);
         tft->setCursor(pos.x, pos.y);
@@ -146,7 +149,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
             ) column = 0;
 
             // When shuffle is enabled, the last item (Shuffle #) overflows under the circle
-            #ifdef ENABLE_SHUFFLE
+            #if defined(ENABLE_SHUFFLE) && NUMBER_SHUFFLE_PATTERNS > 1
                 if (item_index >= items_size-1) {
                     column = -1;
                 }
@@ -198,12 +201,20 @@ class EuclidianPatternControl : public SubMenuItemBar {
         }
 
         // Match SubMenuItemBar behavior: defer opened overlay draw until end of frame.
+        // Must also set active_overlay_item (persistent) — Menu::display() uses that, not
+        // pending_overlay_item, for the deferred draw so the overlay survives skip frames.
         if (opened && this->currently_opened>=0 && this->currently_opened < (int)this->items->size()) {
             MenuItem *opened_item = this->items->get(this->currently_opened);
             if (opened_item!=nullptr && opened_item->wants_fullscreen_overlay_when_opened_in_bar() && menu!=nullptr) {
-                menu->pending_overlay_item = opened_item;
-                menu->pending_overlay_y = pos.y;
+                menu->active_overlay_item  = opened_item;
+                menu->active_overlay_y     = pos.y;
+            } else if (menu != nullptr) {
+                menu->active_overlay_item = nullptr;
+                menu->active_overlay_y    = 0;
             }
+        } else if (opened && menu != nullptr) {
+            menu->active_overlay_item = nullptr;
+            menu->active_overlay_y    = 0;
         }
 
         #ifdef ENABLE_STEP_DISPLAYS

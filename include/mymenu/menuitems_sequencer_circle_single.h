@@ -17,7 +17,7 @@ class SingleCircleDisplay : public MenuItem {
         int_fast16_t coordinates_y[TIME_SIG_MAX_STEPS_PER_BAR];  // 
         SingleCircleDisplay(const char *label, BasePattern *target_pattern, bool show_header = false) : MenuItem(label, false, show_header) {
             this->set_target(target_pattern);
-            add_redraw_policy(REDRAW_ON_BPM_CLOCK_CHANGE | REDRAW_ON_TICK);
+            IF_MENU_PERF_PARTIAL_UPDATES(add_redraw_policy(REDRAW_ON_BPM_CLOCK_CHANGE | REDRAW_ON_TICK);)
         }
 
         void on_add() override {
