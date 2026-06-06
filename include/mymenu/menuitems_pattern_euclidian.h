@@ -29,6 +29,9 @@ class EuclidianPatternControl : public SubMenuItemBar {
             this->circle_display = new SingleCircleDisplay(label, pattern);     // circle display first - don't add this as a submenu item, because it isn't selectable
             this->step_display = new PatternDisplay(label, pattern, false, false);    // step sequence view next - not selectable, don't draw header
             this->target_sequencer = target_sequencer;
+            this->add_redraw_policy(REDRAW_ON_TICK);   // TODO: actually, only part of this control needs to be live-updated - the circle display and the step display.  the other elements can i think be redrawn only when edited or changed due to preset loading, etc
+            // ^^ we will be able to get better performance when we implement tiled updating, because then we can update just the step display and circle display tiles on every tick, and the rest of the control only when needed 
+            // TODO: cleverer custom policy, e.g. we can probably get away with only rendering on steps, or if the pattern has actually changed, or we've gone on/off note since the last render, etc
         #endif
 
         #ifdef ENABLE_OUTPUT_SELECTOR
@@ -99,6 +102,18 @@ class EuclidianPatternControl : public SubMenuItemBar {
         #endif
     }
 
+    virtual void post_event(MenuItem_RedrawPolicy reason) override {
+        SubMenuItemBar::post_event(reason);
+        this->circle_display->post_event(reason);
+        this->step_display->post_event(reason);
+    }
+
+    virtual bool needs_redraw(bool selected, bool opened) override {
+        if (SubMenuItemBar::needs_redraw(selected, opened)) return true;
+        if (this->circle_display!=nullptr && this->circle_display->needs_redraw(selected, opened)) return true;
+        if (this->step_display!=nullptr && this->step_display->needs_redraw(selected, opened)) return true;
+        return false;
+    }
 
     virtual int display(Coord pos, bool selected, bool opened) override {
         //pos.y = header(label, pos, selected, opened);
