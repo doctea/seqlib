@@ -2,6 +2,8 @@
 
 #include "Euclidian.h"
 
+#define DENSITY_GROUP_NONE -1
+
 class EuclidianPattern : public SimplePattern
     #ifdef ENABLE_STORAGE
         , virtual public SHDynamic<3, 10>
@@ -20,7 +22,7 @@ class EuclidianPattern : public SimplePattern
     arguments_t last_post_arguments;
     int maximum_steps = TIME_SIG_MAX_STEPS_PER_BAR;
 
-    int8_t global_density_group = 0;
+    int8_t global_density_group = DENSITY_GROUP_NONE;
 
     EuclidianPattern(LinkedList<BaseOutput*> *available_outputs, int8_t global_density_group, int steps = MAX_STEPS, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
         : SimplePattern(available_outputs)
@@ -81,13 +83,18 @@ class EuclidianPattern : public SimplePattern
     }
 
     virtual float get_global_density() {
-        return all_effective_global_density[this->global_density_group];
+        if (this->global_density_group == DENSITY_GROUP_NONE)
+            return DEFAULT_DENSITY;
+        return all_effective_global_density[this->global_density_group % NUM_GLOBAL_DENSITY_GROUPS];
     }
     virtual int8_t get_global_density_group() {
         return this->global_density_group;
     }
     virtual void set_global_density_group(int8_t channel) {
-        this->global_density_group = channel % NUM_GLOBAL_DENSITY_GROUPS;
+        if (channel >= 0)
+            this->global_density_group = channel % NUM_GLOBAL_DENSITY_GROUPS;
+        else
+            this->global_density_group = DENSITY_GROUP_NONE;
     }
 
     // Mark this pattern as needing a make_euclid() call, to be serviced later from loop() rather than the ISR.

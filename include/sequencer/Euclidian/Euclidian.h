@@ -43,7 +43,7 @@ struct arguments_t {
     int_fast8_t pulses = steps/2;
     int_fast8_t rotation = 1;
     int_fast8_t duration = 1;
-    float effective_euclidian_density = 0.6666;
+    float effective_euclidian_density = DEFAULT_DENSITY;
     int_fast8_t tie_on = -1;
 };
 

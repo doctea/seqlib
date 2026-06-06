@@ -12,6 +12,12 @@
 #include "mymenu/menuitems_outputselectorcontrol.h"
 #include "menuitems_lambda.h"
 
+// override -1 to show "None" for the density group selector in the EuclidianPatternControl
+override_label_t<int8_t> density_group_override_label = {
+    .label = "None",
+    .value = DENSITY_GROUP_NONE
+};
+
 // compound control for Euclidian Patterns; shows step sequence view, animated circle sequence view, and controls 
 class EuclidianPatternControl : public SubMenuItemBar {
     BaseSequencer *target_sequencer = nullptr;
@@ -71,7 +77,21 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 nullptr, MINIMUM_DURATION, TICKS_PER_BAR, true, true));
 
             // choose global density channel to use
-            this->add(new LambdaNumberControl<int8_t> ("Density #", [=](int8_t v) -> int8_t { pattern->set_global_density_group(v); return pattern->get_global_density_group(); }, [=]() -> int8_t { return pattern->get_global_density_group(); }, nullptr, 0, NUM_GLOBAL_DENSITY_GROUPS-1, true, true));
+            this->add(new LambdaNumberControl<int8_t> (
+                "Density #", 
+                [=](int8_t v) -> void { 
+                    pattern->set_global_density_group(v); 
+                }, 
+                [=]() -> int8_t { 
+                    return pattern->get_global_density_group(); 
+                }, 
+                nullptr, 
+                DENSITY_GROUP_NONE,             // so that we can select -1 for None, which will make the pattern use the default density instead of any of the global density groups
+                NUM_GLOBAL_DENSITY_GROUPS-1, 
+                true, 
+                true,
+                &density_group_override_label
+            ));
 
             //menu->debug = true;
             this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
@@ -257,7 +277,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
     }
 
     virtual inline int get_max_pixel_width(uint_fast16_t item_number) {
-        if (item_number==0 || item_number==this->items->size()-1)
+        if (item_number==0 || item_number==(uint_fast16_t)this->items->size()-1)
             return this->tft->width() / 2;
         else
             return this->tft->width() / 4;
