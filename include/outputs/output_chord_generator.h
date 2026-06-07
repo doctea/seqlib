@@ -139,7 +139,7 @@ class MIDIChordGeneratorOutput : public MIDINoteOutput {
     #ifdef ENABLE_SCREEN
     virtual void make_menu_items(Menu *menu, int index) override {
         MIDINoteOutput::make_menu_items(menu, index);
-        LinkedList<MenuItem*> *items = this->chord_player.make_menu_items();
+        MenuItemList *items = this->chord_player.make_menu_items();
         for (auto* item : *items) {
             menu->add(item);
         }

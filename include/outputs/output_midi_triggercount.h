@@ -20,6 +20,8 @@ class MIDINoteTriggerCountOutput : public MIDINoteOutput {
             : MIDINoteOutput(label, output_wrapper, channel) {
             this->nodes = nodes;
 
+            this->octave = octave;
+
             this->start_count_at = start_count_at;
             this->finish_count_at = finish_count_at;
             if (this->finish_count_at<0)
