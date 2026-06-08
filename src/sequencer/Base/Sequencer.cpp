@@ -36,7 +36,7 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
 #ifdef ENABLE_SCREEN
     #include "mymenu/menuitems_sequencer.h"
     void BaseSequencer::make_menu_items(Menu *menu, int combine_pages) {
-        menu->add_page("BaseSequencer");
+        menu->add_page("BaseSequencer", C_WHITE, true, "Sequencer");
         for (size_t i = 0 ; i < this->get_number_patterns() ; i++) {
             char label[MENU_C_MAX];
             snprintf(label, MENU_C_MAX, "Pattern %i", i);

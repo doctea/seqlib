@@ -35,9 +35,10 @@ class EuclidianPatternControl : public SubMenuItemBar {
             this->circle_display = new SingleCircleDisplay(label, pattern);     // circle display first - don't add this as a submenu item, because it isn't selectable
             this->step_display = new PatternDisplay(label, pattern, false, false);    // step sequence view next - not selectable, don't draw header
             this->target_sequencer = target_sequencer;
-            IF_MENU_PERF_PARTIAL_UPDATES(this->add_redraw_policy(REDRAW_ON_TICK);)   // TODO: actually, only part of this control needs to be live-updated - the circle display and the step display.  the other elements can i think be redrawn only when edited or changed due to preset loading, etc
+            // IF_MENU_PERF_PARTIAL_UPDATES(this->add_redraw_policy(REDRAW_ON_TICK);)   // TODO: actually, only part of this control needs to be live-updated - the circle display and the step display.  the other elements can i think be redrawn only when edited or changed due to preset loading, etc
             // ^^ we will be able to get better performance when we implement tiled updating, because then we can update just the step display and circle display tiles on every tick, and the rest of the control only when needed 
             // TODO: cleverer custom policy, e.g. we can probably get away with only rendering on steps, or if the pattern has actually changed, or we've gone on/off note since the last render, etc
+            IF_MENU_PERF_PARTIAL_UPDATES(this->add_redraw_policy(REDRAW_ON_STEP | REDRAW_ON_CUSTOM);)
         #endif
 
         #ifdef ENABLE_OUTPUT_SELECTOR
@@ -108,6 +109,18 @@ class EuclidianPatternControl : public SubMenuItemBar {
             #endif
         #endif
     }
+
+    #if MENU_PERF_PARTIAL_UPDATES
+        uint32_t last_known_mutation_at = 0;
+        virtual bool check_needs_redraw_custom(bool selected, bool opened) override {
+            // only redraw on custom events if we're currently open/selected, to avoid unnecessary redraws when we're not visible
+            if (this->last_known_mutation_at < pattern->get_last_mutation_at()) {
+                this->last_known_mutation_at = pattern->get_last_mutation_at();
+                return true;
+            }
+            return false;
+        }
+    #endif
 
     virtual void on_add() override {
         SubMenuItemBar::on_add();

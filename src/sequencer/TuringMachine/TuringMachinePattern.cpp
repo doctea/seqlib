@@ -47,7 +47,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
     void TuringMachinePattern::create_menu_items(Menu *menu, int pattern_index, BaseSequencer *target_sequencer, int combine_setting) {
         char label[MENU_C_MAX];
         snprintf(label, MENU_C_MAX, "TM %i", pattern_index);
-        menu->add_page(label, this->get_colour(), false);
+        menu->add_page(label, this->get_colour(), false, "Sequencer");
 
         menu->add(new PatternDisplay(label, this, false, false));
 
@@ -86,7 +86,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 menu->add(new SeparatorMenuItem("Modulation"));
             } else {
                 snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
-                menu->add_page(label, this->get_colour(), false);
+                menu->add_page(label, this->get_colour(), false, "Sequencer");
             }
             ParameterList *parameters = this->getParameters(pattern_index);
             create_low_memory_parameter_controls(label, parameters, this->get_colour());

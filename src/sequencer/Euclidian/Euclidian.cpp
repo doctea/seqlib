@@ -274,7 +274,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
         void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index, BaseSequencer *target_sequencer, int combine_setting) {
             char label[MENU_C_MAX];
             snprintf(label, MENU_C_MAX, "Pattern %i", pattern_index);
-            menu->add_page(label, this->get_colour(), false);
+            menu->add_page(label, this->get_colour(), false, "Euclidian");
 
             EuclidianPatternControl *epc = new EuclidianPatternControl(label, this, target_sequencer);
             menu->add(epc);
@@ -283,7 +283,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
                 menu->add(new SeparatorMenuItem("Modulation"));
             } else {
                 snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
-                menu->add_page(label, this->get_colour(), false);
+                menu->add_page(label, this->get_colour(), false, "Euclidian");
             }
 
             ParameterList *parameters = this->getParameters(pattern_index);
@@ -319,7 +319,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
         // todo: do we really need to pass in menu here for some reason?
         void EuclidianSequencer::make_menu_items(Menu *menu, int combine_setting = (COMBINE_LOCKS_WITH_CIRCLE | COMBINE_MODULATION_WITH_MUTATION | COMBINE_PATTERN_MODULATION_WITH_PATTERN)) {
             // add a page for the 'boxed' sequence display of all tracks
-            menu->add_page("Euclidian", TFT_CYAN);
+            menu->add_page("Euclidian", TFT_CYAN, true, "Euclidian");
             for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
                 char label[MENU_C_MAX];
                 snprintf(label, MENU_C_MAX, "Pattern %i", i);
@@ -334,15 +334,15 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
 
             // add a page for the circle display that shows all tracks simultaneously
             if (combine_setting & COMBINE_LOCKS_WITH_CIRCLE) {
-                menu->add_page("Circle & locks");
+                menu->add_page("Circle & locks", C_WHITE, true, "Euclidian");
             } else {          
-                menu->add_page("Circle");
+                menu->add_page("Circle", C_WHITE, true, "Euclidian");
             }
             menu->add(new CircleDisplay("Circle", this));
 
             // multitoggle to lock patterns
             if (!(combine_setting & COMBINE_LOCKS_WITH_CIRCLE)) {
-                menu->add_page("Pattern locks", C_WHITE, false);
+                menu->add_page("Pattern locks", C_WHITE, false, "Euclidian");
             }
             ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Allow changes", true, 2, false);
             for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
@@ -387,7 +387,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
             }
 
             #ifdef ENABLE_SHUFFLE
-                menu->add_page("Shuffle patterns");
+                menu->add_page("Shuffle patterns", C_WHITE, false, "Euclidian");
                 for (size_t i = 0 ; i < shuffle_pattern_wrapper.getCount() ; i++) {
                     char label[MENU_C_MAX];
                     snprintf(label, MENU_C_MAX, "Shuffle %i", i);
@@ -417,7 +417,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
             } else {
                 Serial.printf("EuclidianSequencer::create_menu_euclidian_mutation(): ADDING PAGE (not combining) adding mutation controls to 'Pattern locks' page, combine_setting bitmask = %i\n", combine_setting);
                 decode_combine_page_option(combine_setting);
-                menu->add_page("Mutation", YELLOW, false);
+                menu->add_page("Mutation", YELLOW, false, "Euclidian");
             }
             menu->add(new SeparatorMenuItem("Euclidian Mutations"));
 
@@ -447,7 +447,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
                     menu->add(new SeparatorMenuItem("Modulation"));
                 } else {
                     Serial.printf("EuclidianSequencer::create_menu_euclidian_mutation(): adding page 'Mutation modulation', combine_setting bitmask = %i\n", combine_setting);
-                    menu->add_page("Mutation modulation", C_WHITE, false);
+                    menu->add_page("Mutation modulation", C_WHITE, false, "Euclidian");
                 }
                 //menu->add(new SeparatorMenuItem("Mappable parameters"));
                 // add the sequencer modulation controls to this page

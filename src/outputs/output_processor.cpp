@@ -42,7 +42,7 @@
             ++i;
         }
 
-        menu->add_page("Enable outputs", C_WHITE);
+        menu->add_page("Enable outputs", C_WHITE, false, "Outputs");
 
         ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Enable outputs", true, 3, false);
         for (auto* output : *this->nodes) {

@@ -6,7 +6,7 @@
     void StepAccentSource::make_menu_items() {
         // subclasses can add their own menu items if they want
 
-        menu->add_page("Accents");
+        menu->add_page("Accents", C_WHITE, true, "Sequencer");
         menu->add(new GlobalAccentStepPresetControl());
 
     }

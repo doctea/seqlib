@@ -113,7 +113,7 @@ void setup_output(IMIDINoteAndCCTarget *output_target, MIDIOutputProcessor *proc
                 // create page
                 char label[40];
                 snprintf(label, 40, "%s Modx", this->label);
-                menu->add_page(label, C_WHITE, false);
+                menu->add_page(label, C_WHITE, false, "Outputs");
             }
 
             // create lowmemory parameter controls
