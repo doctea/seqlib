@@ -47,6 +47,11 @@ class BaseOutputProcessor
         virtual BaseOutput *get_output_for_label(const char *label) = 0;
         virtual LinkedList<BaseOutput*> *get_available_outputs() = 0;
 
+        virtual void loop() = 0;
+        virtual void on_bar(uint32_t bar_number) {};
+        virtual void on_phrase(uint32_t phrase_number) {};
+        virtual void on_restart() {}
+
          // configure target sequencer to use the output nodes held by this OutputProcessor
 };
 
@@ -124,6 +129,27 @@ class MIDIOutputProcessor : public BaseOutputProcessor
             if (o!=nullptr)
                 o->loop();
             Debug_println();
+        }
+    }
+
+    virtual void on_bar(uint32_t bar_number) {
+        for (auto* o : *this->nodes) {
+            if (o!=nullptr)
+                o->on_bar(bar_number);
+        }
+    };
+
+    virtual void on_phrase(uint32_t phrase_number) {
+        for (auto* o : *this->nodes) {
+            if (o!=nullptr)
+                o->on_phrase(phrase_number);
+        }
+    };
+
+    virtual void on_restart() {
+        for (auto* o : *this->nodes) {
+            if (o!=nullptr)
+                o->on_restart();
         }
     }
 

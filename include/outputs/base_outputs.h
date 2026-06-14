@@ -61,6 +61,15 @@ class BaseOutput : public ISequencerEventReceiver
 
     virtual void loop() {};
 
+    // called when the sequencer/song is restarted, so the output can reset itself if needed
+    virtual void on_restart() {
+        this->reset();
+    }
+    // called when a phrase is started, so the output can do anything if needed
+    virtual void on_phrase(uint32_t phrase_number) {}
+    // called when a bar is started, so the output can do anything if needed
+    virtual void on_bar(uint32_t bar_number) {}
+
     virtual void set_enabled(bool state) {
         this->enabled = state;
         // todo: should probably ensure we go off?
