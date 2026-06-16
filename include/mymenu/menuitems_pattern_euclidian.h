@@ -111,11 +111,11 @@ class EuclidianPatternControl : public SubMenuItemBar {
     }
 
     #if MENU_PERF_PARTIAL_UPDATES
-        uint32_t last_known_mutation_at = 0;
+        uint32_t last_known_updated_at = 0;
         virtual bool check_needs_redraw_custom(bool selected, bool opened) override {
             // only redraw on custom events if we're currently open/selected, to avoid unnecessary redraws when we're not visible
-            if (this->last_known_mutation_at < pattern->get_last_mutation_at()) {
-                this->last_known_mutation_at = pattern->get_last_mutation_at();
+            if (this->last_known_updated_at < pattern->get_last_updated_at()) {
+                this->last_known_updated_at = pattern->get_last_updated_at();
                 return true;
             }
             return false;

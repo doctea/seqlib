@@ -14,8 +14,8 @@ class EuclidianPattern : public SimplePattern
     bool locked = false;
     bool initialised = false;
     volatile bool needs_recompute = false;
-    uint32_t last_mutation_at = 0;
-    virtual uint32_t get_last_mutation_at() { return last_mutation_at; }
+    // uint32_t last_mutation_at = 0;
+    // virtual uint32_t get_last_mutation_at() { return last_mutation_at; }
 
     arguments_t arguments;
     arguments_t last_arguments;
@@ -113,8 +113,8 @@ class EuclidianPattern : public SimplePattern
     }
 
     FLASHMEM
-    virtual void make_euclid() {
-        if (this->is_locked()) {
+    virtual void make_euclid(bool force = false) {
+        if (!force && this->is_locked()) {
             //if (Serial) { Serial.println("pattern is locked, skipping make_euclid"); Serial.flush(); }
             return;
         }
@@ -166,7 +166,7 @@ class EuclidianPattern : public SimplePattern
 
         memcpy(&this->last_arguments, &this->used_arguments, sizeof(arguments_t));
 
-        this->last_mutation_at = millis();
+        // this->last_updated_at = millis();
     }
 
     // rotate the pattern around specifed number of steps -- 
@@ -189,7 +189,7 @@ class EuclidianPattern : public SimplePattern
         }
     }*/
 
-    void mutate() {
+    virtual void mutate() {
         if (this->is_locked()) {
             //if (Serial) { Serial.println("pattern is locked, skipping mutate"); Serial.flush(); }
             return;

@@ -156,6 +156,11 @@ class TuringMachinePattern : public SimplePattern
 
     #ifdef ENABLE_STORAGE
         virtual void add_saveable_settings(int pattern_index) override {
+
+            // we have a problem here whereby these settings are first adding to the savelib settings
+            // tree by the sequencer hierarchy, and then added again by the parameterinput hierarchy..
+            // 
+
             SimplePattern::add_saveable_settings(pattern_index);
             
             register_setting(new VarSetting<int16_t>("duration", "TuringMachinePattern", &this->current_duration), SL_SCOPE_SCENE | SL_SCOPE_PROJECT);

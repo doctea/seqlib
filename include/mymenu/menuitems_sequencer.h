@@ -13,8 +13,19 @@ class PatternDisplay : public MenuItem {
         PatternDisplay(const char *label, SimplePattern *target_pattern, bool selectable = true, bool show_header = true) : MenuItem(label, selectable) {
             this->set_pattern(target_pattern);
             this->show_header = show_header;
-            IF_MENU_PERF_PARTIAL_UPDATES(this->add_redraw_policy(REDRAW_ON_TICK | REDRAW_ON_STEP);)
+            IF_MENU_PERF_PARTIAL_UPDATES(this->add_redraw_policy(REDRAW_ON_CUSTOM | REDRAW_ON_STEP);)
         }
+        
+        #if MENU_PERF_PARTIAL_UPDATES
+            uint32_t last_rendered_at = 0;
+            virtual bool check_needs_redraw_custom(bool selected, bool opened) override {
+                if (this->target_pattern == nullptr) return false;
+                // only redraw if pattern has changed since last time we checked, or if we're currently on a step and the pattern is active for that step (to allow live-updating the current step without needing to redraw the whole menu every tick)
+                bool needs_redraw = this->target_pattern->get_last_updated_at() > this->last_rendered_at;
+                this->last_rendered_at = millis();
+                return needs_redraw;
+            }
+        #endif
 
         void set_pattern(SimplePattern *pattern) {
             this->target_pattern = pattern;

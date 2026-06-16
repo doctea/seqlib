@@ -207,6 +207,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
         int_fast8_t octave = 3;
         int_fast8_t scale_root = SCALE_GLOBAL_ROOT;
         scale_index_t scale_number = SCALE_GLOBAL;
+        quantise_mode_t quantise_mode = QUANTISE_MODE_NONE;
 
         NOTE_LIMIT_MODE lowest_note_mode = NOTE_LIMIT_MODE::IGNORE;
         NOTE_LIMIT_MODE highest_note_mode = NOTE_LIMIT_MODE::IGNORE;
@@ -287,7 +288,6 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 return this->event_value_3;
             }
 
-            quantise_mode_t quantise_mode = QUANTISE_MODE_NONE;
             virtual int_fast8_t get_note_number() override {
 
                 int8_t note_to_play = this->get_note_to_play();

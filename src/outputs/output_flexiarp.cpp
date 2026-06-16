@@ -13,30 +13,57 @@
 
     labelled_value_list_t<int8_t> next_mode_value_labels = {
         (labelled_value_t<int8_t>[]) {
-            { NEVER, "Never" },
-            { BOUNCE, "Bounce" },
-            { UP, "Up" },
-            { DOWN, "Down" },
-            { RANDOM_WALK, "Random walk" },
-            { RANDOM_ANY, "Random any" }
-        },
-        6
+            { NEVER,        "Never"     },
+            { BOUNCE_UP,    "Up-Down"   },
+            { BOUNCE_DOWN,  "Down-Up"   },
+            { UP,           "Up"        },
+            { DOWN,         "Down"      },
+            { RANDOM_WALK,  "Rand walk" },
+            { RANDOM_ANY,   "Rand any"  }
+        }
+    };
+
+    labelled_value_list_t<int8_t> reset_on_mode_value_labels = {
+        (labelled_value_t<int8_t>[]) {
+            { NONE,         "None"      },
+            { BAR,          "Bar"       },
+            { PHRASE,       "Phrase"    },
+            { TWO_PHRASE,   "2xPhrase"  },
+            { FOUR_PHRASE,  "4xPhrase"  }
+        }
     };
 
     // need to add a menuitem for the degree setting
     void FlexiArpOutput::make_menu_items(Menu *menu, int index) {
         MIDINoteOutput::make_menu_items(menu, index);
 
-        // modify the existing "MIDI settings" submenu to add the degree setting to it, 
-        // rather than creating a new submenu for it
-
+        // modify the existing submenus to add/change our settings by getting the last page and looping to 
+        // find the controls we want to modify
         MenuItemList *items = menu->get_page(menu->get_number_pages()-1)->items;
+
+        // TODO: make a bar dedicated to the flexiarp rules; but for now add flexi arp
+        // settings to the existing midi settings bar, rather than creating a new submenu for
         SubMenuItemBar *midi_settings_bar = nullptr;
 
         for (auto* item : *items) {
             if (strcmp(item->label, "MIDI settings")==0) {
                 midi_settings_bar = static_cast<SubMenuItemBar*>(item);
                 break;
+            } else if (strcmp(item->label, "Scale / Key")==0) {
+                // adjust the quantiser mode controls; it makes no sense to have zero quantising for flexiarps,
+                // so we should remove the 'Off' setting.  then we should prefer this setting when choosing whether to
+                // quantise by scale or chord, falling back to scale if no chord exists.
+                
+                // item should now be the LambdaScaleMenuitemBar, so we need to find the quantise mode control within it
+                LambdaScaleMenuItemBar *scale_menu = static_cast<LambdaScaleMenuItemBar*>(item);
+                for (auto* sub_item : *scale_menu->items) {
+                    if (strcmp(sub_item->label, "Quant")==0) {
+                        LambdaQuantiseModeControl *quant_mode_item = static_cast<LambdaQuantiseModeControl*>(sub_item);
+                        // replace quantise mode control with one that has no 'Off' option, so that flexiarps always quantise to scale or chord
+                        quant_mode_item->set_available_values(&quantise_mode_list_no_none);
+                        break;
+                    }
+                }
             }
         }
 
@@ -56,18 +83,10 @@
             nullptr, true, true
         );
         degree_item->set_available_values(&degree_value_label_list);
-        // degree_item->add_available_value(0, "None");
-        // degree_item->add_available_value(1, "Root");
-        // degree_item->add_available_value(2, "Second");
-        // degree_item->add_available_value(3, "Third");
-        // degree_item->add_available_value(4, "Fourth");
-        // degree_item->add_available_value(5, "Fifth");
-        // degree_item->add_available_value(6, "Sixth");
-        // degree_item->add_available_value(7, "Seventh");
         midi_settings_bar->add(degree_item);
 
         LambdaNumberControl<int8_t> *mod_item = new LambdaNumberControl<int8_t>(
-            "Ch.on", 
+            "Change", 
             [=](int8_t value) -> void {
                 this->change_every.source = value;
             }, 
@@ -91,13 +110,21 @@
             },
             nullptr, true, true
         );
-        next_mode_item->add_available_value(NEVER, "None");
-        next_mode_item->add_available_value(BOUNCE, "Bounce");
-        next_mode_item->add_available_value(UP, "Up");
-        next_mode_item->add_available_value(DOWN, "Down");
-        next_mode_item->add_available_value(RANDOM_WALK, "Walky");
-        next_mode_item->add_available_value(RANDOM_ANY, "Random");
+        next_mode_item->set_available_values(&next_mode_value_labels);
         midi_settings_bar->add(next_mode_item);
+
+        LambdaSelectorControl<int8_t> *reset_on_mode_item = new LambdaSelectorControl<int8_t>(
+            "Reset", 
+            [=](int8_t value) -> void {
+                this->reset_mode = static_cast<reset_on_mode_t>(value);
+            }, 
+            [=](void) -> int8_t {
+                return this->reset_mode;
+            },
+            nullptr, true, true
+        );
+        reset_on_mode_item->set_available_values(&reset_on_mode_value_labels);
+        midi_settings_bar->add(reset_on_mode_item);
 
         CallbackMenuItem *mod_degree_item = new CallbackMenuItem(
             "Mod", 

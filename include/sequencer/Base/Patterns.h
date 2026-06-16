@@ -233,17 +233,6 @@ class BasePattern
 
 class SimplePattern : public BasePattern {
     public:
-    // Override get_velocity() to apply accent scaling.
-    virtual int8_t get_velocity() override {
-        #ifdef ENABLE_ACCENTS
-            IAccentSource* src = get_effective_accent_source();
-            if (src) {
-                float accent = src->get_accent(BPM_CURRENT_STEP_OF_SONG, BPM_CURRENT_STEP_OF_PHRASE);
-                return (int8_t)constrain((int)((float)DEFAULT_VELOCITY * accent), 0, MIDI_MAX_VELOCITY);
-            }
-        #endif
-        return DEFAULT_VELOCITY;
-    }
 
     uint32_t triggered_on_step = -1;
     uint32_t triggered_on_tick = -1;
@@ -256,8 +245,14 @@ class SimplePattern : public BasePattern {
     // and the saveloadlib integration would need to be different for each struct type too
     midi_note_event_t *events = nullptr;
 
+    uint32_t last_updated_at = 0;
+
     SimplePattern(LinkedList<BaseOutput*> *available_outputs) : BasePattern(available_outputs) {
         this->events = (midi_note_event_t*)CALLOC_FUNC(sizeof(midi_note_event_t), steps);
+    }
+
+    virtual uint32_t get_last_updated_at() {
+        return last_updated_at;
     }
 
     // get the step number for this pattern for given tick number
@@ -271,12 +266,16 @@ class SimplePattern : public BasePattern {
         this->events[step].note = note;
         this->events[step].velocity = velocity;
         this->events[step].channel = channel;
+
+        this->last_updated_at = millis();
     }
     virtual void unset_event_for_tick(unsigned int tick) override {
         short step = get_step_for_tick(tick);
         this->events[step].velocity = 0;
         //this->events[step].note = NOTE_OFF;
         //this->events[step].channel = channel;
+
+        this->last_updated_at = millis();
     }
 
     virtual bool query_note_on_for_tick(unsigned int tick) override {
@@ -332,6 +331,18 @@ class SimplePattern : public BasePattern {
     /*#ifdef ENABLE_SCREEN
         virtual void create_menu_items(Menu *menu, int index) override;
     #endif*/
+
+    // Override get_velocity() to apply accent scaling.
+    virtual int8_t get_velocity() override {
+        #ifdef ENABLE_ACCENTS
+            IAccentSource* src = get_effective_accent_source();
+            if (src) {
+                float accent = src->get_accent(BPM_CURRENT_STEP_OF_SONG, BPM_CURRENT_STEP_OF_PHRASE);
+                return (int8_t)constrain((int)((float)DEFAULT_VELOCITY * accent), 0, MIDI_MAX_VELOCITY);
+            }
+        #endif
+        return DEFAULT_VELOCITY;
+    }
 
 };
 
