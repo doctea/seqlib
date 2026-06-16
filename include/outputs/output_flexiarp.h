@@ -63,6 +63,7 @@ class FlexiArpOutput : public MIDINoteOutput
         int_fast8_t change_every = 0
     ) : MIDINoteOutput(label, output_wrapper, channel)//, degree_base(degree_base)
     {
+        this->quantise_mode = QUANTISE_MODE_SCALE;  // flexiarp cannot have no quantisation enabled so default to SCALE
         this->degree_base.source = degree_base;
         this->degree_base.effective = degree_base;
         this->next_mode.source = next_mode;
@@ -112,15 +113,6 @@ class FlexiArpOutput : public MIDINoteOutput
     virtual void on_bar(uint32_t bar) {
         if (this->reset_mode==BAR)
             this->reset_arp_counters();
-    }
-
-    virtual bool should_quantise_to_chord() {
-        // TODO: this should check if we are in (this->quantise_mode == QUANTISE_MODE_CHORD), and if so
-        // then check if a valid chord is set (by checking global chord, for arranger)
-
-        if (this->quantise_mode == QUANTISE_MODE_CHORD && get_global_chord_identity().is_valid_chord())
-            return true;
-        return false;
     }
 
     virtual int8_t get_degree_mod_result() {

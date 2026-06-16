@@ -134,28 +134,6 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
             
         parameters = new ParameterList();
 
-        #ifdef ENABLE_SHUFFLE
-            for (size_t i = 0 ; i < shuffle_pattern_wrapper.getCount() ; i++) {
-                char label[32];
-                snprintf(label, sizeof(label), "Shuffle amount %u", (unsigned)i);
-                parameters->add(new LDataParameter<float>(
-                    label,
-                    [=] (float v) { 
-                        //if (Serial) Serial.printf("Shuffle amount %i set to %f\n", i, v);
-                        //ATOMIC() {
-                            shuffle_pattern_wrapper[i]->set_amount(v); 
-                            shuffle_pattern_wrapper[i]->update_target();
-                        //}
-                    },
-                    [=] () -> float { return shuffle_pattern_wrapper[i]->get_amount(); },
-                    -1.0f,
-                    1.0f
-                ));
-            }
-        #endif
-
-        // todo: unsure what this comment originally meant?!.... store these in the object, create a page for the local-only ones
-
         // multiple global density parameters
         for (int i = 0  ; i < NUM_GLOBAL_DENSITY_GROUPS ; i++) {
             char label[32];
@@ -193,6 +171,26 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
                 parameters->add(pattern_parameters->get(i));
             }*/
         }
+
+        #ifdef ENABLE_SHUFFLE
+            for (size_t i = 0 ; i < shuffle_pattern_wrapper.getCount() ; i++) {
+                char label[32];
+                snprintf(label, sizeof(label), "Shuffle amount %u", (unsigned)i);
+                parameters->add(new LDataParameter<float>(
+                    label,
+                    [=] (float v) { 
+                        //if (Serial) Serial.printf("Shuffle amount %i set to %f\n", i, v);
+                        //ATOMIC() {
+                            shuffle_pattern_wrapper[i]->set_amount(v); 
+                            shuffle_pattern_wrapper[i]->update_target();
+                        //}
+                    },
+                    [=] () -> float { return shuffle_pattern_wrapper[i]->get_amount(); },
+                    -1.0f,
+                    1.0f
+                ));
+            }
+        #endif
 
         parameter_manager->addParameters(parameters);
 
@@ -280,7 +278,9 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
             menu->add(epc);
 
             if (combine_setting & COMBINE_MODULATION_WITH_MUTATION) {
-                menu->add(new SeparatorMenuItem("Modulation"));
+                if (combine_setting & COMBINE_PATTERN_INCLUDE_SEPARATOR) {
+                    menu->add(new SeparatorMenuItem("Modulation"));
+                }
             } else {
                 snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
                 menu->add_page(label, this->get_colour(), false, "Euclidian");
@@ -443,10 +443,12 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
 
             #ifdef ENABLE_PARAMETERS
                 if (combine_setting & COMBINE_PATTERN_MODULATION_WITH_PATTERN) {
-                    Serial.printf("EuclidianSequencer::create_menu_euclidian_mutation(): adding separator for 'Modulation', combine_setting bitmask = %i\n", combine_setting);
-                    menu->add(new SeparatorMenuItem("Modulation"));
+                    // Serial.printf("EuclidianSequencer::create_menu_euclidian_mutation(): adding separator for 'Modulation', combine_setting bitmask = %i\n", combine_setting);
+                    if (combine_setting & COMBINE_PATTERN_INCLUDE_SEPARATOR) {
+                        menu->add(new SeparatorMenuItem("Modulation"));
+                    }
                 } else {
-                    Serial.printf("EuclidianSequencer::create_menu_euclidian_mutation(): adding page 'Mutation modulation', combine_setting bitmask = %i\n", combine_setting);
+                    // Serial.printf("EuclidianSequencer::create_menu_euclidian_mutation(): adding page 'Mutation modulation', combine_setting bitmask = %i\n", combine_setting);
                     menu->add_page("Mutation modulation", C_WHITE, false, "Euclidian");
                 }
                 //menu->add(new SeparatorMenuItem("Mappable parameters"));

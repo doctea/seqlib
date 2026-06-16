@@ -60,7 +60,8 @@ extern float all_effective_global_density[];
             COMBINE_MUTATION_WITH_LOCKS = 2,
             COMBINE_MODULATION_WITH_MUTATION = 4,
             COMBINE_PATTERN_MODULATION_WITH_PATTERN = 8,
-            COMBINE_ALL = 15
+            COMBINE_PATTERN_INCLUDE_SEPARATOR = 16,
+            COMBINE_ALL = 0xFF
         };
 
         void decode_combine_page_option(CombinePageOption option);

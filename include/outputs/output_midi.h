@@ -288,6 +288,15 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 return this->event_value_3;
             }
 
+            virtual bool should_quantise_to_chord() {
+                // TODO: this should check if we are in (this->quantise_mode == QUANTISE_MODE_CHORD), and if so
+                // then check if a valid chord is set (by checking global chord, for arranger)
+
+                if (this->quantise_mode == QUANTISE_MODE_CHORD && get_global_chord_identity().is_valid_chord())
+                    return true;
+                return false;
+            }
+
             virtual int_fast8_t get_note_number() override {
 
                 int8_t note_to_play = this->get_note_to_play();
@@ -309,9 +318,11 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                     return NOTE_OFF;
 
                 if (!this->is_quantise())
+                    // not quantising, so just return the note to play
                     return note_to_play;
 
-                if (this->quantise_mode == QUANTISE_MODE_CHORD) {
+                // quantise to nearest chord tone, if chord is set - otherwise fall back to scale quantisation
+                if (this->should_quantise_to_chord()) {
                     int8_t quantised = quantise_pitch_to_chord(
                         note_to_play,
                         12, // nearest chord tone within an octave

@@ -290,6 +290,13 @@ class EuclidianPattern : public SimplePattern
     #endif
 
     #ifdef ENABLE_STORAGE
+
+        void on_after_load() override {
+            // force a recompute of the pattern after loading
+            // TODO: maybe we only want to do this if the pattern has actually had its values changed during the load..?
+            this->make_euclid(true);
+        }
+
         virtual void add_saveable_settings(int pattern_index) override {
             SimplePattern::add_saveable_settings(pattern_index);
 

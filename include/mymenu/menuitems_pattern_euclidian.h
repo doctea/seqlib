@@ -94,9 +94,6 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 &density_group_override_label
             ));
 
-            //menu->debug = true;
-            this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
-
             // Shuffle # is last so it overflows to the under-circle (-1 column) position
             // only worth showing controls if more than 1 shuffle pattern, since everything is by default in that one pattern anyway!
             #if defined(ENABLE_SHUFFLE) && NUMBER_SHUFFLE_PATTERNS > 1
@@ -107,6 +104,9 @@ class EuclidianPatternControl : public SubMenuItemBar {
                     nullptr, 0, shuffle_pattern_wrapper.getCount()-1, true, true
                 ));
             #endif
+
+            //menu->debug = true;
+            this->add(new ObjectToggleControl<EuclidianPattern> ("Locked", pattern, &EuclidianPattern::set_locked, &EuclidianPattern::is_locked));
         #endif
     }
 
@@ -163,6 +163,8 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 pos.y = this->step_display->display(pos, selected, opened); // display the step sequencer across the top
         #endif
 
+        uint_fast16_t initial_y = pos.y;   // remember where we started drawing so we can use it to draw the Locked toggle in the top-left corner of the widget
+
         uint_fast16_t start_y = pos.y;        // y to start drawing at (just under header)
         uint_fast16_t finish_y = pos.y;       // highest y that we finished drawing at
 
@@ -173,33 +175,51 @@ class EuclidianPatternControl : public SubMenuItemBar {
 
         int widget_height = 0;
 
+        int adjust_skipped = 0;   // how many items have been skipped (e.g. Locked toggle) so we can adjust the index for the currently selected item
+
         const uint_fast16_t items_size = this->items->size();
         for (uint_fast16_t item_index = 0 ; item_index < items_size ; item_index++) {
 
-            int_fast16_t column = (item_index-1)%2==1;   // first menu item ('output' should span both columns, s
+            int_fast16_t column = (adjust_skipped+item_index-1)%2==1;   // first menu item ('output' should span both columns, s
             if (item_index==0   // first item forced to first column
                 //|| item_index==items_size-1    // last item forced to first column?
             ) column = 0;
 
             // When shuffle is enabled, the last item (Shuffle #) overflows under the circle
-            #if defined(ENABLE_SHUFFLE) && NUMBER_SHUFFLE_PATTERNS > 1
-                if (item_index >= items_size-1) {
-                    column = -1;
-                }
-            #endif
+            // #if defined(ENABLE_SHUFFLE) && NUMBER_SHUFFLE_PATTERNS > 1
+            //     if (item_index >= items_size-1) {
+            //         column = -1;
+            //     }
+            // #endif
+
+            // Do a dirty hack to put the Locked toggle in the top-left of the widget..
+            if (strcmp(this->items->get(item_index)->get_label(), "Locked") == 0) {
+                this->small_display(
+                    item_index, 
+                    0, 
+                    initial_y, 
+                    tft->width()/6, //width_per_item, 
+                    (selected && !opened) || this->currently_selected==(int)item_index, 
+                    this->currently_opened==(int)item_index,
+                    selected
+                );
+                adjust_skipped += 1;
+                continue;
+            }
 
             if (column==0)
                 start_x = tft->width()/2;
-            else if (column==-1) {
-                // put last item under the circle display
-                if (item_index < items_size-1) {
-                    start_x = 0;        // start from left edge, but move up to under the circle display
-                    start_y = start_y - widget_height;  // move up by one row from the current row (which is just under the header)
-                } else {
-                    start_x = tft->width()/4;   // start from the middle of the left half, and move up to under the circle display
-                    start_y = start_y - widget_height;  // move up by one row from the current row (which is just under the header)
-                }
-            } else
+            // else if (column==-1) {
+            //     // put last item under the circle display
+            //     if (item_index < items_size-1) {
+            //         start_x = 0;        // start from left edge, but move up to under the circle display
+            //         start_y = start_y - widget_height;  // move up by one row from the current row (which is just under the header)
+            //     } else {
+            //         start_x = tft->width()/4;   // start from the middle of the left half, and move up to under the circle display
+            //         start_y = start_y - widget_height;  // move up by one row from the current row (which is just under the header)
+            //     }
+            // } 
+            else
                 start_x = (tft->width()/2)  + (tft->width()/4);
 
             bool wrap = item_index==0   // first item moves cursor to next row
@@ -229,8 +249,8 @@ class EuclidianPatternControl : public SubMenuItemBar {
             //if (item_index==0 || (item_index-1)%2==0 || item_index==this->items->size()-2)
             if (wrap)
                 start_y = temp_y;
-            if (temp_y>finish_y)
-                finish_y = temp_y;
+            if (temp_y + widget_height>finish_y)
+                finish_y = temp_y + widget_height;
         }
 
         // Match SubMenuItemBar behavior: defer opened overlay draw until end of frame.
@@ -253,6 +273,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
         #ifdef ENABLE_STEP_DISPLAYS
             uint16_t circle_y = 0;
             if (this->circle_display!=nullptr) {
+                this->circle_display->available_height = finish_y - initial_y;   // tell the circle display how much vertical space it has to work with, so it can scale the circle size accordingly
                 circle_y = this->circle_display->display(pos, selected, opened);
                 // Overlay the current effective (post-modulation) values in the circle center
                 if (this->pattern != nullptr) {
@@ -276,17 +297,20 @@ class EuclidianPatternControl : public SubMenuItemBar {
                         ? YELLOW : C_WHITE, BLACK);
                     tft->setCursor(tx, ty);
                     tft->printf("%s", eff_buf);
+                    if (tft->getCursorY() > finish_y) {
+                        finish_y = tft->getCursorY();
+                    }
                 }
             }
         #endif
 
         tft->setTextWrap(true); // re-enable textwrap - bit of a bodge to prevent the label text from wrapping weirdly
 
-        #ifdef ENABLE_STEP_DISPLAYS
-            return max(finish_y, circle_y);
-        #else
-            return finish_y;
-        #endif
+        // #ifdef ENABLE_STEP_DISPLAYS
+        //     return max(finish_y, circle_y);
+        // #else
+            return finish_y - widget_height;
+        // #endif
     }
 
     virtual inline int get_max_pixel_width(uint_fast16_t item_number) {

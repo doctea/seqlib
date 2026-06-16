@@ -17,12 +17,15 @@ class SingleCircleDisplay : public MenuItem {
         int_fast16_t coordinates_y[TIME_SIG_MAX_STEPS_PER_BAR];  // 
         SingleCircleDisplay(const char *label, BasePattern *target_pattern, bool show_header = false) : MenuItem(label, false, show_header) {
             this->set_target(target_pattern);
+            // TODO: add a custom redraw policy so that we can redraw this only when the pattern has changed
             IF_MENU_PERF_PARTIAL_UPDATES(add_redraw_policy(REDRAW_ON_BPM_CLOCK_CHANGE | REDRAW_ON_TICK);)
         }
 
         void on_add() override {
             MenuItem::on_add();
             setup_coordinates();
+            this->available_height = tft->width()/2;
+            recalculate_needed = true;   // recalculate coordinates on first display, in case the layout has changed 
         }
 
         void set_target(BasePattern *target_pattern) {
@@ -30,13 +33,16 @@ class SingleCircleDisplay : public MenuItem {
             this->recalculate_needed = true;
         }
 
+        // TODO: something so that we can ensure the circle display only uses the actual available vertical space
+        int available_height = 0, last_available_height = 0;   // used to tell the circle display how much vertical space it has to work with, so it can scale the circle size accordingly
         float circle_size = 20.0;
         void setup_coordinates() {
             Debug_printf("SingleCircleDisplay() setup_coordinates, tft width is %i\n", tft->width()); Serial.flush();
             //this->set_pattern(target_pattern);
             const size_t divisions = STEPS_PER_BAR;
             const float degrees_per_iter = 360.0 / divisions;
-            circle_size = 20.0*(tft->width()/2);
+            circle_size = 20.0*(this->available_height);
+            // circle_size = 20.0*((tft->height()-tft->getCursorY())/2);   // use half of the available space after drawing the header
             int position = STEPS_PER_BAR / STEPS_PER_BEAT;
             for (unsigned int i = 0 ; i < divisions; i++) {
                 Debug_printf("generating coordinate for position %i:\trad(cos()) is %f\n", i, radians(cos(i*degrees_per_iter*PI/180)));
@@ -48,6 +54,7 @@ class SingleCircleDisplay : public MenuItem {
                 position = position % divisions;
             }
             recalculate_needed = false;
+            this->last_available_height = this->available_height;
             //this->set_sequencer(sequencer);
             Debug_println("SingleCircleDisplay() finished setup_coordinates"); Serial.flush();
         }
@@ -61,8 +68,8 @@ class SingleCircleDisplay : public MenuItem {
             static const uint_fast16_t tft_width_quartered = tft->width()/4;
             const uint_fast16_t circle_center_x = tft_width_quartered;
 
-            if (recalculate_needed || this->last_steps != STEPS_PER_BAR) {
-                Debug_printf("SingleCircleDisplay() detected change in steps from %i to %i, recalculating coordinates\n", this->last_steps, STEPS_PER_BAR); Serial.flush();
+            if (recalculate_needed || this->last_steps != STEPS_PER_BAR || this->last_available_height != this->available_height) {
+                Debug_printf("SingleCircleDisplay() detected change in steps from %i to %i or available height from %i to %i, recalculating coordinates\n", this->last_steps, STEPS_PER_BAR, this->last_available_height, this->available_height); Serial.flush();
                 setup_coordinates();
                 this->last_steps = STEPS_PER_BAR;
                 circle_center_y = 6 + pos.y + coordinates_y[STEPS_PER_BAR/2];

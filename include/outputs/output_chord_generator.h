@@ -108,11 +108,6 @@ class MIDIChordGeneratorOutput : public MIDINoteOutput {
         BaseOutput::set_enabled(state);
     }
 
-    virtual const char* get_menu_type_name() const override { return "Chord"; }
-    virtual bool is_menu_scrollable() const override { return true; }
-    virtual void add_scale_menu_items(Menu *menu) override { (void)menu; }
-    virtual void add_status_menu_items(Menu *menu) override { (void)menu; }
-
     virtual void process() override {
         BaseOutput::process();
 
@@ -137,31 +132,53 @@ class MIDIChordGeneratorOutput : public MIDINoteOutput {
     }
 
     #ifdef ENABLE_SCREEN
-    virtual void make_menu_items(Menu *menu, int index) override {
-        MIDINoteOutput::make_menu_items(menu, index);
-        MenuItemList *items = this->chord_player.make_menu_items();
-        for (auto* item : *items) {
-            menu->add(item);
+        virtual const char* get_menu_type_name() const override { return "Chord"; }
+        virtual bool is_menu_scrollable() const override { return true; }
+        virtual void add_scale_menu_items(Menu *menu) override {
+            // 
+            for (auto* label : {"Scale / Key", "Quantise / chords"}) {
+                MenuItem *item = this->chord_player_menu_items->get_and_remove_by_label(label);
+                if (item != nullptr) {
+                    item->show_header = false;
+                    menu->add(item);
+                }
+            }
         }
-    }
+        virtual void add_status_menu_items(Menu *menu) override { (void)menu; }
+
+        MenuItemList *chord_player_menu_items = nullptr;
+        virtual void make_menu_items(Menu *menu, int index) override {
+
+            // get the chord player menu items first, so that we can re-insert them at the 
+            // consistent positions via the add_XXX_menu_items() functions
+            this->chord_player_menu_items = this->chord_player.make_menu_items();
+
+            MIDINoteOutput::make_menu_items(menu, index);
+
+            // anything that is left in the chord_player_menu_items list is not already added
+            // and can be added to the menu now
+            for (auto* item : *chord_player_menu_items) {
+                menu->add(item);
+            }
+        }
     #endif
 
     #ifdef ENABLE_PARAMETERS
-    virtual ParameterList *get_parameters() override {
-        ParameterList *parameters = MIDINoteOutput::get_parameters();
-        if (!this->chord_modulation_parameters_added && parameters != nullptr) {
-            add_chord_modulation_parameters(parameters, &this->chord_player);
-            this->chord_modulation_parameters_added = true;
+        virtual ParameterList *get_parameters() override {
+            ParameterList *parameters = MIDINoteOutput::get_parameters();
+            if (!this->chord_modulation_parameters_added && parameters != nullptr) {
+                add_chord_modulation_parameters(parameters, &this->chord_player);
+                this->chord_modulation_parameters_added = true;
+            }
+            return parameters;
         }
-        return parameters;
-    }
     #endif
 
     #ifdef ENABLE_STORAGE
-    virtual void setup_saveable_settings() override {
-        MIDINoteOutput::setup_saveable_settings();
-        register_child(&chord_player);
-    }
+        virtual void setup_saveable_settings() override {
+            MIDINoteOutput::setup_saveable_settings();
+            register_child(&chord_player);
+        }
     #endif
 };
 

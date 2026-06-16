@@ -82,8 +82,10 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
 
         #ifdef ENABLE_PARAMETERS
             // add parameter modulation controls -- we can choose to combine these on the same page as the main pattern controls, or put them on a separate page with a link from the main one
-            if (combine_setting & COMBINE_MODULATION_WITH_MAIN) {
-                menu->add(new SeparatorMenuItem("Modulation"));
+            if (combine_setting & COMBINE_PATTERN_MODULATION_WITH_PATTERN) { //COMBINE_MODULATION_WITH_MAIN) {
+                if (combine_setting & COMBINE_PATTERN_INCLUDE_SEPARATOR) {
+                    menu->add(new SeparatorMenuItem("Modulation"));
+                }
             } else {
                 snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
                 menu->add_page(label, this->get_colour(), false, "Sequencer");
