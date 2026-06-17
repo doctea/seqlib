@@ -27,7 +27,7 @@ void SimplePattern::trigger_on_for_step(int step) {
 
     if (this->output!=nullptr) {
         this->output->receive_event(1,0,-1,this->get_velocity());
-        this->output->process();
+        // this->output->process();
         note_held = true;
     }
 }
@@ -36,7 +36,7 @@ void SimplePattern::trigger_off_for_step(int step) {
     this->triggered_on_tick = -1;
     if (this->output!=nullptr) {
         this->output->receive_event(0,1,-1,this->get_velocity());
-        this->output->process();
+        // this->output->process();
         note_held = false;
     }
 };

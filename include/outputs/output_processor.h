@@ -96,25 +96,50 @@ class MIDIOutputProcessor : public BaseOutputProcessor
     // ask all the nodes to do their thing; send the results out to our output device
     virtual void process() {
         Debug_println("process-->");
-        //static int count = 0;
-        //midi->sendNoteOff(35 + count, 0, 1);
-        /*for (int i = 0 ; i < this->nodes.size() ; i++) {
-            BaseOutput *n = this->nodes.get(i);
-            n->stop();
-        }*/
-        //count = 0;
-        unsigned _i = 0;
-        for (auto* o : *this->nodes) {
-            Debug_printf("\tnode %i\n", _i);
-            o->process();
-            Debug_println();
-            ++_i;
+
+        // experiment: choke groups / singleton-hit drum mode
+        // so for now, let's assume that all the drum outputs are in a single choke group, and we want to only allow one of them to be on at a time.  
+        // so we will first query all the nodes to see which ones want to go on, and if more than one does, then:-
+        // - the one that has been allowed to play the fewest times so far will be the one that is allowed to go on, and the others will be told not to go on.
+        // - if there is a tie, then the lowest-numbered (first) ones will win.
+        int output_to_allow_index = -1;
+        BaseOutput *current_winner = nullptr;
+        for (int i = 0 ; i < this->nodes->size(); ++i) {
+            BaseOutput *node = this->nodes->get(i);
+            if (node->choke_group != 1) continue; // only consider nodes in choke group 1 for now
+            if (node==nullptr) continue;
+            if (node->should_go_on()) {
+                if (output_to_allow_index<0) {
+                    output_to_allow_index = i;
+                } else {
+                    // we have a tie; check which one has been allowed to go on the fewest times so far
+                    current_winner = this->nodes->get(output_to_allow_index);
+                    if (node->event_on_count < current_winner->event_on_count) {
+                        output_to_allow_index = i;
+                    }
+                }
+            }
         }
-        /*if (count>0) {
-            Serial.printf("sending combo note %i\n", count);
-            midi->sendNoteOn(35 + count, 127, 1);
-            //count = 35;
-        }*/
+
+        if (current_winner != nullptr)
+            current_winner->process();
+
+        for (auto *node : *this->nodes) {
+            if (node == current_winner) continue; // already processed the winner above
+
+            if (node->choke_group == 1)  {
+                node->cancel_event_value_1(); // tell all the choke group nodes that they are not allowed to go on, so they will not send note on messages
+            }
+            node->process();
+        }
+
+        // unsigned _i = 0;
+        // for (auto* o : *this->nodes) {
+        //     Debug_printf("\tnode %i\n", _i);
+        //     o->process();
+        //     Debug_println();
+        //     ++_i;
+        // }
 
         for (auto* node : *this->nodes) {
             node->reset();

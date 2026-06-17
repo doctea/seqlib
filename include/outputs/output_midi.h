@@ -126,6 +126,7 @@ class MIDIBaseOutput : public BaseOutput {
                 set_last_note_number(note_number);
                 output_wrapper->sendNoteOn(note_number, this->event_value_4, get_channel());
                 this->has_gone_on = true;
+                this->event_on_count += 1;
             }
             //count += i;
         }
@@ -155,6 +156,9 @@ class MIDIBaseOutput : public BaseOutput {
         this->event_value_2 += event_value_2;   // note offs?
         this->event_value_3 = event_value_3;    // used for carrying note value
         this->event_value_4 = event_value_4;    // used for carrying velocity value
+    }
+    virtual void cancel_event_value_1() override {
+        this->event_value_1 = 0;
     }
 
     // forget the last message
@@ -190,6 +194,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
     public:
     MIDIDrumOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, int_fast8_t note_number, int_fast8_t channel = GM_CHANNEL_DRUMS) 
         : MIDIBaseOutput(label, output_wrapper, note_number, channel) {
+            this->choke_group = 1; // default to choke group 1 for all drum outputs
     }
 };
 

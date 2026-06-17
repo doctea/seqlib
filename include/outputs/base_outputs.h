@@ -17,6 +17,7 @@
 class ISequencerEventReceiver {
     public:
     virtual void receive_event(int_fast8_t event_value_1, int_fast8_t event_value_2, int_fast8_t event_value_3, int_fast8_t event_value_4) = 0;
+    virtual void cancel_event_value_1() {}
 };
 
 #include "parameters/Parameter.h"
@@ -31,6 +32,9 @@ class BaseOutput : public ISequencerEventReceiver
     public:
     bool enabled = true;
     bool has_gone_on = false;
+
+    int8_t event_on_count = 0;
+    int8_t choke_group = 0;
 
     char label[MAX_LABEL];
     BaseOutput (const char *label) {
@@ -66,7 +70,9 @@ class BaseOutput : public ISequencerEventReceiver
         this->reset();
     }
     // called when a phrase is started, so the output can do anything if needed
-    virtual void on_phrase(uint32_t phrase_number) {}
+    virtual void on_phrase(uint32_t phrase_number) {
+        this->event_on_count = 0;
+    }
     // called when a bar is started, so the output can do anything if needed
     virtual void on_bar(uint32_t bar_number) {}
 
