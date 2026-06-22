@@ -134,14 +134,16 @@
                 return buf;
             }
         );
-        mod_degree_item->add_redraw_custom_policy([=](bool selected, bool opened) -> bool {
-            static int8_t last_degree_mod_result = -1;
-            if (this->get_degree_mod_result() != last_degree_mod_result) {
-                last_degree_mod_result = this->get_degree_mod_result();
-                return true;
-            }
-            return false;
-        });
+        #ifdef MENU_PERF_PARTIAL_UPDATES
+            mod_degree_item->add_redraw_custom_policy([=](bool selected, bool opened) -> bool {
+                static int8_t last_degree_mod_result = -1;
+                if (this->get_degree_mod_result() != last_degree_mod_result) {
+                    last_degree_mod_result = this->get_degree_mod_result();
+                    return true;
+                }
+                return false;
+            });
+        #endif
         midi_settings_bar->add(mod_degree_item);
 
         midi_settings_bar->on_add();

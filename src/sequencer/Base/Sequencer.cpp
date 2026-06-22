@@ -90,18 +90,21 @@ int freeRam();
             p->add_saveable_settings(i);
             // if (Serial) Serial.printf("    register_child(pattern[%u]) after: %u\n", (unsigned)i, freeRam());
         }
+        if (Serial) Serial.printf("... BaseSequencer::setup_saveable_settings() done for sequencer %p, free ram is %u\n", this, freeRam()); Serial.flush();
         
         if (Serial) 
             Serial.printf("... BaseSequencer::setup_saveable_settings() after doing settings, free ram is %u\n\n", freeRam()); Serial.flush();
 
         #ifdef ENABLE_PARAMETERS
             // register parameters for this output
+            if (Serial) Serial.printf("BaseSequencer::setup_saveable_settings() registering parameters for sequencer %p, free ram is %u\n", this, freeRam()); Serial_flush();
             ParameterList *parameters = this->getParameters();
             if (parameters!=nullptr) {
                 for (auto* param : *parameters) {
                     register_child(param);
                 }
             }
+            if (Serial) Serial.printf("... BaseSequencer::setup_saveable_settings() done registering parameters for sequencer %p, free ram is %u\n", this, freeRam()); Serial_flush();
         #endif
         
         if (Serial) Serial.printf("=== BaseSequencer::setup_saveable_settings() done for sequencer  %p, free ram is %u\n\n", this, freeRam()); Serial.flush();
