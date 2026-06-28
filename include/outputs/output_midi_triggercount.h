@@ -11,12 +11,12 @@
 
 class MIDINoteTriggerCountOutput : public MIDINoteOutput {
     public:
-        LinkedList<BaseOutput*> *nodes = nullptr;   // output nodes that will count towards the note calculation
+        GenericList<BaseOutput*> *nodes = nullptr;   // output nodes that will count towards the note calculation
 
         uint8_t start_count_at = 0;
         int finish_count_at = -1;
 
-        MIDINoteTriggerCountOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, LinkedList<BaseOutput*> *nodes, int_fast8_t channel = 1, int start_count_at = 0, int finish_count_at = -1, int8_t octave = 3) 
+        MIDINoteTriggerCountOutput(const char *label, IMIDINoteAndCCTarget *output_wrapper, GenericList<BaseOutput*> *nodes, int_fast8_t channel = 1, int start_count_at = 0, int finish_count_at = -1, int8_t octave = 3) 
             : MIDINoteOutput(label, output_wrapper, channel) {
             this->nodes = nodes;
 

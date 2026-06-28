@@ -101,7 +101,7 @@ void setup_output(IMIDINoteAndCCTarget *output_target, MIDIOutputProcessor *proc
     #ifdef ENABLE_PARAMETERS
         #include "mymenu_items/ParameterMenuItems_lowmemory.h"
         //FLASHMEM
-        void BaseOutput::make_parameter_menu_items(Menu *menu, int index, uint16_t colour, bool combine_pages) {
+        void BaseOutput::make_parameter_menu_items(Menu *menu, int index, uint16_t colour, bool combine_pages, const char *group_name = "Output nodes") {
             // don't make a menu page if no parameters to use
             ParameterList *parameters = this->get_parameters();
             if (parameters==nullptr || parameters->size()==0)
@@ -113,7 +113,7 @@ void setup_output(IMIDINoteAndCCTarget *output_target, MIDIOutputProcessor *proc
                 // create page
                 char label[40];
                 snprintf(label, 40, "%s Modx", this->label);
-                menu->add_page(label, C_WHITE, false, "Output nodes");
+                menu->add_page(label, C_WHITE, false, group_name);
             }
 
             // create lowmemory parameter controls

@@ -4,6 +4,7 @@
 
 #include "output.h"
 #include "envelopes.h"
+#include <GenericList.h>
 
 #ifdef ENABLE_SCALES
     #include "scales.h"
@@ -45,7 +46,7 @@ class BaseOutputProcessor
         #endif
 
         virtual BaseOutput *get_output_for_label(const char *label) = 0;
-        virtual LinkedList<BaseOutput*> *get_available_outputs() = 0;
+        virtual GenericList<BaseOutput*> *get_available_outputs() = 0;
 
         virtual void loop() = 0;
         virtual void on_bar(uint32_t bar_number) {};
@@ -66,7 +67,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor
     {
     public:
 
-    LinkedList<BaseOutput*> *nodes = new LinkedList<BaseOutput*>();
+    GenericList<BaseOutput*> *nodes = new GenericList<BaseOutput*>();
     IMIDINoteAndCCTarget *output_target = nullptr;
 
     MIDIOutputProcessor(IMIDINoteAndCCTarget *output_target) : BaseOutputProcessor(), output_target(output_target) {
@@ -89,7 +90,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor
         return nullptr;
     }
 
-    virtual LinkedList<BaseOutput*> *get_available_outputs() override {
+    virtual GenericList<BaseOutput*> *get_available_outputs() override {
         return this->nodes;
     }
 
@@ -190,7 +191,7 @@ class MIDIOutputProcessor : public BaseOutputProcessor
 
     #ifdef ENABLE_SCREEN
         //FLASHMEM
-        virtual void create_menu_items(bool combine_pages = false);
+        virtual void create_menu_items(bool combine_pages = false, const char *page_name = "Enable outputs", const char *group_name = "Output nodes");
     #endif
 
     #ifdef ENABLE_STORAGE

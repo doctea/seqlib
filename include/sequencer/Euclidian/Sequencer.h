@@ -25,16 +25,27 @@ class EuclidianSequencer : public BaseSequencer
     bool seed_locked = false;
     uint32_t last_locked_seed = 0;
 
+    // Per-instance density arrays (not shared between sequencer instances)
+    float instance_density[NUM_GLOBAL_DENSITY_GROUPS];
+    float effective_instance_density[NUM_GLOBAL_DENSITY_GROUPS];
 
+    #ifdef ENABLE_PARAMETERS
+        ParameterList *seq_parameters = nullptr;
+    #endif
 
     public:
     
     // need to pass desired number_patterns so that we can pre-allocate the patterns array... default to 20
-    EuclidianSequencer(LinkedList<BaseOutput*> *available_outputs, int8_t number_patterns = 20) : BaseSequencer() {
+    EuclidianSequencer(GenericList<BaseOutput*> *available_outputs, int8_t number_patterns = 20) : BaseSequencer() {
 
         #ifdef ENABLE_STORAGE
              this->set_path_segment("EuclidianSequencer");
         #endif
+
+        for (int_fast8_t i = 0; i < NUM_GLOBAL_DENSITY_GROUPS; i++) {
+            instance_density[i] = DEFAULT_DENSITY;
+            effective_instance_density[i] = DEFAULT_DENSITY;
+        }
 
         EuclidianPattern *p = nullptr;
         if (number_patterns > 0) {
@@ -54,6 +65,7 @@ class EuclidianSequencer : public BaseSequencer
                  p->set_path_segment_fmt("pattern_%i", i);
             #endif
             this->add_pattern(p);
+            p->set_density_source(this->instance_density, this->effective_instance_density);
 
             #ifdef ENABLE_SHUFFLE
                 // for testing shuffled, make every other pattern shuffled
@@ -95,12 +107,10 @@ class EuclidianSequencer : public BaseSequencer
 
     // parameters and settings
     float get_density(int8_t channel) {
-        //return this->global_density;
-        return all_global_density[channel];
+        return instance_density[channel];
     }
     void set_density(int8_t channel, float v) {
-        //this->global_density = v;
-        all_global_density[channel] = v;
+        instance_density[channel] = v;
     }
 
     bool is_mutate_enabled() {
@@ -346,9 +356,9 @@ class EuclidianSequencer : public BaseSequencer
         //     this->make_menu_items(menu, 0);
         // }
         //FLASHMEM
-        virtual void make_menu_items(Menu *menu, int combine_pages);
+        virtual void make_menu_items(Menu *menu, int combine_pages, const char *group_name = "Euclidian");
         //FLASHMEM
-        virtual void create_menu_euclidian_mutation(Euclidian::CombinePageOption combine_setting);
+        virtual void create_menu_euclidian_mutation(Euclidian::CombinePageOption combine_setting, const char *group_name = "Euclidian");
     #endif
 
     #ifdef ENABLE_STORAGE
@@ -356,21 +366,22 @@ class EuclidianSequencer : public BaseSequencer
             // inherit parent's settings
             BaseSequencer::setup_saveable_settings();
 
+            // todo: add the global density settings up to NUM_GLOBAL_DENSITY_GROUPS programmatically
             register_setting(
-                new VarSetting<float>("Global Density 0", "Euclidian", &all_global_density[0]), 
-                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global density to be saved at scene or project level, since it's more of a preference setting than a performance setting
+                new VarSetting<float>("Global Density 0", "Euclidian", &this->instance_density[0]), 
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT
             );
             register_setting(
-                new VarSetting<float>("Global Density 1", "Euclidian", &all_global_density[1]), 
-                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global density to be saved at scene or project level, since it's more of a preference setting than a performance setting
+                new VarSetting<float>("Global Density 1", "Euclidian", &this->instance_density[1]), 
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT
             );
             register_setting(
-                new VarSetting<float>("Global Density 2", "Euclidian", &all_global_density[2]), 
-                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global density to be saved at scene or project level, since it's more of a preference setting than a performance setting
+                new VarSetting<float>("Global Density 2", "Euclidian", &this->instance_density[2]), 
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT
             );
             register_setting(
-                new VarSetting<float>("Global Density 3", "Euclidian", &all_global_density[3]), 
-                SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow global density to be saved at scene or project level, since it's more of a preference setting than a performance setting
+                new VarSetting<float>("Global Density 3", "Euclidian", &this->instance_density[3]), 
+                SL_SCOPE_SCENE | SL_SCOPE_PROJECT
             );
             register_setting(
                 new VarSetting<bool>("Mutate Enabled", "Euclidian", &this->mutate_enabled),

@@ -5,20 +5,20 @@
 #include "outputs/base_outputs.h"
 #include "debug.h"
 
-#include <LinkedList.h>
+#include <GenericList.h>
 
 static constexpr int OUTPUT_SELECTOR_MAX_OPTIONS = 64;
 static constexpr int OUTPUT_SELECTOR_MAX_SNAPSHOTS = 8;
 
 struct OutputSelectorSnapshotEntry {
-    LinkedList<BaseOutput*> *source = nullptr;
+    GenericList<BaseOutput*> *source = nullptr;
     int count = 0;
     BaseOutput *outputs[OUTPUT_SELECTOR_MAX_OPTIONS] = {nullptr};
 };
 
 class OutputSelectorSnapshotCache {
     public:
-        static OutputSelectorSnapshotEntry *rebuild(LinkedList<BaseOutput*> *source) {
+        static OutputSelectorSnapshotEntry *rebuild(GenericList<BaseOutput*> *source) {
             if (source==nullptr)
                 return nullptr;
 
@@ -50,7 +50,7 @@ class OutputSelectorSnapshotCache {
             return storage;
         }
 
-        static OutputSelectorSnapshotEntry *find_slot(LinkedList<BaseOutput*> *source) {
+        static OutputSelectorSnapshotEntry *find_slot(GenericList<BaseOutput*> *source) {
             OutputSelectorSnapshotEntry *storage = entries();
             for (int i = 0; i < OUTPUT_SELECTOR_MAX_SNAPSHOTS; i++) {
                 if (storage[i].source == source)
@@ -73,7 +73,7 @@ class OutputSelectorSnapshotCache {
 template<class TargetClass>
 class OutputSelectorControl : public SelectorControl<int_least16_t> {
     BaseOutput *initial_selected_object = nullptr;
-    LinkedList<BaseOutput*> *available_objects = nullptr;
+    GenericList<BaseOutput*> *available_objects = nullptr;
     OutputSelectorSnapshotEntry *snapshot = nullptr;
     int snapshot_count = 0;
 
@@ -114,7 +114,7 @@ class OutputSelectorControl : public SelectorControl<int_least16_t> {
         TargetClass *target_object, 
         void(TargetClass::*setter_func)(BaseOutput*), 
         BaseOutput*(TargetClass::*getter_func)(), 
-        LinkedList<BaseOutput*> *available_objects,
+        GenericList<BaseOutput*> *available_objects,
         BaseOutput *initial_selected_object = nullptr,
         bool show_values = false
     ) : SelectorControl(label, -1) {
@@ -126,7 +126,7 @@ class OutputSelectorControl : public SelectorControl<int_least16_t> {
         this->set_available_values(available_objects);
     };
 
-    virtual void configure (LinkedList<BaseOutput*> *available_objects) {
+    virtual void configure (GenericList<BaseOutput*> *available_objects) {
         this->set_available_values(available_objects);
         const char *initial_name = (char*)"None";
         if (this->initial_selected_object!=nullptr)
@@ -288,10 +288,10 @@ class OutputSelectorControl : public SelectorControl<int_least16_t> {
         //msg[20] = '\0'; // limit the string so we don't overflow set_last_message
         menu_set_last_message(msg,GREEN);
 
-        return go_back_on_select;
+        return flags.go_back_on_select;
     }
 
-    virtual void set_available_values(LinkedList<BaseOutput*> *available_values) {
+    virtual void set_available_values(GenericList<BaseOutput*> *available_values) {
         this->available_objects = available_values;
         this->rebuild_snapshot();
         this->num_values = this->snapshot_count;

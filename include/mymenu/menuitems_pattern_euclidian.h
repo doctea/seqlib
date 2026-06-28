@@ -50,7 +50,7 @@ class EuclidianPatternControl : public SubMenuItemBar {
                 pattern->available_outputs,
                 pattern->output
             );
-            selector->go_back_on_select = true;
+            selector->flags.go_back_on_select = true;
             this->add(selector);
         #endif
 

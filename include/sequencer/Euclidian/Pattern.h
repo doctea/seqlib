@@ -25,8 +25,14 @@ class EuclidianPattern : public SimplePattern
     int maximum_steps = TIME_SIG_MAX_STEPS_PER_BAR;
 
     int8_t global_density_group = DENSITY_GROUP_NONE;
+    float *p_effective_density = nullptr;   // points to owning sequencer's per-instance effective density array
 
-    EuclidianPattern(LinkedList<BaseOutput*> *available_outputs, int8_t global_density_group, int steps = MAX_STEPS, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
+    void set_density_source(float *density, float *effective_density) {
+        Serial.printf("EuclidianPattern::set_density_source() density=%p, effective_density=%p\n", density, effective_density);
+        this->p_effective_density = effective_density;
+    }
+
+    EuclidianPattern(GenericList<BaseOutput*> *available_outputs, int8_t global_density_group, int steps = MAX_STEPS, int pulses = 0, int rotation = -1, int duration = -1, int tie_on = -1) 
         : SimplePattern(available_outputs)
         {
             default_arguments.steps = steps;
@@ -87,7 +93,9 @@ class EuclidianPattern : public SimplePattern
     virtual float get_global_density() {
         if (this->global_density_group == DENSITY_GROUP_NONE)
             return DEFAULT_DENSITY;
-        return all_effective_global_density[this->global_density_group % NUM_GLOBAL_DENSITY_GROUPS];
+        if (this->p_effective_density == nullptr)
+            return DEFAULT_DENSITY;
+        return this->p_effective_density[this->global_density_group % NUM_GLOBAL_DENSITY_GROUPS];
     }
     virtual int8_t get_global_density_group() {
         return this->global_density_group;
@@ -282,7 +290,7 @@ class EuclidianPattern : public SimplePattern
 
     #ifdef ENABLE_SCREEN
         //FLASHMEM
-        virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, int combine_settings = (Euclidian::CombinePageOption)Euclidian::COMBINE_NONE) override;
+        virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, int combine_settings = (Euclidian::CombinePageOption)Euclidian::COMBINE_NONE, const char *group_name = "Euclidian") override;
     #endif
     
     #if defined(ENABLE_PARAMETERS)

@@ -58,7 +58,7 @@ class TuringMachinePattern : public SimplePattern
 
     public:
 
-    TuringMachinePattern(LinkedList<BaseOutput*> *available_outputs) 
+    TuringMachinePattern(GenericList<BaseOutput*> *available_outputs) 
         : SimplePattern(available_outputs) 
         #ifdef ENABLE_PARAMETERS
             , AnalogParameterInputBase<float>((char*)"TM", "Seqs", 0.005, UNIPOLAR)
@@ -148,7 +148,7 @@ class TuringMachinePattern : public SimplePattern
     }
 
     #if defined(ENABLE_SCREEN) 
-        virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, int combine_settings = (TuringMachine::CombinePageOption)TuringMachine::COMBINE_NONE) override;
+        virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, int combine_settings = (TuringMachine::CombinePageOption)TuringMachine::COMBINE_NONE, const char *group_name = "TuringMachine") override;
     #endif
 
     #if defined(ENABLE_PARAMETERS)

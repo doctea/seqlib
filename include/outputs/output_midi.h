@@ -224,7 +224,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
         }
 
         virtual void setLowestNote(int8_t note) {
-            // don't allow highest note to be set higher than highest note
+            // don't allow lowest note to be set higher than highest note
             if (note > this->getHighestNote())
                 note = this->getHighestNote();
             if (!is_valid_note(note)) 
@@ -392,7 +392,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
 
             #ifdef ENABLE_SCREEN
                 //FLASHMEM
-                virtual void make_menu_items(Menu *menu, int index) override;
+                virtual void make_menu_items(Menu *menu, int index, const char *group_name = "Output nodes") override;
 
                 virtual const char* get_menu_type_name() const { return "Note"; }
                 virtual bool is_menu_scrollable() const { return false; }

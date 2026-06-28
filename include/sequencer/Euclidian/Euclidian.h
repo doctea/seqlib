@@ -48,9 +48,6 @@ struct arguments_t {
 };
 
 extern arguments_t initial_arguments[];
-extern float all_global_density[];
-extern float all_effective_global_density[];
-
 
 #ifdef ENABLE_SCREEN
     namespace Euclidian {

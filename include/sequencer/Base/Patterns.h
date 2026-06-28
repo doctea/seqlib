@@ -55,15 +55,15 @@ class BasePattern
     #endif
 
     BaseOutput *output = nullptr;
-    LinkedList<BaseOutput*> *available_outputs = nullptr;
+    GenericList<BaseOutput*> *available_outputs = nullptr;
 
     bool debug = false;
 
-    virtual void set_available_outputs(LinkedList<BaseOutput*> *available_outputs) {
+    virtual void set_available_outputs(GenericList<BaseOutput*> *available_outputs) {
         this->available_outputs = available_outputs;
     }
 
-    BasePattern(LinkedList<BaseOutput*> *available_outputs) {
+    BasePattern(GenericList<BaseOutput*> *available_outputs) {
         this->set_available_outputs(available_outputs);
     }
 
@@ -150,6 +150,12 @@ class BasePattern
         return this->get_steps();
     }
 
+    // Return the number of MIDI channels/sources this pattern can output to.
+    // Default is 1 (mono pattern). Override in subclasses for polyphonic/multi-channel patterns.
+    virtual uint8_t get_source_count() {
+        return 1;
+    }
+
     virtual void set_locked(bool v = true) {
         this->locked = v;
     }
@@ -186,7 +192,7 @@ class BasePattern
     #endif
 
     #ifdef ENABLE_SCREEN
-        virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, int combine_pages = 0);
+        virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, int combine_pages = 0, const char *group_name = "Sequencer");
     #endif
 
     #ifdef ENABLE_STORAGE
@@ -247,7 +253,7 @@ class SimplePattern : public BasePattern {
 
     uint32_t last_updated_at = 0;
 
-    SimplePattern(LinkedList<BaseOutput*> *available_outputs) : BasePattern(available_outputs) {
+    SimplePattern(GenericList<BaseOutput*> *available_outputs) : BasePattern(available_outputs) {
         this->events = (midi_note_event_t*)CALLOC_FUNC(sizeof(midi_note_event_t), steps);
     }
 

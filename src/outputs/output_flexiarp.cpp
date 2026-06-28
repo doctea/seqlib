@@ -34,8 +34,8 @@
     };
 
     // need to add a menuitem for the degree setting
-    void FlexiArpOutput::make_menu_items(Menu *menu, int index) {
-        MIDINoteOutput::make_menu_items(menu, index);
+    void FlexiArpOutput::make_menu_items(Menu *menu, int index, const char *group_name = "FlexiArp") {
+        MIDINoteOutput::make_menu_items(menu, index, group_name);
 
         // modify the existing submenus to add/change our settings by getting the last page and looping to 
         // find the controls we want to modify
@@ -134,7 +134,7 @@
                 return buf;
             }
         );
-        #ifdef MENU_PERF_PARTIAL_UPDATES
+        #if MENU_PERF_PARTIAL_UPDATES
             mod_degree_item->add_redraw_custom_policy([=](bool selected, bool opened) -> bool {
                 static int8_t last_degree_mod_result = -1;
                 if (this->get_degree_mod_result() != last_degree_mod_result) {

@@ -281,7 +281,7 @@ class FlexiArpOutput : public MIDINoteOutput
 
     #ifdef ENABLE_SCREEN
         // need to add a menuitem for the degree setting
-        virtual void make_menu_items(Menu *menu, int index) override;
+        virtual void make_menu_items(Menu *menu, int index, const char *group_name = "FlexiArp") override;
         virtual const char* get_menu_type_name() const { return "FlexiArp"; }
     #endif
 

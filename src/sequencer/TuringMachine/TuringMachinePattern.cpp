@@ -44,10 +44,10 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
         #include "mymenu/menuitems_scale.h"
     #endif
 
-    void TuringMachinePattern::create_menu_items(Menu *menu, int pattern_index, BaseSequencer *target_sequencer, int combine_setting) {
+    void TuringMachinePattern::create_menu_items(Menu *menu, int pattern_index, BaseSequencer *target_sequencer, int combine_setting, const char *group_name = "TuringMachine") {
         char label[MENU_C_MAX];
         snprintf(label, MENU_C_MAX, "TM %i", pattern_index);
-        menu->add_page(label, this->get_colour(), false, "Sequencer");
+        menu->add_page(label, this->get_colour(), false, group_name);
 
         menu->add(new PatternDisplay(label, this, false, false));
 
@@ -59,7 +59,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
             this->available_outputs,
             this->output
         );
-        selector->go_back_on_select = true;
+        selector->flags.go_back_on_select = true;
         SubMenuItemBar *output_bar = new SubMenuItemBar("Output", true, false);
         output_bar->add(selector);
         menu->add(output_bar);
@@ -88,7 +88,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 }
             } else {
                 snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
-                menu->add_page(label, this->get_colour(), false, "Sequencer");
+                menu->add_page(label, this->get_colour(), false, group_name);
             }
             ParameterList *parameters = this->getParameters(pattern_index);
             create_low_memory_parameter_controls(label, parameters, this->get_colour());

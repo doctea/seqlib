@@ -4,9 +4,9 @@
 
 #include "conductor.h"
 #include <bpm.h>
+#include <GenericList.h>
 
 #if defined(ENABLE_PARAMETERS)
-    #include <LinkedList.h>
     #include "parameter_list.h"
 #endif
 
@@ -122,7 +122,7 @@ class BaseSequencer
     #endif
 
     #if defined(ENABLE_SCREEN)
-        virtual void make_menu_items(Menu *menu, int combine_pages);
+        virtual void make_menu_items(Menu *menu, int combine_pages, const char *group_name = "Sequencer");
     #endif
 
     #ifdef ENABLE_STORAGE
@@ -132,11 +132,11 @@ class BaseSequencer
 
 class SimpleSequencer : public BaseSequencer {
 
-    LinkedList<BaseOutput*> *available_outputs = nullptr;
-    LinkedList<BasePattern*> *patterns = new LinkedList<BasePattern*>();
+    GenericList<BaseOutput*> *available_outputs = nullptr;
+    GenericList<BasePattern*> *patterns = new GenericList<BasePattern*>();
 
     public:
-    SimpleSequencer(LinkedList<BaseOutput*> *available_outputs) : BaseSequencer() {
+    SimpleSequencer(GenericList<BaseOutput*> *available_outputs) : BaseSequencer() {
         this->available_outputs = available_outputs;
     }
 

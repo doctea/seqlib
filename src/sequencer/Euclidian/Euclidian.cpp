@@ -102,37 +102,17 @@
     }
 #endif
 
-float all_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
-    DEFAULT_DENSITY, DEFAULT_DENSITY
-    #if NUM_GLOBAL_DENSITY_GROUPS > 2
-        , DEFAULT_DENSITY
-    #endif
-    #if NUM_GLOBAL_DENSITY_GROUPS > 3
-        , DEFAULT_DENSITY
-    #endif
-};
-float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
-    DEFAULT_DENSITY, DEFAULT_DENSITY
-    #if NUM_GLOBAL_DENSITY_GROUPS > 2
-        , DEFAULT_DENSITY
-    #endif
-    #if NUM_GLOBAL_DENSITY_GROUPS > 3
-        , DEFAULT_DENSITY
-    #endif
-};
-
 #if defined(ENABLE_PARAMETERS)
     #include "parameters/Parameter.h"
     #include "parameters/ProxyParameter.h"
     #include "ParameterManager.h"
 
     ParameterList *EuclidianSequencer::getParameters() {
-        static ParameterList *parameters = nullptr;
-        
-        if (parameters!=nullptr)
-            return parameters;
-            
-        parameters = new ParameterList();
+        if (this->seq_parameters != nullptr)
+            return this->seq_parameters;
+
+        this->seq_parameters = new ParameterList();
+        ParameterList *parameters = this->seq_parameters;
 
         // multiple global density parameters
         for (int i = 0  ; i < NUM_GLOBAL_DENSITY_GROUPS ; i++) {
@@ -140,8 +120,8 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
             snprintf(label, sizeof(label), "Global density %i", i);
             parameters->add(new ProxyParameter<float>(
                 label,
-                &all_global_density[i],
-                &all_effective_global_density[i],
+                &this->instance_density[i],
+                &this->effective_instance_density[i],
                 MINIMUM_DENSITY,
                 MAXIMUM_DENSITY
             ));
@@ -269,10 +249,10 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
         #include "mymenu_items/ParameterMenuItems_lowmemory.h"
         #include "mymenu/menuitems_pattern_euclidian.h"
 
-        void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index, BaseSequencer *target_sequencer, int combine_setting) {
+        void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index, BaseSequencer *target_sequencer, int combine_setting, const char *group_name = "Euclidian") {
             char label[MENU_C_MAX];
             snprintf(label, MENU_C_MAX, "Pattern %i", pattern_index);
-            menu->add_page(label, this->get_colour(), false, "Euclidian");
+            menu->add_page(label, this->get_colour(), false, group_name);
 
             EuclidianPatternControl *epc = new EuclidianPatternControl(label, this, target_sequencer);
             menu->add(epc);
@@ -283,7 +263,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
                 }
             } else {
                 snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
-                menu->add_page(label, this->get_colour(), false, "Euclidian");
+                menu->add_page(label, this->get_colour(), false, group_name);
             }
 
             ParameterList *parameters = this->getParameters(pattern_index);
@@ -299,7 +279,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
                     this->available_outputs,
                     this->output
                 );
-                selector->go_back_on_select = true;
+                selector->flags.go_back_on_select = true;
                 menu->add(selector);
             #endif
         }
@@ -317,9 +297,9 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
         
         // todo: this should really be called create_menu_items, since it directly adds to menu
         // todo: do we really need to pass in menu here for some reason?
-        void EuclidianSequencer::make_menu_items(Menu *menu, int combine_setting = (COMBINE_LOCKS_WITH_CIRCLE | COMBINE_MODULATION_WITH_MUTATION | COMBINE_PATTERN_MODULATION_WITH_PATTERN)) {
+        void EuclidianSequencer::make_menu_items(Menu *menu, int combine_setting = (COMBINE_LOCKS_WITH_CIRCLE | COMBINE_MODULATION_WITH_MUTATION | COMBINE_PATTERN_MODULATION_WITH_PATTERN), const char *group_name = "Euclidian") {
             // add a page for the 'boxed' sequence display of all tracks
-            menu->add_page("Euclidian", TFT_CYAN, true, "Euclidian");
+            menu->add_page(group_name, TFT_CYAN, true, group_name);
             for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
                 char label[MENU_C_MAX];
                 snprintf(label, MENU_C_MAX, "Pattern %i", i);
@@ -334,15 +314,15 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
 
             // add a page for the circle display that shows all tracks simultaneously
             if (combine_setting & COMBINE_LOCKS_WITH_CIRCLE) {
-                menu->add_page("Circle & locks", C_WHITE, true, "Euclidian");
+                menu->add_page("Circle & locks", C_WHITE, true, group_name);
             } else {          
-                menu->add_page("Circle", C_WHITE, true, "Euclidian");
+                menu->add_page("Circle", C_WHITE, true, group_name);
             }
             menu->add(new CircleDisplay("Circle", this));
 
             // multitoggle to lock patterns
             if (!(combine_setting & COMBINE_LOCKS_WITH_CIRCLE)) {
-                menu->add_page("Pattern locks", C_WHITE, false, "Euclidian");
+                menu->add_page("Pattern locks", C_WHITE, false, group_name);
             }
             ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Allow changes", true, 2, false);
             for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
@@ -361,11 +341,11 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
             menu->add(toggle);
 
             Serial.printf("EuclidianSequencer::make_menu_items(): about to call create_menu_euclidian_mutation with bitmask = %i\n", combine_setting);    
-            create_menu_euclidian_mutation((CombinePageOption)combine_setting);
+            this->create_menu_euclidian_mutation((CombinePageOption)combine_setting, group_name);
 
             /*
             // create a dedicated page for the sequencer modulations
-            menu->add_page("Sequencer mods");
+            menu->add_page("Sequencer mods", C_WHITE, false, group_name);
             LinkedList<FloatParameter*> *parameters = getParameters();
             //parameter_manager->addParameters(parameters);
             for (int i = 0 ; i < parameters->size() ; i++) {
@@ -383,11 +363,11 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
                 //Serial.printf("adding controls for pattern %i..\n", i);
                 BasePattern *p = (BasePattern *)this->get_pattern(i);
 
-                p->create_menu_items(menu, i, this, combine_setting);
+                p->create_menu_items(menu, i, this, combine_setting, group_name);
             }
 
             #ifdef ENABLE_SHUFFLE
-                menu->add_page("Shuffle patterns", C_WHITE, false, "Euclidian");
+                menu->add_page("Shuffle patterns", C_WHITE, false, group_name);
                 for (size_t i = 0 ; i < shuffle_pattern_wrapper.getCount() ; i++) {
                     char label[MENU_C_MAX];
                     snprintf(label, MENU_C_MAX, "Shuffle %i", i);
@@ -409,7 +389,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
         
         #include "mymenu_items/ParameterMenuItems_lowmemory.h"
 
-        void EuclidianSequencer::create_menu_euclidian_mutation(CombinePageOption combine_setting) {
+        void EuclidianSequencer::create_menu_euclidian_mutation(CombinePageOption combine_setting, const char *group_name = "Euclidian") {
             if (combine_setting & COMBINE_MUTATION_WITH_LOCKS) {
                 // wtf why is this always combining even when the bit isn't set?!... is it something to do with the way the bitmask is being passed in or defined?
                 Serial.printf("EuclidianSequencer::create_menu_euclidian_mutation(): NOT ADDING PAGE (combining) adding mutation controls to 'Pattern locks' page, combine_setting bitmask = %i\n", combine_setting);
@@ -417,17 +397,17 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
             } else {
                 Serial.printf("EuclidianSequencer::create_menu_euclidian_mutation(): ADDING PAGE (not combining) adding mutation controls to 'Pattern locks' page, combine_setting bitmask = %i\n", combine_setting);
                 decode_combine_page_option(combine_setting);
-                menu->add_page("Mutation", YELLOW, false, "Euclidian");
+                menu->add_page("Mutation", YELLOW, false, group_name);
             }
             menu->add(new SeparatorMenuItem("Euclidian Mutations"));
 
             // add controls for the 4 density channels
             SubMenuItemColumns *submenu_densities = new SubMenuItemColumns("Global densities", 4, true, true);
             //submenu->add(new ObjectNumberControl<EuclidianSequencer,float>("Density", this, &EuclidianSequencer::set_density,        &EuclidianSequencer::get_density, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
-            submenu_densities->add(new LambdaNumberControl<float>("Group 0", [=](float v) -> void { all_global_density[0] = v; }, [=]() -> float { return all_global_density[0]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
-            submenu_densities->add(new LambdaNumberControl<float>("Group 1", [=](float v) -> void { all_global_density[1] = v; }, [=]() -> float { return all_global_density[1]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
-            submenu_densities->add(new LambdaNumberControl<float>("Group 2", [=](float v) -> void { all_global_density[2] = v; }, [=]() -> float { return all_global_density[2]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
-            submenu_densities->add(new LambdaNumberControl<float>("Group 3", [=](float v) -> void { all_global_density[3] = v; }, [=]() -> float { return all_global_density[3]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+            submenu_densities->add(new LambdaNumberControl<float>("Group 0", [this](float v) -> void { instance_density[0] = v; }, [this]() -> float { return instance_density[0]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+            submenu_densities->add(new LambdaNumberControl<float>("Group 1", [this](float v) -> void { instance_density[1] = v; }, [this]() -> float { return instance_density[1]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+            submenu_densities->add(new LambdaNumberControl<float>("Group 2", [this](float v) -> void { instance_density[2] = v; }, [this]() -> float { return instance_density[2]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
+            submenu_densities->add(new LambdaNumberControl<float>("Group 3", [this](float v) -> void { instance_density[3] = v; }, [this]() -> float { return instance_density[3]; }, nullptr, MINIMUM_DENSITY, MAXIMUM_DENSITY));
             menu->add(submenu_densities);
 
             // add controls for the global euclidian mutation settings
@@ -449,7 +429,7 @@ float all_effective_global_density[NUM_GLOBAL_DENSITY_GROUPS] = {
                     }
                 } else {
                     // Serial.printf("EuclidianSequencer::create_menu_euclidian_mutation(): adding page 'Mutation modulation', combine_setting bitmask = %i\n", combine_setting);
-                    menu->add_page("Mutation modulation", C_WHITE, false, "Euclidian");
+                    menu->add_page("Mutation modulation", C_WHITE, false, group_name);
                 }
                 //menu->add(new SeparatorMenuItem("Mappable parameters"));
                 // add the sequencer modulation controls to this page

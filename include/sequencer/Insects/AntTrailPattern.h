@@ -22,7 +22,7 @@ class AntTrailPattern : public SimplePattern {
     float evaporation_factor = 0.005;
     float probability_grid[SEQUENCE_LENGTH_STEPS];
 
-    AntTrailPattern(LinkedList<BaseOutput*> *available_outputs) : SimplePattern(available_outputs) {
+    AntTrailPattern(GenericList<BaseOutput*> *available_outputs) : SimplePattern(available_outputs) {
         for (int i = 0 ; i < SEQUENCE_LENGTH_STEPS ; i++) {
             probability_grid[i] = 0.5f;
         }

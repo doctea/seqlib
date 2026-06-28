@@ -10,11 +10,11 @@ class MultiSequencer : public SimpleSequencer
     #endif
 {
     public:
-    LinkedList<BaseSequencer*> *sequencers = nullptr;
+    GenericList<BaseSequencer*> *sequencers = nullptr;
     int number_patterns = 0;
 
     MultiSequencer() : SimpleSequencer(nullptr) {
-        this->sequencers = new LinkedList<BaseSequencer*>();
+        this->sequencers = new GenericList<BaseSequencer*>();
         #ifdef ENABLE_STORAGE
              this->set_path_segment("MultiSequencer");
         #endif

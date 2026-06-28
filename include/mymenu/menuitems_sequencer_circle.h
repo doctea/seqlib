@@ -158,7 +158,7 @@ class CircleDisplay : public MenuItem {
                 //tft->printf("%8s", (char*)pattern->get_output_label());
             }
 
-            uint16_t max_height_reached = circle_center_y + (dia/2) + 6;  // start with the lowest possible point on the circle, plus the radius of the circles we're about to draw for each step
+            uint16_t max_height_reached = circle_center_y + coordinates_y[STEPS_PER_BAR/2] + radius + 6;  // lowest point on circle = center + bottom coordinate + dot radius
 
             //tft->printf("dia = %3.3f, cursorY=%i\n\n", dia, tft->getCursorY());
             tft->setCursor(0, max_height_reached); //tft->getCursorY() + 16);

@@ -106,12 +106,12 @@
     }
 
     //FLASHMEM
-    void MIDINoteOutput::make_menu_items(Menu *menu, int index) {
+    void MIDINoteOutput::make_menu_items(Menu *menu, int index, const char *group_name = "Output nodes") {
         //#ifdef ENABLE_ENVELOPE_MENUS
             char label[40];
             //snprintf(label, 40, "%s %i: %s", this->get_menu_type_name(), index, this->label);
             snprintf(label, 40, "%s", this->label);
-            menu->add_page(label, C_WHITE, this->is_menu_scrollable(), "Output nodes");
+            menu->add_page(label, C_WHITE, this->is_menu_scrollable(), group_name);
 
             // SubMenuItemColumns *sub_menu_item_columns = new SubMenuItemColumns("Options", 3);
             // // todo: convert all these ObjectNumberControls and ObjectToggleControls into LambdaNumberControls and LambdaToggleControls

@@ -139,7 +139,7 @@ class MIDIChordGeneratorOutput : public MIDINoteOutput {
             for (auto* label : {"Scale / Key", "Quantise / chords"}) {
                 MenuItem *item = this->chord_player_menu_items->get_and_remove_by_label(label);
                 if (item != nullptr) {
-                    item->show_header = false;
+                    item->flags.show_header = false;
                     menu->add(item);
                 }
             }
@@ -147,13 +147,13 @@ class MIDIChordGeneratorOutput : public MIDINoteOutput {
         virtual void add_status_menu_items(Menu *menu) override { (void)menu; }
 
         MenuItemList *chord_player_menu_items = nullptr;
-        virtual void make_menu_items(Menu *menu, int index) override {
+        virtual void make_menu_items(Menu *menu, int index, const char *group_name = "Output nodes") override {
 
             // get the chord player menu items first, so that we can re-insert them at the 
             // consistent positions via the add_XXX_menu_items() functions
             this->chord_player_menu_items = this->chord_player.make_menu_items();
 
-            MIDINoteOutput::make_menu_items(menu, index);
+            MIDINoteOutput::make_menu_items(menu, index, group_name);
 
             // anything that is left in the chord_player_menu_items list is not already added
             // and can be added to the menu now

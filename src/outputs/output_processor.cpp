@@ -12,7 +12,7 @@
     #endif
 
     //FLASHMEM
-    void MIDIOutputProcessor::create_menu_items(bool combine_pages) {
+    void MIDIOutputProcessor::create_menu_items(bool combine_pages, const char *page_name = "Enable outputs", const char *group_name = "Output nodes") {
 
         // make a QuickJump page for the outputs
         menu->add_page("QuickJumpOutputs", C_WHITE);
@@ -26,9 +26,9 @@
 
         unsigned int i = 0;
         for (auto* node : *this->nodes) {
-            node->make_menu_items(menu, i);
+            node->make_menu_items(menu, i, group_name);
             #ifdef ENABLE_PARAMETERS
-                node->make_parameter_menu_items(menu, i, C_WHITE, combine_pages);
+                node->make_parameter_menu_items(menu, i, C_WHITE, combine_pages, group_name);
             #endif
 
             // add page to quickjump, so long as isn't itself
@@ -42,9 +42,9 @@
             ++i;
         }
 
-        menu->add_page("Enable outputs", C_WHITE, false, "Output nodes");
+        menu->add_page(page_name, C_WHITE, false, group_name);
 
-        ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl("Enable outputs", true, 3, false);
+        ObjectMultiToggleColumnControl *toggle = new ObjectMultiToggleColumnControl(page_name, true, 3, false);
         for (auto* output : *this->nodes) {
             MultiToggleItemClass<BaseOutput> *option = new MultiToggleItemClass<BaseOutput> (
                 output->label,

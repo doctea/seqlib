@@ -12,7 +12,7 @@ class PatternDisplay : public MenuItem {
         SimplePattern *target_pattern = nullptr;
         PatternDisplay(const char *label, SimplePattern *target_pattern, bool selectable = true, bool show_header = true) : MenuItem(label, selectable) {
             this->set_pattern(target_pattern);
-            this->show_header = show_header;
+            this->flags.show_header = show_header;
             IF_MENU_PERF_PARTIAL_UPDATES(this->add_redraw_policy(REDRAW_ON_CUSTOM | REDRAW_ON_STEP);)
         }
         
@@ -34,7 +34,7 @@ class PatternDisplay : public MenuItem {
 
         virtual int display(Coord pos, bool selected, bool opened) override {
             char label_info[MENU_C_MAX];
-            if(this->show_header) {
+            if(this->flags.show_header) {
                 /*snprintf(label_info, MENU_C_MAX, "%s: Steps=%2i Pulses=%2i Rot=%2i", 
                     this->label, 
                     ((EuclidianPattern*)target_pattern)->get_steps(), 
