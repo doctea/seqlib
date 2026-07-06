@@ -249,7 +249,7 @@
         #include "mymenu_items/ParameterMenuItems_lowmemory.h"
         #include "mymenu/menuitems_pattern_euclidian.h"
 
-        void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index, BaseSequencer *target_sequencer, int combine_setting, const char *group_name = "Euclidian") {
+        void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index, BaseSequencer *target_sequencer, int combine_setting, const char *group_name) {
             char label[MENU_C_MAX];
             snprintf(label, MENU_C_MAX, "Pattern %i", pattern_index);
             menu->add_page(label, this->get_colour(), false, group_name);
@@ -297,7 +297,8 @@
         
         // todo: this should really be called create_menu_items, since it directly adds to menu
         // todo: do we really need to pass in menu here for some reason?
-        void EuclidianSequencer::make_menu_items(Menu *menu, int combine_setting = (COMBINE_LOCKS_WITH_CIRCLE | COMBINE_MODULATION_WITH_MUTATION | COMBINE_PATTERN_MODULATION_WITH_PATTERN), const char *group_name = "Euclidian") {
+        void EuclidianSequencer::make_menu_items(
+                Menu *menu, int combine_setting, const char *group_name) {
             // add a page for the 'boxed' sequence display of all tracks
             menu->add_page(group_name, TFT_CYAN, true, group_name);
             for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
@@ -389,7 +390,7 @@
         
         #include "mymenu_items/ParameterMenuItems_lowmemory.h"
 
-        void EuclidianSequencer::create_menu_euclidian_mutation(CombinePageOption combine_setting, const char *group_name = "Euclidian") {
+        void EuclidianSequencer::create_menu_euclidian_mutation(CombinePageOption combine_setting, const char *group_name) {
             if (combine_setting & COMBINE_MUTATION_WITH_LOCKS) {
                 // wtf why is this always combining even when the bit isn't set?!... is it something to do with the way the bitmask is being passed in or defined?
                 Serial.printf("EuclidianSequencer::create_menu_euclidian_mutation(): NOT ADDING PAGE (combining) adding mutation controls to 'Pattern locks' page, combine_setting bitmask = %i\n", combine_setting);

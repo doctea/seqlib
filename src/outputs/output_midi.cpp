@@ -106,7 +106,7 @@
     }
 
     //FLASHMEM
-    void MIDINoteOutput::make_menu_items(Menu *menu, int index, const char *group_name = "Output nodes") {
+    void MIDINoteOutput::make_menu_items(Menu *menu, int index, const char *group_name) {
         //#ifdef ENABLE_ENVELOPE_MENUS
             char label[40];
             //snprintf(label, 40, "%s %i: %s", this->get_menu_type_name(), index, this->label);

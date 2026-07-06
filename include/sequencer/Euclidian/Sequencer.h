@@ -356,7 +356,14 @@ class EuclidianSequencer : public BaseSequencer
         //     this->make_menu_items(menu, 0);
         // }
         //FLASHMEM
-        virtual void make_menu_items(Menu *menu, int combine_pages, const char *group_name = "Euclidian");
+        virtual void make_menu_items(
+            Menu *menu, 
+            int combine_pages = 
+                Euclidian::CombinePageOption::COMBINE_LOCKS_WITH_CIRCLE 
+                | Euclidian::CombinePageOption::COMBINE_MODULATION_WITH_MUTATION 
+                | Euclidian::CombinePageOption::COMBINE_PATTERN_MODULATION_WITH_PATTERN, 
+            const char *group_name = "Euclidian"
+        );
         //FLASHMEM
         virtual void create_menu_euclidian_mutation(Euclidian::CombinePageOption combine_setting, const char *group_name = "Euclidian");
     #endif

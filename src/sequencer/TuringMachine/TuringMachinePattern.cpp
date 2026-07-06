@@ -44,7 +44,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
         #include "mymenu/menuitems_scale.h"
     #endif
 
-    void TuringMachinePattern::create_menu_items(Menu *menu, int pattern_index, BaseSequencer *target_sequencer, int combine_setting, const char *group_name = "TuringMachine") {
+    void TuringMachinePattern::create_menu_items(Menu *menu, int pattern_index, BaseSequencer *target_sequencer, int combine_setting, const char *group_name) {
         char label[MENU_C_MAX];
         snprintf(label, MENU_C_MAX, "TM %i", pattern_index);
         menu->add_page(label, this->get_colour(), false, group_name);

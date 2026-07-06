@@ -144,10 +144,10 @@ class MultiSequencer : public SimpleSequencer
     #endif
 
     #if defined(ENABLE_SCREEN)
-        virtual void make_menu_items(Menu *menu, int combine_pages) override {
+        virtual void make_menu_items(Menu *menu, int combine_pages, const char *group_name = "MultiSequencer") override {
             for (auto* s : *this->sequencers) {
                 if (s!=nullptr)
-                    s->make_menu_items(menu, combine_pages);
+                    s->make_menu_items(menu, combine_pages, group_name);
             }
         }
     #endif

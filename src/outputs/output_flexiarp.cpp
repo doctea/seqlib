@@ -34,7 +34,7 @@
     };
 
     // need to add a menuitem for the degree setting
-    void FlexiArpOutput::make_menu_items(Menu *menu, int index, const char *group_name = "FlexiArp") {
+    void FlexiArpOutput::make_menu_items(Menu *menu, int index, const char *group_name) {
         MIDINoteOutput::make_menu_items(menu, index, group_name);
 
         // modify the existing submenus to add/change our settings by getting the last page and looping to 

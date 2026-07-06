@@ -4,6 +4,7 @@
 
 #include "clock.h"
 
+#define COMBINE_PATTERN_INCLUDE_SEPARATOR 16    // BIG HACK @@TODO: replace this with a proper CombinePageOption enum value in the future
 
 OUTPUT_TYPE operator ++( OUTPUT_TYPE &id, int )
 {
@@ -101,14 +102,15 @@ void setup_output(IMIDINoteAndCCTarget *output_target, MIDIOutputProcessor *proc
     #ifdef ENABLE_PARAMETERS
         #include "mymenu_items/ParameterMenuItems_lowmemory.h"
         //FLASHMEM
-        void BaseOutput::make_parameter_menu_items(Menu *menu, int index, uint16_t colour, bool combine_pages, const char *group_name = "Output nodes") {
+        void BaseOutput::make_parameter_menu_items(Menu *menu, int index, uint16_t colour, bool combine_pages, const char *group_name) {
             // don't make a menu page if no parameters to use
             ParameterList *parameters = this->get_parameters();
             if (parameters==nullptr || parameters->size()==0)
                 return;
 
             if (combine_pages) {
-                menu->add(new SeparatorMenuItem("Modulation", colour));
+                if (combine_pages & COMBINE_PATTERN_INCLUDE_SEPARATOR)
+                    menu->add(new SeparatorMenuItem("Modulation", colour));
             } else {
                 // create page
                 char label[40];

@@ -12,7 +12,7 @@
     #endif
 
     //FLASHMEM
-    void MIDIOutputProcessor::create_menu_items(bool combine_pages, const char *page_name = "Enable outputs", const char *group_name = "Output nodes") {
+    void MIDIOutputProcessor::create_menu_items(bool combine_pages, const char *page_name, const char *group_name) {
 
         // make a QuickJump page for the outputs
         menu->add_page("QuickJumpOutputs", C_WHITE);

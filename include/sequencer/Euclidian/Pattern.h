@@ -290,7 +290,12 @@ class EuclidianPattern : public SimplePattern
 
     #ifdef ENABLE_SCREEN
         //FLASHMEM
-        virtual void create_menu_items(Menu *menu, int index, BaseSequencer *target_sequencer, int combine_settings = (Euclidian::CombinePageOption)Euclidian::COMBINE_NONE, const char *group_name = "Euclidian") override;
+        virtual void create_menu_items(
+            Menu *menu, 
+            int index, 
+            BaseSequencer *target_sequencer, 
+            int combine_settings = (Euclidian::CombinePageOption::COMBINE_NONE), 
+            const char *group_name = "Euclidian") override;
     #endif
     
     #if defined(ENABLE_PARAMETERS)
