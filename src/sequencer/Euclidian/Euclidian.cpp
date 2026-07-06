@@ -257,7 +257,7 @@
             EuclidianPatternControl *epc = new EuclidianPatternControl(label, this, target_sequencer);
             menu->add(epc);
 
-            if (combine_setting & COMBINE_MODULATION_WITH_MUTATION) {
+            if (combine_setting & COMBINE_PATTERN_MODULATION_WITH_PATTERN) {
                 if (combine_setting & COMBINE_PATTERN_INCLUDE_SEPARATOR) {
                     menu->add(new SeparatorMenuItem("Modulation"));
                 }

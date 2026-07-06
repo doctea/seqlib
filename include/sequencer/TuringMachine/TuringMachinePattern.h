@@ -58,10 +58,10 @@ class TuringMachinePattern : public SimplePattern
 
     public:
 
-    TuringMachinePattern(GenericList<BaseOutput*> *available_outputs) 
+    TuringMachinePattern(GenericList<BaseOutput*> *available_outputs, const char *input_name = "TM", const char *group_name = "Seqs") 
         : SimplePattern(available_outputs) 
         #ifdef ENABLE_PARAMETERS
-            , AnalogParameterInputBase<float>((char*)"TM", "Seqs", 0.005, UNIPOLAR)
+            , AnalogParameterInputBase<float>((char*)input_name, (char*)group_name, 0.005, UNIPOLAR)
         #endif
     {}
 
