@@ -46,7 +46,8 @@ class OutputSelectorSnapshotCache {
 
     private:
         static OutputSelectorSnapshotEntry *entries() {
-            static OutputSelectorSnapshotEntry storage[OUTPUT_SELECTOR_MAX_SNAPSHOTS];
+            // EXTMEM: move 2KB snapshot cache to PSRAM on Teensy 4.x, freeing RAM1 stack space.
+            static EXTMEM OutputSelectorSnapshotEntry storage[OUTPUT_SELECTOR_MAX_SNAPSHOTS];
             return storage;
         }
 
