@@ -344,21 +344,6 @@
             Serial.printf("EuclidianSequencer::make_menu_items(): about to call create_menu_euclidian_mutation with bitmask = %i\n", combine_setting);    
             this->create_menu_euclidian_mutation((CombinePageOption)combine_setting, group_name);
 
-            /*
-            // create a dedicated page for the sequencer modulations
-            menu->add_page("Sequencer mods", C_WHITE, false, group_name);
-            LinkedList<FloatParameter*> *parameters = getParameters();
-            //parameter_manager->addParameters(parameters);
-            for (int i = 0 ; i < parameters->size() ; i++) {
-                menu->add(parameters->get(i)->makeControls());
-            }*/
-
-            //using option=ObjectSelectorControl<EuclidianPattern,BaseOutput*>::option;
-            /*LinkedList<BaseOutput*> *nodes = new LinkedList<BaseOutput*>();
-            for (int i = 0 ; i < output_processor.nodes.size() ; i++) {
-                nodes->add(output_processor.nodes.get(i));
-            }*/
-
             // ask each pattern to add their menu pages
             for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
                 //Serial.printf("adding controls for pattern %i..\n", i);

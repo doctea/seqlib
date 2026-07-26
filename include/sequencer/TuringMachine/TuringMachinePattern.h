@@ -230,6 +230,9 @@ class TuringMachinePattern : public SimplePattern
         
         virtual int8_t get_voltage_pitch() override {
             // current_note_number should only change when a step actually fires
+            if (this->inverted) {
+                return 127 - this->current_note_number;
+            }
             return this->current_note_number;
         }
 

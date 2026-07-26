@@ -7,6 +7,8 @@
 #include <clock.h>
 #include <midi_helpers.h>
 
+#include "GenericList.h"
+
 #ifndef CALLOC_FUNC
     #define CALLOC_FUNC calloc
 #endif
@@ -265,6 +267,9 @@ class SimplePattern : public BasePattern {
     virtual unsigned int get_step_for_tick(unsigned int tick) {
         // get global step number for this tick, then mod by pattern length in steps to get the step number within this pattern
         return (tick / TICKS_PER_STEP) % this->get_effective_steps();
+
+        // TODO: hm would this be enough for doing the 'polymeter reset' mode? lol no it seems not (every step thinks its triggering?)
+        // return BPM_CURRENT_STEP_OF_PHRASE % this->get_effective_steps();
     }
 
     virtual void set_event_for_tick(unsigned int tick, short note = 0, short velocity = DEFAULT_VELOCITY, short channel = 0) override {

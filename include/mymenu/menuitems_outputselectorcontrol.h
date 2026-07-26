@@ -7,6 +7,10 @@
 
 #include <GenericList.h>
 
+#ifndef CALLOC_FUNC
+    #define CALLOC_FUNC calloc
+#endif
+
 static constexpr int OUTPUT_SELECTOR_MAX_OPTIONS = 64;
 static constexpr int OUTPUT_SELECTOR_MAX_SNAPSHOTS = 8;
 
@@ -46,8 +50,11 @@ class OutputSelectorSnapshotCache {
 
     private:
         static OutputSelectorSnapshotEntry *entries() {
-            // EXTMEM: move 2KB snapshot cache to PSRAM on Teensy 4.x, freeing RAM1 stack space.
-            static EXTMEM OutputSelectorSnapshotEntry storage[OUTPUT_SELECTOR_MAX_SNAPSHOTS];
+            // Use CALLOC_FUNC (extmem_calloc on Teensy) to place in PSRAM without relying on
+            // static-local + EXTMEM, which has unreliable initialisation on Teensy 4.x.
+            static OutputSelectorSnapshotEntry *storage = nullptr;
+            if (storage == nullptr)
+                storage = (OutputSelectorSnapshotEntry*)CALLOC_FUNC(OUTPUT_SELECTOR_MAX_SNAPSHOTS, sizeof(OutputSelectorSnapshotEntry));
             return storage;
         }
 

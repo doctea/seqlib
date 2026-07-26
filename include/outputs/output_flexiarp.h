@@ -333,19 +333,22 @@ class FlexiArpOutput : public MIDINoteOutput
             ParameterList *params = MIDINoteOutput::get_parameters();
 
             // add degree parameter
-            // TODO: do we want to make this modulatable..? yeah i guess probably do
             params->add(new ProxyLabelledParameter<int8_t>(
                 "Base Degree",
                 &this->degree_base,
                 // 0, PITCHES_PER_SCALE
-                &degree_value_label_list
+                #ifdef ENABLE_SCREEN
+                    &degree_value_label_list
+                #endif
             ));
 
             // add "next mode" parameter
             params->add(new ProxyLabelledParameter<int8_t>(
                 "Next mode",
                 &this->next_mode,
-                &next_mode_value_labels
+                #ifdef ENABLE_SCREEN
+                    &next_mode_value_labels
+                #endif
             ));
 
             // add "change every" parameter
