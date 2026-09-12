@@ -230,6 +230,25 @@ class EuclidianPattern : public SimplePattern
         // When locked, return the step count that make_euclid() last actually computed,
         // not the (possibly modulation-modified) used_arguments.steps.
         return this->is_locked() ? this->last_arguments.steps : this->used_arguments.steps;
+        // TODO: i think this is where we want to hook in the 'polymeter reset' mode, so 
+        // that the sequencer only modulos around the first X steps of the pattern, rather than the full length;
+        // but so that make_euclid still computes the full pattern length.
+        // maybe we want a separate 'effective_steps' variable that is set by the polymeter reset mode, and
+        // is used by make_euclid.
+        // further TODO: thought; maybe we want to have a 'start at' step for the polymeter reset mode, so
+        // that we can have a 7/4 pattern that starts at step 2, for example, so that the first step of the bar 
+        // is actually step 2 of the pattern.  effectively "windowing" the pattern to a subset of its steps, 
+        // but still allowing the full pattern to be computed by make_euclid.
+        //
+        // do we actually need a three-way toggle? (or even 4-way?!)
+        // - polymeter reset off (default) - use the full pattern length, as computed by make_euclid
+        // - polymeter reset on, playback pattern length, as decided by get_step_for_tick which currently calls get_effective_steps
+        // - use the global time signature length for make_euclid calculation
+        // - use the global time signature length for playback pattern length
+        // orrrr do we need like, two different length settings, set independently, with extra setting on each to tell them to mirror?
+        // - so, eg, generate length = 8, playback length = 7
+        //           effective generate length = [generate length|pattern length|global bar length]
+        //           effective playback length = [playback length|pattern length|global bar length]
     }
     virtual int8_t get_steps() override {
         return this->arguments.steps;
@@ -257,7 +276,7 @@ class EuclidianPattern : public SimplePattern
     }
     virtual void set_duration(int8_t duration) {
         this->arguments.duration = duration;
-        used_arguments.duration = duration;
+        this->used_arguments.duration = duration;
     }
 
     virtual int8_t get_tick_duration() override {

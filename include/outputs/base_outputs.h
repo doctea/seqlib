@@ -84,6 +84,17 @@ class BaseOutput : public ISequencerEventReceiver
         }
     #endif
 
+    // -1 means "not a MIDI-note-based output"; overridden by MIDIBaseOutput.
+    // Declared here (rather than using dynamic_cast) since RTTI is disabled on some build targets.
+    // This is here because of Compulidian needing to know the note number and channel of outputs for SysEx configuration - 
+    // but we might want to change how we do this in future, since BaseOutputs shouldn't really need to know about this.
+    virtual int_fast8_t get_note_number() {
+        return -1;
+    }
+    virtual int_fast8_t get_channel() {
+        return -1;
+    }
+
     #ifdef ENABLE_SCREEN
         //FLASHMEM
         virtual void make_menu_items(Menu *menu, int index, const char *group_name = "Output nodes") {}

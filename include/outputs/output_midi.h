@@ -81,7 +81,7 @@ class MIDIBaseOutput : public BaseOutput {
         : BaseOutput(label), note_number(note_number), channel(channel), output_wrapper(output_wrapper) {
         }
 
-    virtual int_fast8_t get_note_number() {
+    virtual int_fast8_t get_note_number() override {
         return this->note_number;
     }
     virtual int_fast8_t get_last_note_number() {
@@ -90,7 +90,7 @@ class MIDIBaseOutput : public BaseOutput {
     virtual void set_last_note_number(int_fast8_t note_number) {
         this->last_note_number = note_number;
     }
-    virtual int_fast8_t get_channel() {
+    virtual int_fast8_t get_channel() override {
         return this->channel;
     }
 

@@ -49,7 +49,7 @@
     
             int8_t get_step(int8_t step_number) {
                 if (step_number >= 0 && step_number < MAX_SHUFFLE_TEMPLATE_SIZE) {
-                    return step[step_number];
+                    return step[step_number % size];
                 }
                 return 0;
             }
@@ -74,14 +74,15 @@
                     uClock.setShuffleSize(this->size, this->track_number);
                     this->last_sent_size = size;
                 }
-                uClock.setShuffle(this->amount < 0.01f || this->amount > 0.01f, this->track_number);
+                this->set_active(this->amount < 0.01f || this->amount > 0.01f);
+                int i_amount = (int)(this->amount * 1000.0f);
                 for (int i = 0 ; i < size ; i++) {
-                    int t = (float)step[i] * this->amount;
+                    int t = (int)(step[i] * i_amount) / 1000;
                     if (force || t!=last_sent_step[i]) {
                         //if (Serial) Serial.printf("setTrackShuffleData(%i, %i, %i)\n", track_number, i, t);
                         uClock.setShuffleData(i, t, this->track_number);
                         last_sent_step[i] = t;
-                    }                
+                    }
                 }
             }
     };
