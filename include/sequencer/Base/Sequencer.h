@@ -100,7 +100,7 @@ class BaseSequencer
     
     #ifdef ENABLE_SHUFFLE
         virtual void on_step_shuffled(int8_t track, int step) = 0;
-        virtual void on_step_end_shuffled(int8_t track, int step) = 0;
+        // virtual void on_step_end_shuffled(int8_t track, int step) = 0;
         
         virtual bool is_shuffle_enabled() {
             return this->shuffle_enabled;
@@ -169,7 +169,7 @@ class SimpleSequencer : public BaseSequencer {
 
     #ifdef ENABLE_SHUFFLE
         virtual void on_step_shuffled(int8_t track, int step) override;
-        virtual void on_step_end_shuffled(int8_t track, int step) override;
+        // virtual void on_step_end_shuffled(int8_t track, int step) override;
     #endif
    
 };

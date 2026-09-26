@@ -23,7 +23,9 @@ const char *BasePattern::get_output_label() {
 void SimplePattern::trigger_on_for_step(int step) {
     this->triggered_on_step = step;
     this->triggered_on_tick = ticks;
+    Serial.printf("SimplePattern::trigger_on_for_step: output=%s, step=%i, ticks=%6u, current_duration=(%i -> ", this->get_output_label(), step, ticks, this->current_duration);
     this->current_duration = this->get_tick_duration();
+    Serial.printf("%i)\n", this->current_duration);
 
     if (this->output!=nullptr) {
         this->output->receive_event(1,0,-1,this->get_velocity());

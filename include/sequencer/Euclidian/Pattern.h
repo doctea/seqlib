@@ -282,11 +282,19 @@ class EuclidianPattern : public SimplePattern
     virtual int8_t get_tick_duration() override {
         // When locked, use the duration that was last actually applied by make_euclid().
         const int8_t dur = this->is_locked() ? this->last_arguments.duration : this->used_arguments.duration;
-        return dur
+        if (dur<=0) {
+            Serial.printf("EuclidianPattern::get_tick_duration got a negative duration!: dur=%i, locked is %i\n", dur, this->is_locked());
+        }
+        int8_t tick_dur = dur
         #ifdef ENABLE_SHUFFLE 
-            + this->get_shuffle_length()
+            // + this->get_shuffle_length()     /// hmm, so we end up with negative durations if we do this...
         #endif
         ;
+        if (tick_dur<=0) {
+            Serial.printf("EuclidianPattern::get_tick_duration got a non-positive tick duration!: tick_dur=%i, get_shuffle_length() returned %i\n", tick_dur, this->get_shuffle_length());
+        }
+        tick_dur = max(tick_dur, (int8_t)1); // ensure we dont get a negative or zero tick duration
+        return tick_dur;
     }
 
     // virtual int8_t get_velocity() override {

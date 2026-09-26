@@ -266,21 +266,22 @@ class EuclidianSequencer : public BaseSequencer
 
             for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
                 if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
-                    //if (Serial) Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
+                    if (Serial) Serial.printf("\t\ton_step_shuffled(%i, %i): EuclidianSequencer at tick %i, calling process_step for %s\n", track, step, ticks, this->get_pattern(i)->get_output_label());
                     this->get_pattern(i)->process_step(step);
                 }
             }
         };
 
-        virtual void on_step_end_shuffled(int8_t track, int step) override {
-            if (!is_shuffle_enabled()) return;
+        // virtual void on_step_end_shuffled(int8_t track, int step) override {
+        //     if (!is_shuffle_enabled()) return;
 
-            for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
-                if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
-                    this->get_pattern(i)->process_step_end(step);
-                }
-            }
-        }
+        //     for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
+        //         if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
+        //             if (Serial) Serial.printf("\t\tEuclidianSequencer at tick %i, received on_step_end_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
+        //             this->get_pattern(i)->process_step_end(step);
+        //         }
+        //     }
+        // }
     #endif
     virtual void on_beat(int beat) override {
 

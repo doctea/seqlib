@@ -151,13 +151,13 @@ void SimpleSequencer::on_step_end(int step) {
         }
     };
 
-    void SimpleSequencer::on_step_end_shuffled(int8_t track, int step) {
-        if (!is_shuffle_enabled()) return;
+    // void SimpleSequencer::on_step_end_shuffled(int8_t track, int step) {
+    //     if (!is_shuffle_enabled()) return;
 
-        for (auto* p : *this->patterns) {
-            if (p!=nullptr && p->is_shuffled() && p->get_shuffle_track()==track) {
-                p->process_step_end(step);
-            }
-        }
-    }
+    //     for (auto* p : *this->patterns) {
+    //         if (p!=nullptr && p->is_shuffled() && p->get_shuffle_track()==track) {
+    //             p->process_step_end(step);
+    //         }
+    //     }
+    // }
 #endif

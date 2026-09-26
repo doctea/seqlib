@@ -103,11 +103,11 @@ class MultiSequencer : public SimpleSequencer
                 s->on_step_shuffled(track, step);
             }
         };
-        virtual void on_step_end_shuffled(int8_t track, int step) override {
-            for (auto* s : *this->sequencers) {
-                s->on_step_end_shuffled(track, step);
-            }
-        };
+        // virtual void on_step_end_shuffled(int8_t track, int step) override {
+        //     for (auto* s : *this->sequencers) {
+        //         s->on_step_end_shuffled(track, step);
+        //     }
+        // };
         
         virtual bool is_shuffle_enabled() override {
             return this->shuffle_enabled;
