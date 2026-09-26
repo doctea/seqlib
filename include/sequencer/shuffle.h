@@ -30,9 +30,12 @@
                 return uClock.isShuffled(this->track_number);
             }
     
-            void set_steps(int8_t *steps, int8_t size) {
-                this->size = size;
-                for (int i = 0 ; i < size ; i++) {
+            void set_steps(const int8_t *steps, int8_t size) {
+                if (steps == nullptr)
+                    return;
+                this->size = size < 1 ? 1 :
+                    (size > MAX_SHUFFLE_TEMPLATE_SIZE ? MAX_SHUFFLE_TEMPLATE_SIZE : size);
+                for (int i = 0 ; i < this->size ; i++) {
                     set_step(i, steps[i]);
                 }
                 update_target();
@@ -59,7 +62,7 @@
     
             void set_amount(float amount) {
                 this->amount = amount;
-                if (this->amount < 0.0f || this->amount > 0.0f)
+                if (this->amount < -0.01f || this->amount > 0.01f)
                     this->set_active(true);
                 else
                     this->set_active(false);
@@ -70,20 +73,24 @@
     
             int8_t last_sent_size = -1;
             void update_target(bool force = false) {
-                if (force || last_sent_size != size) {
-                    uClock.setShuffleSize(this->size, this->track_number);
-                    this->last_sent_size = size;
-                }
-                this->set_active(this->amount < 0.01f || this->amount > 0.01f);
+                size = size < 1 ? 1 :
+                    (size > MAX_SHUFFLE_TEMPLATE_SIZE ? MAX_SHUFFLE_TEMPLATE_SIZE : size);
+                bool changed = force || last_sent_size != size;
+                int8_t scaled_steps[MAX_SHUFFLE_TEMPLATE_SIZE] = {0};
                 int i_amount = (int)(this->amount * 1000.0f);
                 for (int i = 0 ; i < size ; i++) {
                     int t = (int)(step[i] * i_amount) / 1000;
-                    if (force || t!=last_sent_step[i]) {
-                        //if (Serial) Serial.printf("setTrackShuffleData(%i, %i, %i)\n", track_number, i, t);
-                        uClock.setShuffleData(i, t, this->track_number);
-                        last_sent_step[i] = t;
-                    }
+                    scaled_steps[i] = t;
+                    if (t != last_sent_step[i])
+                        changed = true;
                 }
+                if (changed) {
+                    uClock.setShuffleTemplate(scaled_steps, this->size, this->track_number);
+                    for (int i = 0; i < size; i++)
+                        last_sent_step[i] = scaled_steps[i];
+                    this->last_sent_size = size;
+                }
+                this->set_active(this->amount < -0.01f || this->amount > 0.01f);
             }
     };
     
@@ -110,10 +117,11 @@
                 for (size_t i = 0 ; i < number_shuffle_wrappers ; i++) {
                     delete shuffle_patterns[i];
                 }
+                delete[] shuffle_patterns;
             }
 
             ShufflePatternWrapper* operator[](size_t index) {
-                if (index < 0 || index >= number_shuffle_wrappers) {
+                if (index >= number_shuffle_wrappers) {
                     return nullptr;
                 }
                 return shuffle_patterns[index];

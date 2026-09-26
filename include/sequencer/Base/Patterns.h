@@ -300,8 +300,8 @@ class SimplePattern : public BasePattern {
 
     virtual void process_step(int step) override {
         if (this->query_note_on_for_step(step)) {
-            // if (debug) 
-            Serial.printf("\tprocess_step: %s doing trigger_on_for_step for step %u! (ticks=%6u, note_held=%i)\n", this->get_output_label(), step%STEPS_PER_BAR, ticks, this->note_held);
+            if (this->debug)
+                Serial.printf("\tprocess_step: %s doing trigger_on_for_step for step %u! (ticks=%6u, note_held=%i)\n", this->get_output_label(), step%STEPS_PER_BAR, ticks, this->note_held);
             if (!this->note_held)
                 this->trigger_on_for_step(step);
         }
@@ -326,14 +326,20 @@ class SimplePattern : public BasePattern {
         // check if note is held and duration has passed...
         int step = BPM_GLOBAL_STEP_FROM_TICKS(ticks) % STEPS_PER_BAR;
 
-        Serial.printf("SimplePattern::process_tick for %s\n", this->get_output_label());
-        Serial.printf("\tstep=%i, step_of_pattern=%i, ticks=%6u, triggered_on_tick=%6u, current_duration=%i, note_held=%i\n", BPM_CURRENT_STEP_OF_SONG % STEPS_PER_BAR, step, ticks, triggered_on_tick, current_duration, this->note_held); Serial.flush();
+        if (this->debug) {
+            Serial.printf("SimplePattern::process_tick for %s\n", this->get_output_label());
+            Serial.printf("\tstep=%i, step_of_pattern=%i, ticks=%6u, triggered_on_tick=%6u, current_duration=%i, note_held=%i\n", BPM_CURRENT_STEP_OF_SONG % STEPS_PER_BAR, step, ticks, triggered_on_tick, current_duration, this->note_held); Serial.flush();
+        }
         // Serial.printf("\tticks=%i, step_of_song=%i, step_of_pattern=%i\n", ticks, BPM_GLOBAL_STEP_FROM_TICKS(ticks), step);
 
         if (this->note_held && ((uint32_t)ticks >= triggered_on_tick + (this->current_duration) || (uint32_t)ticks < triggered_on_tick)) {
-            Serial.printf("\ttriggering trigger_off_for_step for step %i..\n", step); Serial.flush();
+            if (this->debug) {
+                Serial.printf("\ttriggering trigger_off_for_step for step %i..\n", step); Serial.flush();
+            }
             this->trigger_off_for_step(step); // this->process_step_end(step);
-            Serial.printf("finished trigger_off_for_step for step %i\n", step); Serial.flush();
+            if (this->debug) {
+                Serial.printf("finished trigger_off_for_step for step %i\n", step); Serial.flush();
+            }
         }
     }
 

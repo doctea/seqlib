@@ -16,6 +16,16 @@ void SimpleSequencer::on_tick(int tick) {
     }
 };
 
+void BaseSequencer::release_outputs() {
+    for (uint16_t i = 0; i < get_number_patterns(); i++) {
+        SimplePattern *pattern = get_pattern(i);
+        if (pattern != nullptr && pattern->note_held) {
+            pattern->trigger_off_for_step(-1);
+            pattern->note_held = false;
+        }
+    }
+}
+
 void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
     if (index >= (int)this->get_number_patterns()) {
         String message = String("Attempted to configure pattern with invalid index ") + String(index);

@@ -60,6 +60,8 @@ class BaseSequencer
         this->running = state;
     }
 
+    virtual void release_outputs();
+
     // called every tick, call the appropriate callbacks for the current tick, step, beat, bar, and phrase
     //virtual void on_tick(int tick) = 0;
     virtual void on_tick(int tick) {
