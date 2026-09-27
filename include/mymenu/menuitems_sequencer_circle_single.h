@@ -6,6 +6,12 @@
 #include <bpm.h>
 #include <clock.h>
 
+// TODO: it would be ultrafuckingcool if this could respect the shuffle amount of the 
+// pattern and apply it to the step positions in the circle display in real-time!
+// This would make the circle display more visually aligned with the groove of the pattern.
+// It would require dynamically adjusting the angles of the steps based on the shuffle amount.
+// This would likely involve modifying the setup_coordinates() method to take the shuffle amount into account when calculating the angles for each step.
+
 class SingleCircleDisplay : public MenuItem {
     public:
 
