@@ -285,16 +285,7 @@ class EuclidianPattern : public SimplePattern
         if (dur<=0) {
             Serial.printf("EuclidianPattern::get_tick_duration got a negative duration!: dur=%i, locked is %i\n", dur, this->is_locked());
         }
-        int8_t tick_dur = dur
-        #ifdef ENABLE_SHUFFLE 
-            // + this->get_shuffle_length()     /// hmm, so we end up with negative durations if we do this...
-        #endif
-        ;
-        if (tick_dur<=0) {
-            Serial.printf("EuclidianPattern::get_tick_duration got a non-positive tick duration!: tick_dur=%i, get_shuffle_length() returned %i\n", tick_dur, this->get_shuffle_length());
-        }
-        tick_dur = max(tick_dur, (int8_t)1); // ensure we dont get a negative or zero tick duration
-        return tick_dur;
+        return max(dur, (int8_t)1);
     }
 
     // virtual int8_t get_velocity() override {

@@ -26,6 +26,16 @@ void SimplePattern::trigger_on_for_step(int step) {
     if (this->debug)
         Serial.printf("SimplePattern::trigger_on_for_step: output=%s, step=%i, ticks=%6u, current_duration=(%i -> ", this->get_output_label(), step, ticks, this->current_duration);
     this->current_duration = this->get_tick_duration();
+    #ifdef ENABLE_SHUFFLE
+        if (this->is_shuffled() && this->query_note_on_for_step(step + 1)) {
+            const int16_t output_ppqn = (int16_t)uClock.getOutputPPQN();
+            const int16_t output_ticks_per_step = output_ppqn / STEPS_PER_BEAT;
+            const int16_t next_onset_ticks = output_ticks_per_step + this->get_shuffle_length();
+            const int16_t ticks_before_next_onset = (next_onset_ticks * PPQN) / output_ppqn;
+            const int16_t maximum_duration = max((int16_t)1, ticks_before_next_onset - 1);
+            this->current_duration = min(this->current_duration, maximum_duration);
+        }
+    #endif
     if (this->debug)
         Serial.printf("%i)\n", this->current_duration);
 
