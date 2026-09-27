@@ -27,13 +27,24 @@ void SimplePattern::trigger_on_for_step(int step) {
         Serial.printf("SimplePattern::trigger_on_for_step: output=%s, step=%i, ticks=%6u, current_duration=(%i -> ", this->get_output_label(), step, ticks, this->current_duration);
     this->current_duration = this->get_tick_duration();
     #ifdef ENABLE_SHUFFLE
-        if (this->is_shuffled() && this->query_note_on_for_step(step + 1)) {
-            const int16_t output_ppqn = (int16_t)uClock.getOutputPPQN();
-            const int16_t output_ticks_per_step = output_ppqn / STEPS_PER_BEAT;
-            const int16_t next_onset_ticks = output_ticks_per_step + this->get_shuffle_length();
-            const int16_t ticks_before_next_onset = (next_onset_ticks * PPQN) / output_ppqn;
-            const int16_t maximum_duration = max((int16_t)1, ticks_before_next_onset - 1);
-            this->current_duration = min(this->current_duration, maximum_duration);
+        if (this->is_shuffled()) {
+            const int effective_steps = this->get_effective_steps();
+            for (int steps_to_next_onset = 1; steps_to_next_onset <= effective_steps; steps_to_next_onset++) {
+                if (!this->query_note_on_for_step(step + steps_to_next_onset))
+                    continue;
+
+                const int32_t output_ppqn = (int32_t)uClock.getOutputPPQN();
+                const int32_t output_ticks_per_step = output_ppqn / STEPS_PER_BEAT;
+                const int32_t current_offset = uClock.getShuffleOffset(step, this->get_shuffle_track());
+                const int32_t next_offset = uClock.getShuffleOffset(
+                    step + steps_to_next_onset, this->get_shuffle_track());
+                const int32_t next_onset_ticks =
+                    steps_to_next_onset * output_ticks_per_step + next_offset - current_offset;
+                const int32_t ticks_before_next_onset = (next_onset_ticks * PPQN) / output_ppqn;
+                const int16_t maximum_duration = max((int32_t)1, ticks_before_next_onset - 1);
+                this->current_duration = min(this->current_duration, maximum_duration);
+                break;
+            }
         }
     #endif
     if (this->debug)

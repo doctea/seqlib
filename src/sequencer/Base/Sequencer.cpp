@@ -156,7 +156,7 @@ void SimpleSequencer::on_step_end(int step) {
         for (auto* p : *this->patterns) {
             if (p!=nullptr && p->is_shuffled() && p->get_shuffle_track()==track) {
                 //if (Serial) Serial.printf("at tick %i, received on_step_shuffled(%i, %i) callback for shuffled track %i\n", ticks, track, step, track);
-                p->process_step(step);
+                ((SimplePattern*)p)->process_step_shuffled(step);
             }
         }
     };

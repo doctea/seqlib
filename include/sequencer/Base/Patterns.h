@@ -245,6 +245,11 @@ class SimplePattern : public BasePattern {
     uint32_t triggered_on_step = -1;
     uint32_t triggered_on_tick = -1;
     int16_t current_duration = PPQN;
+    #ifdef ENABLE_SHUFFLE
+        bool shuffled_step_end_pending = false;
+        uint32_t shuffled_step_started_at_tick = 0;
+        int shuffled_step_end_step = 0;
+    #endif
 
     // todo: can probably save some RAM if we allow subclassed patterns to choose their storage format
     // eg EuclidianPatterns only actually need to store on/off for each step so we could easily reduce memory usage by a third
@@ -308,6 +313,16 @@ class SimplePattern : public BasePattern {
         //if (debug) Serial.println();
         //debug = false;
     }
+    #ifdef ENABLE_SHUFFLE
+        virtual void process_step_shuffled(int step) {
+            if (this->shuffled_step_end_pending)
+                this->process_step_end(this->shuffled_step_end_step);
+            this->shuffled_step_end_pending = true;
+            this->shuffled_step_started_at_tick = ticks;
+            this->shuffled_step_end_step = step;
+            this->process_step(step);
+        }
+    #endif
     virtual void process_step_end(int step) override {
         if (this->query_note_off_for_step((step+1) % this->get_effective_steps()) && this->note_held) {
             // only turn off if the duration has passed, otherwise we might cut off a note early
@@ -320,6 +335,13 @@ class SimplePattern : public BasePattern {
         }
     }
     virtual void process_tick(int ticks) override { 
+        #ifdef ENABLE_SHUFFLE
+            if (this->shuffled_step_end_pending && (uint32_t)ticks != this->shuffled_step_started_at_tick) {
+                this->shuffled_step_end_pending = false;
+                this->process_step_end(this->shuffled_step_end_step);
+            }
+        #endif
+
         // Early-out: most ticks have no note held — skip the modulo division entirely.
         if (!this->note_held) return;
 

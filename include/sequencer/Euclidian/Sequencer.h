@@ -267,7 +267,7 @@ class EuclidianSequencer : public BaseSequencer
             for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
                 if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
                     if (Serial && this->debug) Serial.printf("\t\ton_step_shuffled(%i, %i): EuclidianSequencer at tick %i, calling process_step for %s\n", track, step, ticks, this->get_pattern(i)->get_output_label());
-                    this->get_pattern(i)->process_step(step);
+                    this->get_pattern(i)->process_step_shuffled(step);
                 }
             }
         };
