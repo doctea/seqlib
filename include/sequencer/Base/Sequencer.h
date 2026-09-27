@@ -41,6 +41,15 @@ class BaseSequencer
                 [this](time_sig_t time_sig) { this->notify_time_sig_changed(time_sig); }
             );
         #endif
+        #ifdef ENABLE_SHUFFLE
+            // register the shuffle callback for this sequencer
+            // @@TODO: we probably want to make this optional so that the project can decide
+            // whether to register the sequencer directly, or whether there is some other
+            // wrapper (eg behaviour manager, or individual behaviours?) that will handle it.
+            shuffle_pattern_wrapper.register_shuffle_callback(
+                [this](uint32_t step, uint8_t track) { this->on_step_shuffled(track, step); }
+            );
+        #endif
     }
     virtual ~BaseSequencer() = default;
 
@@ -91,8 +100,8 @@ class BaseSequencer
     virtual void on_step_end(int step) = 0;
 
     #ifdef ENABLE_TIME_SIGNATURE
-            // callback for when time signature changes; default implementation is a no-op, but sequencers that need to know about time signature changes can override this to be notified whenever the time signature changes
         virtual void notify_time_sig_changed(time_sig_t time_sig) {
+            // callback for when time signature changes; default implementation is a no-op, but sequencers that need to know about time signature changes can override this to be notified whenever the time signature changes
             // default implementation is a no-op; override in sequencers that need to know about time signature changes
 
             // loop over the patterns and notify them of the time signature change

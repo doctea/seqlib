@@ -3,9 +3,21 @@
 #ifdef ENABLE_SHUFFLE
     #include "uClock.h"
 
+    #include "functional-vlpp.h"
+    #include "GenericList.h"
+    
+    #ifdef ENABLE_PARAMETERS
+        #include "parameter_list.h"
+    #endif
+
     #ifndef NUMBER_SHUFFLE_PATTERNS
         #define NUMBER_SHUFFLE_PATTERNS 1
     #endif
+
+    void shuffled_callback(uint32_t step, uint8_t track_number);
+
+    typedef vl::Func<void(uint32_t, uint8_t)> shuffle_callback_def_t;
+
     class ShufflePatternWrapper {
         public:
             int8_t track_number = 0;
@@ -111,6 +123,10 @@
                 for (size_t i = 0 ; i < number_shuffle_wrappers ; i++) {
                     shuffle_patterns[i] = new ShufflePatternWrapper(i);
                 }
+
+                // register our global shuffle_callback with uClock so that we get told about shuffle events
+                // we then dispatch these events to the registered shuffle callbacks
+                uClock.setOnStep(::shuffled_callback, this->number_shuffle_wrappers);
             }
 
             ~ShufflePatternWrapperManager() {
@@ -118,6 +134,12 @@
                     delete shuffle_patterns[i];
                 }
                 delete[] shuffle_patterns;
+                for (size_t i = 0; i < shuffle_callbacks.size(); i++) {
+                    delete shuffle_callbacks.get(i);
+                }
+                #ifdef ENABLE_PARAMETERS
+                    delete parameters;
+                #endif
             }
 
             ShufflePatternWrapper* operator[](size_t index) {
@@ -126,7 +148,29 @@
                 }
                 return shuffle_patterns[index];
             }
+
+            // list of callbacks to notify when a shuffle callback occurs
+            GenericList<shuffle_callback_def_t*> shuffle_callbacks;
+
+            void register_shuffle_callback(shuffle_callback_def_t cb) {
+                shuffle_callbacks.add(new shuffle_callback_def_t(cb));
+            }
+
+            void shuffled_callback(uint32_t step, uint8_t track_number) {
+                for (size_t i = 0; i < shuffle_callbacks.size(); i++) {
+                    (*shuffle_callbacks.get(i))(step, track_number);
+                }
+            }
+
+            #if defined(ENABLE_PARAMETERS)
+                ParameterList *parameters = nullptr;
+                ParameterList* getParameters();
+            #endif
     };
     extern ShufflePatternWrapperManager shuffle_pattern_wrapper;
-    
+
+    #ifdef ENABLE_SCREEN
+        void setup_menu_shuffle();
+    #endif
+
 #endif

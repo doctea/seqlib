@@ -152,26 +152,6 @@
             }*/
         }
 
-        #ifdef ENABLE_SHUFFLE
-            for (size_t i = 0 ; i < shuffle_pattern_wrapper.getCount() ; i++) {
-                char label[32];
-                snprintf(label, sizeof(label), "Shuffle amount %u", (unsigned)i);
-                parameters->add(new LDataParameter<float>(
-                    label,
-                    [=] (float v) { 
-                        //if (Serial) Serial.printf("Shuffle amount %i set to %f\n", i, v);
-                        //ATOMIC() {
-                            shuffle_pattern_wrapper[i]->set_amount(v); 
-                            shuffle_pattern_wrapper[i]->update_target();
-                        //}
-                    },
-                    [=] () -> float { return shuffle_pattern_wrapper[i]->get_amount(); },
-                    -1.0f,
-                    1.0f
-                ));
-            }
-        #endif
-
         parameter_manager->addParameters(parameters);
 
         return parameters;
@@ -351,21 +331,6 @@
 
                 p->create_menu_items(menu, i, this, combine_setting, group_name);
             }
-
-            #ifdef ENABLE_SHUFFLE
-                menu->add_page("Shuffle patterns", C_WHITE, false, group_name);
-                for (size_t i = 0 ; i < shuffle_pattern_wrapper.getCount() ; i++) {
-                    char label[MENU_C_MAX];
-                    snprintf(label, MENU_C_MAX, "Shuffle %i", i);
-                    //SubMenuItemBar *submenu = new SubMenuItemColumns(label, 2, true, true);
-                    SubMenuItemBar *submenu = new DualMenuItem(label, false, true, 48);
-                    submenu->add(new LambdaNumberControl<float>("Amount", [=](float v) -> void { shuffle_pattern_wrapper[i]->set_amount(v); shuffle_pattern_wrapper[i]->update_target(); }, [=]() -> float { return shuffle_pattern_wrapper[i]->get_amount(); }, nullptr, 0.0f, 1.0f, true, true));
-                    //submenu->add(new LambdaToggleControl("Active", [=](bool v) -> void { shuffle_pattern_wrapper[i]->set_active(v); shuffle_pattern_wrapper[i]->update_target(); }, [=]() -> bool { return shuffle_pattern_wrapper[i]->is_active(); }));
-                    submenu->add(new ShufflePatternEditorControl((const char*)label, shuffle_pattern_wrapper[i]));
-                    menu->add(submenu);
-                }
-                menu->remember_opened_page();
-            #endif
         }
 
         #include "LinkedList.h"

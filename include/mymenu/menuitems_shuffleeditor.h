@@ -12,8 +12,8 @@ class ShufflePatternEditorControl : public MenuItem {
     int selected_step = 0;
     bool editing = false;
 
-    const int SHUFFLE_MINIMUM = -12;
-    const int SHUFFLE_MAXIMUM =  12;
+    const int SHUFFLE_MINIMUM = -12;    // todo: calculate this based on the actual uclock internal PPQN
+    const int SHUFFLE_MAXIMUM =  12;    // todo: calculate this based on the actual uclock internal PPQN
 
     public:
         ShufflePatternEditorControl(const char *label, ShufflePatternWrapper *shuffwrapper) : MenuItem(label) {
@@ -34,6 +34,7 @@ class ShufflePatternEditorControl : public MenuItem {
             this->colours(false);
 
             for (int i = 0 ; i < shufflewrapper->size ; i++) {
+                // todo: fix so that short templates (eg 8 steps) go over one line instead of being split into 2 as they do currently
                 int row = i+1 >= (shufflewrapper->size / 2) ? 1 : 0;
                 int column = i % (shufflewrapper->size / 2);
 

@@ -239,6 +239,7 @@ class EuclidianSequencer : public BaseSequencer
         for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
             #ifdef ENABLE_SHUFFLE
                 if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->get_pattern(i)->is_shuffled())) {
+                    // only process patterns that aren't shuffled
                     this->get_pattern(i)->process_step(step);
                 }
             #else
@@ -252,6 +253,7 @@ class EuclidianSequencer : public BaseSequencer
         for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
             #ifdef ENABLE_SHUFFLE
                 if (!is_shuffle_enabled() || (is_shuffle_enabled() && !this->get_pattern(i)->is_shuffled())) {
+                    // only process patterns that aren't shuffled
                     this->get_pattern(i)->process_step_end(step);
                 }
             #else
@@ -266,6 +268,7 @@ class EuclidianSequencer : public BaseSequencer
 
             for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
                 if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
+                    // only process patterns that are shuffled and match the shuffle track
                     if (Serial && this->debug) Serial.printf("\t\ton_step_shuffled(%i, %i): EuclidianSequencer at tick %i, calling process_step for %s\n", track, step, ticks, this->get_pattern(i)->get_output_label());
                     this->get_pattern(i)->process_step_shuffled(step);
                 }
@@ -337,7 +340,6 @@ class EuclidianSequencer : public BaseSequencer
             }
         }
     }
-
 
     
     #if defined(ENABLE_PARAMETERS)
