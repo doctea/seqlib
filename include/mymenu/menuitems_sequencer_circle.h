@@ -110,6 +110,10 @@ class CircleDisplay : public MenuItem {
                 }
                 if (count>1) {
                     tft->drawLine(last_x, last_y, first_x, first_y, colour);
+                } else if (count==1) {
+                    // only one event - draw it as a filled circle so it can be seen
+                    // todo: multiple items on the same step should be represented differently
+                    tft->fillCircle(last_x, last_y, 5, colour);
                 }
             }
 

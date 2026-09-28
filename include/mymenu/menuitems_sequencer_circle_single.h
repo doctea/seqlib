@@ -125,6 +125,9 @@ class SingleCircleDisplay : public MenuItem {
             }
             if (count>1) {
                 tft->drawLine(last_x, last_y, first_x, first_y, pattern_colour);
+            } else if (count==1) {
+                // only one event - draw it as a filled circle so it can be seen
+                tft->fillCircle(last_x, last_y, 5, pattern_colour);
             }
 
             // draw step markers around circle
