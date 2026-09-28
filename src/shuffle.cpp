@@ -66,6 +66,9 @@
                     1.0f
                 ));
             }
+
+            parameter_manager->addParameters(parameters);
+
             return parameters;
         }
     #endif
