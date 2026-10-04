@@ -43,6 +43,8 @@
     #endif
 
     #ifdef ENABLE_PARAMETERS
+        #include "parameters/Parameter.h"
+        #include "ParameterManager.h"
         ParameterList* ShufflePatternWrapperManager::getParameters() {
             if(parameters!=nullptr)
                 return parameters;

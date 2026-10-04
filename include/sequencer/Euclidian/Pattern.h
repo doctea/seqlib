@@ -11,7 +11,6 @@ class EuclidianPattern : public SimplePattern
     {
     public:
 
-    bool locked = false;
     bool initialised = false;
     volatile bool needs_recompute = false;
     // uint32_t last_mutation_at = 0;
@@ -322,10 +321,13 @@ class EuclidianPattern : public SimplePattern
 
     #ifdef ENABLE_STORAGE
 
-        void on_after_load() override {
-            // force a recompute of the pattern after loading
-            // TODO: maybe we only want to do this if the pattern has actually had its values changed during the load..?
-            this->make_euclid(true);
+        // TODO: maybe we only want to do this if the pattern has actually had its values changed during the load..?
+        void recalculate_after_load() override {
+            // the load setters only write `arguments`; `used_arguments` is normally refreshed from it
+            // by the ProxyParameters, so mirror it here to recompute from the values just loaded.
+            memcpy(&this->used_arguments, &this->arguments, sizeof(arguments_t));
+            this->needs_recompute = false;
+            this->make_euclid();
         }
 
         virtual void add_saveable_settings(int pattern_index) override {

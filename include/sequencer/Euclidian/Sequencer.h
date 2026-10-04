@@ -56,10 +56,10 @@ class EuclidianSequencer : public BaseSequencer
         this->patterns = (EuclidianPattern**) CALLOC_FUNC(number_patterns, sizeof(p));
 
         for (int_fast8_t i = 0 ; i < number_patterns ; i++) {
-            if (this->debug && Serial) {
-                Serial.printf("EuclidianSequencer constructor creating EuclidianPattern %i; available_outputs is @%p (size %i)\n", i, available_outputs, available_outputs->size()); 
-                Serial.flush();
-            }
+            // if (this->debug && Serial) {
+            //     Serial.printf("EuclidianSequencer constructor creating EuclidianPattern %i; available_outputs is @%p (size %i)\n", i, available_outputs, available_outputs->size()); 
+            //     Serial.flush();
+            // }
             EuclidianPattern *p = new EuclidianPattern(available_outputs, i / (number_patterns / NUM_GLOBAL_DENSITY_GROUPS));
             #ifdef ENABLE_STORAGE
                  p->set_path_segment_fmt("pattern_%i", i);
@@ -269,7 +269,6 @@ class EuclidianSequencer : public BaseSequencer
             for (uint_fast8_t i = 0 ; i < this->get_number_patterns() ; i++) {
                 if (this->get_pattern(i)->is_shuffled() && this->get_pattern(i)->get_shuffle_track()==track) {
                     // only process patterns that are shuffled and match the shuffle track
-                    if (Serial && this->debug) Serial.printf("\t\ton_step_shuffled(%i, %i): EuclidianSequencer at tick %i, calling process_step for %s\n", track, step, ticks, this->get_pattern(i)->get_output_label());
                     this->get_pattern(i)->process_step_shuffled(step);
                 }
             }

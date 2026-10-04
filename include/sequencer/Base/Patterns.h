@@ -198,6 +198,21 @@ class BasePattern
     #endif
 
     #ifdef ENABLE_STORAGE
+        // Rebuild any derived state from the freshly-loaded settings.
+        // Called from on_after_load() with the lock temporarily cleared, so implementations
+        // can just do their normal recompute without needing to know about loading or locking.
+        virtual void recalculate_after_load() {}
+
+        virtual void on_after_load() override {
+            // `locked` is itself a saved setting, so the pattern may already be locked (or have
+            // just become locked) by the time the rest of its values have been loaded.  Drop the
+            // lock for the duration of the recalculation so the loaded values actually get applied.
+            const bool was_locked = this->is_locked();
+            if (was_locked) this->set_locked(false);
+            this->recalculate_after_load();
+            if (was_locked) this->set_locked(true);
+        }
+
         virtual void add_saveable_settings(int pattern_index) {
 
             register_setting(
