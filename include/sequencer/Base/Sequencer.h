@@ -129,7 +129,7 @@ class BaseSequencer
 
     #if defined(ENABLE_PARAMETERS)
         virtual ParameterList *getParameters();
-        virtual FloatParameter* getParameterByName(const char *name);   // UNTESTED!!
+        virtual FloatParameter* getParameterByName(const char *name);
     #endif
 
     #if defined(ENABLE_SCREEN)

@@ -108,8 +108,8 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
 
         SimplePattern::getParameters(i);
 
-        char label[MAX_LABEL];
-        snprintf(label, MAX_LABEL, "TM %i probability", i);
+        char label[MAX_PARAMETER_NAME_LENGTH];
+        snprintf(label, MAX_PARAMETER_NAME_LENGTH, "TM %i probability", i);
         parameters->add(
             new ProxyParameter<float>(
                 label, 
@@ -119,7 +119,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 1.0f
             ));
 
-        snprintf(label, MAX_LABEL, "TM %i steps", i);
+        snprintf(label, MAX_PARAMETER_NAME_LENGTH, "TM %i steps", i);
         parameters->add(
             new ProxyParameter<uint8_t>(
                 label, 
@@ -129,7 +129,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 TIME_SIG_MAX_STEPS_PER_BAR*2
             ));
 
-        snprintf(label, MAX_LABEL, "TM %i duration", i);
+        snprintf(label, MAX_PARAMETER_NAME_LENGTH, "TM %i duration", i);
         parameters->add(
             new ProxyParameter<int>(
                 label, 
@@ -139,7 +139,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 PPQN    // /4
             ));
 
-        snprintf(label, MAX_LABEL, "TM %i mutlock amt", i);
+        snprintf(label, MAX_PARAMETER_NAME_LENGTH, "TM %i mutlock amt", i);
         parameters->add(
             new ProxyParameter<int>(
                 label,
@@ -148,7 +148,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                 1,
                 8
             ));
-        snprintf(label, MAX_LABEL, "TM %i mutlock on", i);
+        snprintf(label, MAX_PARAMETER_NAME_LENGTH, "TM %i mutlock on", i);
         parameters->add(
             new ProxyParameter<bool>(
                 label,

@@ -1,6 +1,6 @@
 #pragma once
 
-#define MAX_LABEL 40
+#define MAX_OUTPUT_LABEL 40
 
 #ifdef ENABLE_SCREEN
     class Menu;
@@ -32,10 +32,10 @@ class BaseOutput : public ISequencerEventReceiver
     bool enabled = true;
     bool has_gone_on = false;
 
-    char label[MAX_LABEL];
+    char label[MAX_OUTPUT_LABEL];
     BaseOutput (const char *label) {
-        strncpy(this->label, label, MAX_LABEL);
-        this->label[MAX_LABEL - 1] = '\0';
+        strncpy(this->label, label, MAX_OUTPUT_LABEL);
+        this->label[MAX_OUTPUT_LABEL - 1] = '\0';
 
         #ifdef ENABLE_STORAGE
             this->set_path_segment(label);

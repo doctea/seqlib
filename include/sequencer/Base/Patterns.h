@@ -185,6 +185,12 @@ class BasePattern
             else
                 return 0;
         }
+        virtual int16_t get_shuffle_offset(int step) {
+            if (this->is_shuffled()) {
+                return uClock.getShuffleOffset(step, this->get_shuffle_track());
+            }else
+                return 0;
+        }
     #endif
 
     #ifdef ENABLE_PARAMETERS

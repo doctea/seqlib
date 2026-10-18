@@ -33,6 +33,7 @@
             float amount = 1.0f;
     
             int8_t last_sent_step[MAX_SHUFFLE_TEMPLATE_SIZE] = {0};
+            uint32_t shuffle_last_changed_at = millis();
     
             ShufflePatternWrapper(int8_t track_number) {
                 this->track_number = track_number;
@@ -47,6 +48,16 @@
             }
             bool is_active() {
                 return uClock.isShuffled(this->track_number);
+            }
+            uint32_t get_shuffle_last_changed_at() {
+                return shuffle_last_changed_at;
+            }
+
+            int16_t get_shuffle_offset(int8_t step_number) {
+                if (step_number >= 0 && step_number < MAX_SHUFFLE_TEMPLATE_SIZE) {
+                    return step[step_number % size];
+                }
+                return 0;
             }
     
             void set_steps(const int8_t *steps, int8_t size) {
@@ -107,6 +118,7 @@
                     uClock.setShuffleTemplate(scaled_steps, this->size, this->track_number);
                     for (int i = 0; i < size; i++)
                         last_sent_step[i] = scaled_steps[i];
+                    this->shuffle_last_changed_at = millis();
                     this->last_sent_size = size;
                 }
                 this->set_active(this->amount < -0.01f || this->amount > 0.01f);
@@ -232,6 +244,13 @@
             for (size_t i = 0; i < shuffle_callbacks.size(); i++) {
                 (*shuffle_callbacks.get(i))(step, track_number);
             }
+        }
+
+        uint32_t get_shuffle_last_changed_at(uint8_t track_number) {
+            if (track_number >= number_shuffle_wrappers) {
+                return 0;
+            }
+            return shuffle_patterns[track_number]->get_shuffle_last_changed_at();
         }
 
         #if defined(ENABLE_PARAMETERS)
