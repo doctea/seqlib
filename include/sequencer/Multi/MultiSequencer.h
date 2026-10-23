@@ -138,7 +138,9 @@ class MultiSequencer : public SimpleSequencer
                     }
                 }
             }
-            return params;
+            
+            this->parameters = params;
+            return this->parameters;
         }
         //virtual FloatParameter* getParameterByName(const char *name) {}
     #endif

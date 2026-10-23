@@ -69,6 +69,18 @@ class TuringMachinePattern : public SimplePattern
         return "Turing Machine";
     }
 
+    virtual const char *get_parameter_label_prefix() {
+        return "TM ";
+    }
+
+    // virtual bool query_note_off_for_tick(unsigned int tick) override {
+    //     if (SimplePattern::query_note_off_for_tick(tick)) {
+    //         return true;
+    //     }
+    //     short step = get_step_for_tick(tick);
+    //     return (this->events[step].velocity==0);
+    // }
+
     virtual void trigger_on_for_step(int step) override;
     virtual void trigger_off_for_step(int step) override;
 
@@ -140,7 +152,7 @@ class TuringMachinePattern : public SimplePattern
             if (current_state) {
                 this->unset_event_for_tick(step * TICKS_PER_STEP);
             } else {
-                int8_t new_note = random(128);
+                int8_t new_note = random(MIDI_NUM_NOTES);
                 this->set_event_for_tick(step * TICKS_PER_STEP, new_note, MIDI_MAX_VELOCITY, 1);
             }
             if (is_mutation_lock_active()) this->lock_step(step);

@@ -64,21 +64,30 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
         output_bar->add(selector);
         menu->add(output_bar);
 
-        SubMenuItemBar *lock_bar = new SubMenuItemBar("Pattern settings", true, false);
+        SubMenuItemBar *pattern_bar = new SubMenuItemBar("Pattern settings", true, false);
 
-        lock_bar->add(new LambdaToggleControl(
+        pattern_bar->add(new LambdaToggleControl(
             "Lock pattern",
             [=](bool value) { this->set_locked(value); },
             [=]() -> bool { return this->is_locked(); }
         ));
 
-        lock_bar->add(new LambdaNumberControl<int8_t> ("Steps",
+        pattern_bar->add(new LambdaNumberControl<int8_t> ("Steps",
             [=](int8_t v) -> void { this->set_steps(v); },
             [=]() -> int8_t { return this->get_steps(); },
             nullptr, 1, TIME_SIG_MAX_STEPS_PER_BAR, true, true
         ));
 
-        menu->add(lock_bar);
+        #if defined(ENABLE_SHUFFLE) && NUMBER_SHUFFLE_PATTERNS > 1
+            pattern_bar->add(new LambdaNumberControl<int8_t> (
+                "Shuffle #", 
+                [=](int8_t track) -> void { this->set_shuffle_track(track); }, 
+                [=]() -> int8_t { return this->get_shuffle_track(); },
+                nullptr, 0, shuffle_pattern_wrapper.getCount()-1, true, true
+            ));
+        #endif
+
+        menu->add(pattern_bar);
 
         #ifdef ENABLE_PARAMETERS
             // add parameter modulation controls -- we can choose to combine these on the same page as the main pattern controls, or put them on a separate page with a link from the main one
@@ -108,50 +117,44 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
 
         SimplePattern::getParameters(i);
 
-        char label[MAX_PARAMETER_NAME_LENGTH];
-        snprintf(label, MAX_PARAMETER_NAME_LENGTH, "TM %i probability", i);
         parameters->add(
             new ProxyParameter<float>(
-                label, 
+                this->make_parameter_label("probability", i),
                 &this->probability,
                 &this->effective_probability,
                 0.0f, 
                 1.0f
             ));
 
-        snprintf(label, MAX_PARAMETER_NAME_LENGTH, "TM %i steps", i);
         parameters->add(
             new ProxyParameter<uint8_t>(
-                label, 
+                this->make_parameter_label("steps", i), 
                 &this->steps,
                 &this->effective_steps,
                 1, 
                 TIME_SIG_MAX_STEPS_PER_BAR*2
             ));
 
-        snprintf(label, MAX_PARAMETER_NAME_LENGTH, "TM %i duration", i);
         parameters->add(
             new ProxyParameter<int>(
-                label, 
+                this->make_parameter_label("duration", i), 
                 &this->default_duration,
                 &this->effective_duration,
                 1, 
                 PPQN    // /4
             ));
 
-        snprintf(label, MAX_PARAMETER_NAME_LENGTH, "TM %i mutlock amt", i);
         parameters->add(
             new ProxyParameter<int>(
-                label,
+                this->make_parameter_label("mutlock amt", i),
                 &this->mutation_lock_count,
                 &this->mutation_lock_count,
                 1,
                 8
             ));
-        snprintf(label, MAX_PARAMETER_NAME_LENGTH, "TM %i mutlock on", i);
         parameters->add(
             new ProxyParameter<bool>(
-                label,
+                this->make_parameter_label("mutlock on", i),
                 &this->mutation_lock_active,
                 &this->mutation_lock_active,
                 false,

@@ -108,6 +108,11 @@ class MIDIChordGeneratorOutput : public MIDINoteOutput {
         BaseOutput::set_enabled(state);
     }
 
+    // chords are built from the scale by the chord player, so harmony settings are intrinsic here
+    virtual bool uses_own_quantiser() const override {
+        return true;
+    }
+
     virtual void process() override {
         BaseOutput::process();
 

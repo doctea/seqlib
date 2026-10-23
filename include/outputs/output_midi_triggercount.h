@@ -28,6 +28,11 @@ class MIDINoteTriggerCountOutput : public MIDINoteOutput {
                 this->finish_count_at = this->nodes->size() + finish_count_at;  // if finish_count_at is negative, count backwards from the end of the list
         }
 
+        // base note comes from the scale root setting
+        virtual bool uses_scale_for_generation() const override {
+            return true;
+        }
+
         virtual int8_t get_note_to_play() override {
             int8_t note_number = get_base_note() + get_note_number_count();
             // Serial.printf(

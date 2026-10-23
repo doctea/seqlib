@@ -60,13 +60,22 @@ class BasePattern
     GenericList<BaseOutput*> *available_outputs = nullptr;
 
     bool debug = false;
+    
+    BasePattern(GenericList<BaseOutput*> *available_outputs) {
+        this->set_available_outputs(available_outputs);
+    }
+        
+    virtual const char *get_parameter_label_prefix() {
+        return "Pattern ";
+    }
+    virtual const char *make_parameter_label(const char *parameter_name, int parameter_index) {
+        static char buffer[64];
+        snprintf(buffer, sizeof(buffer), "%s%i %s", this->get_parameter_label_prefix(), parameter_index, parameter_name);
+        return buffer;
+    }
 
     virtual void set_available_outputs(GenericList<BaseOutput*> *available_outputs) {
         this->available_outputs = available_outputs;
-    }
-
-    BasePattern(GenericList<BaseOutput*> *available_outputs) {
-        this->set_available_outputs(available_outputs);
     }
 
     virtual void set_output_by_name(const char *output_name);
@@ -281,6 +290,7 @@ class SimplePattern : public BasePattern {
 
     uint32_t last_updated_at = 0;
 
+    
     SimplePattern(GenericList<BaseOutput*> *available_outputs) : BasePattern(available_outputs) {
         this->events = (midi_note_event_t*)CALLOC_FUNC(sizeof(midi_note_event_t), steps);
     }

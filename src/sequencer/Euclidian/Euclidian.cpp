@@ -174,21 +174,18 @@
         BasePattern::getParameters(i);
 
         #ifndef SEQLIB_DISABLE_PATTERN_EUCLIDIAN_PARAMETERS
-            char label[MENU_C_MAX];
-            snprintf(label, MENU_C_MAX, "Pattern %i steps", i);
             parameters->add(
                 new ProxyParameter<int>(
-                    label, 
+                    this->make_parameter_label("steps", i), 
                     &this->arguments.steps,
                     &this->used_arguments.steps,
                     1, 
                     this->maximum_steps
                 ));
 
-            snprintf(label, MENU_C_MAX, "Pattern %i pulses", i);
             parameters->add(
                 new ProxyParameter<int>(
-                    label,
+                    this->make_parameter_label("pulses", i),
                     &this->arguments.pulses,
                     &this->used_arguments.pulses,
                     0,
@@ -196,10 +193,9 @@
                 )
             );
 
-            snprintf(label, MENU_C_MAX, "Pattern %i rotation", i);
             parameters->add(
                 new ProxyParameter<int>(
-                    label,
+                    this->make_parameter_label("rotation", i),
                     &this->arguments.rotation,
                     &this->used_arguments.rotation,
                     1,
@@ -207,10 +203,9 @@
                 )
             );
 
-            snprintf(label, MENU_C_MAX, "Pattern %i duration", i);
             parameters->add(
                 new ProxyParameter<int>(
-                    label,
+                    this->make_parameter_label("duration", i),
                     &this->arguments.duration,
                     &this->used_arguments.duration,
                     1,

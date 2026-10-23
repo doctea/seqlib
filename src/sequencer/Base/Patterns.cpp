@@ -67,9 +67,21 @@ void SimplePattern::trigger_off_for_step(int step) {
 };
 
 #ifdef ENABLE_PARAMETERS
+    #include "parameters/Parameter.h"
+
     ParameterList *BasePattern::getParameters(unsigned int i) {
-        if (this->parameters==nullptr)
+        if (this->parameters==nullptr) {
             this->parameters = new ParameterList();
+
+            // @@TODO: set up the default steps parameter
+
+            // set up the default locked parameter
+            this->parameters->add(new LToggleDataParameter<>(
+                this->make_parameter_label("locked", i), 
+                [=](bool value) -> void { this->set_locked(value); },
+                [=]() -> bool { return this->is_locked(); }
+            ));
+        }
         return this->parameters;
     }
 #endif

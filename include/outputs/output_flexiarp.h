@@ -72,6 +72,12 @@ class FlexiArpOutput : public MIDINoteOutput
         this->change_every.effective = change_every;
     }
 
+    // flexiarp picks scale/chord degrees, so its scale/chord choice is intrinsic to note generation
+    // rather than an optional quantiser; keep it even when SEQLIB_EXTERNAL_NOTE_QUANTISE is defined
+    virtual bool uses_own_quantiser() const override {
+        return true;
+    }
+
 
     virtual void reset_arp_counters() {
         trigger_count = 0;

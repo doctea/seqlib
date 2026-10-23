@@ -288,6 +288,21 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 return this->event_value_3;
             }
 
+            // Projects that quantise notes downstream (eg per-connection in a routing matrix) can define
+            // SEQLIB_EXTERNAL_NOTE_QUANTISE to bypass this output's own quantiser and hide its controls.
+            // Outputs whose note generation is defined in terms of scale/chord (eg FlexiArp) override this.
+            virtual bool uses_own_quantiser() const {
+                #ifdef SEQLIB_EXTERNAL_NOTE_QUANTISE
+                    return false;
+                #else
+                    return true;
+                #endif
+            }
+            // true if get_note_to_play() derives pitches from this output's scale/root settings
+            virtual bool uses_scale_for_generation() const {
+                return false;
+            }
+
             virtual bool should_quantise_to_chord() {
                 // TODO: this should check if we are in (this->quantise_mode == QUANTISE_MODE_CHORD), and if so
                 // then check if a valid chord is set (by checking global chord, for arranger)
@@ -317,7 +332,7 @@ class MIDIDrumOutput : public MIDIBaseOutput {
                 if (!is_valid_note(note_to_play))
                     return NOTE_OFF;
 
-                if (!this->is_quantise())
+                if (!this->uses_own_quantiser() || !this->is_quantise())
                     // not quantising, so just return the note to play
                     return note_to_play;
 

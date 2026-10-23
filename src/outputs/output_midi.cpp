@@ -24,27 +24,30 @@
             false
         );
 
-        LambdaQuantiseModeControl *quant_mode = new LambdaQuantiseModeControl(
-            "Quant",
-            [=](int8_t v) -> void {
-                this->set_quantise_mode((quantise_mode_t)constrain((int)v, (int)quantise_mode_t::QUANTISE_MODE_NONE, (int)quantise_mode_t::QUANTISE_MODE_CHORD));
-            },
-            [=]() -> int8_t {
-                return (int8_t)this->get_quantise_mode();
-            }
-        );
-        scale_menu->add(quant_mode);
+        if (this->uses_own_quantiser()) {
+            LambdaQuantiseModeControl *quant_mode = new LambdaQuantiseModeControl(
+                "Quant",
+                [=](int8_t v) -> void {
+                    this->set_quantise_mode((quantise_mode_t)constrain((int)v, (int)quantise_mode_t::QUANTISE_MODE_NONE, (int)quantise_mode_t::QUANTISE_MODE_CHORD));
+                },
+                [=]() -> int8_t {
+                    return (int8_t)this->get_quantise_mode();
+                }
+            );
+            scale_menu->add(quant_mode);
+        }
 
         menu->add(scale_menu);
     }
 
     void MIDINoteOutput::add_status_menu_items(Menu *menu) {
+        static quantise_mode_t external_quantise_mode = QUANTISE_MODE_NONE;
         menu->add(new HarmonyDisplay(
             "Output",
             &this->scale_number,
             &this->scale_root,
             &this->last_note_number,
-            &this->quantise_mode,
+            this->uses_own_quantiser() ? &this->quantise_mode : &external_quantise_mode,
             &conductor->global_chord_identity,
             false
         ));
@@ -125,7 +128,9 @@
             // menu->add(sub_menu_item_columns);
 
             #ifdef ENABLE_SCALES
-                this->add_scale_menu_items(menu);
+                // scale/key settings only matter if this output quantises itself or derives pitches from them
+                if (this->uses_own_quantiser() || this->uses_scale_for_generation())
+                    this->add_scale_menu_items(menu);
             #endif
             this->add_note_limit_menu_items(menu);
             this->add_midi_settings_menu_items(menu);
