@@ -282,7 +282,8 @@ class EuclidianPattern : public SimplePattern
         // When locked, use the duration that was last actually applied by make_euclid().
         const int8_t dur = this->is_locked() ? this->last_arguments.duration : this->used_arguments.duration;
         if (dur<=0) {
-            Serial.printf("EuclidianPattern::get_tick_duration got a negative duration!: dur=%i, locked is %i\n", dur, this->is_locked());
+            // @@TODO: solve this, as it still happens...
+            //Serial.printf("EuclidianPattern::get_tick_duration got a negative duration!: dur=%i, locked is %i\n", dur, this->is_locked());
         }
         return max(dur, (int8_t)1);
     }
