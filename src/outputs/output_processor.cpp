@@ -14,15 +14,17 @@
     //FLASHMEM
     void MIDIOutputProcessor::create_menu_items(bool combine_pages, const char *page_name, const char *group_name) {
 
-        // make a QuickJump page for the outputs
-        menu->add_page("QuickJumpOutputs", C_WHITE);
-        CustomQuickPagesMenuItem *quickjump = new CustomQuickPagesMenuItem("QuickJump to Outputs");
-        menu->add(quickjump);
-        page_t *started_page = menu->get_selected_page();   // for remembering what page the quickjump menu itself is
-        menu->remember_opened_page(
-            menu->get_page_index_for_name(menu->get_selected_page()->title), 
-            true
-        );
+        CustomQuickPagesMenuItem *quickjump = nullptr;
+
+        if (this->nodes->size() > QUICKJUMP_NODES_THRESHOLD) {
+            // make a QuickJump page for the outputs
+            char quickjump_label[32];
+            snprintf(quickjump_label, sizeof(quickjump_label), "QuickJump to %s", page_name);
+            menu->add_page(quickjump_label, C_WHITE);
+            menu->remember_opened_page(menu->get_selected_page_index());
+            quickjump = new CustomQuickPagesMenuItem(quickjump_label);
+            menu->add(quickjump);
+        }
 
         unsigned int i = 0;
         for (auto* node : *this->nodes) {
@@ -32,7 +34,7 @@
             #endif
 
             // add page to quickjump, so long as isn't itself
-            if (started_page!=menu->get_selected_page()) {
+            if (quickjump) {
                 // most outputs have two pages (eg settings and parameters) so add both to the quickjump list if not combining pages
                 // todo: this needs to be improved
                 if (!combine_pages) 
@@ -57,7 +59,7 @@
         }
         menu->add(toggle);
 
-        if (started_page!=menu->get_selected_page())
+        if (quickjump)
             quickjump->add_page(menu->get_selected_page());
 
         // todo: implement a CombinePageOptions-style mask, like we did with the sequencer menu items, 

@@ -3,18 +3,14 @@
 #include "Euclidian.h"
 #include "Pattern.h"
 
-class EuclidianSequencer : public BaseSequencer
+class EuclidianSequencer : public SimpleSequencer
     #ifdef ENABLE_STORAGE
         , virtual public SHDynamic<34, 12>  
     #endif
     {
-    // todo: list of EuclidianPatterns...? althoguh array is probably fine
-    EuclidianPattern **patterns = nullptr;
-    int_fast8_t number_patterns = 0;
-    int_fast8_t number_added_patterns = 0;  // just so we can count how many patterns have been added, so we know where to add the next one
 
     int seed = 0;
-    uint_fast8_t mutate_minimum_pattern = 0, mutate_maximum_pattern = 0;
+    uint_fast8_t mutate_minimum_pattern = 0;
     uint_fast8_t mutation_count = DEFAULT_MUTATION_COUNT, effective_mutation_count = DEFAULT_MUTATION_COUNT;
     bool    reset_before_mutate = true, 
             mutate_enabled = true, 
@@ -26,8 +22,9 @@ class EuclidianSequencer : public BaseSequencer
     uint32_t last_locked_seed = 0;
 
     // Per-instance density arrays (not shared between sequencer instances)
-    float instance_density[NUM_GLOBAL_DENSITY_GROUPS];
-    float effective_instance_density[NUM_GLOBAL_DENSITY_GROUPS];
+    float *instance_density;
+    float *effective_instance_density;
+    uint8_t number_density_groups = NUM_GLOBAL_DENSITY_GROUPS;
 
     #ifdef ENABLE_PARAMETERS
         ParameterList *seq_parameters = nullptr;
@@ -35,32 +32,51 @@ class EuclidianSequencer : public BaseSequencer
 
     public:
     
-    // need to pass desired number_patterns so that we can pre-allocate the patterns array... default to 20
-    EuclidianSequencer(GenericList<BaseOutput*> *available_outputs, int8_t number_patterns = 20) : BaseSequencer() {
+    // constructor that doesn't care about the default pattern label prefix
+    // pass desired number_patterns so that we can generate them at the same time
+    EuclidianSequencer(
+        GenericList<BaseOutput*> *available_outputs, 
+        uint8_t number_patterns = 20,    // number of patterns to create
+        uint8_t number_density_groups = NUM_GLOBAL_DENSITY_GROUPS   // number of density groups for this set of patterns
+    ) : EuclidianSequencer(
+        available_outputs,
+        this->default_pattern_label_prefix,
+        number_patterns,
+        number_density_groups
+    ) {}
+
+    // pass desired number_patterns so that we can generate them at the same time
+    EuclidianSequencer(
+        GenericList<BaseOutput*> *available_outputs, 
+        const char *default_pattern_label_prefix = "Pattern ",
+        uint8_t number_patterns = 20,    // number of patterns to create
+        uint8_t number_density_groups = NUM_GLOBAL_DENSITY_GROUPS   // number of density groups for this set of patterns
+    ) : SimpleSequencer(available_outputs, default_pattern_label_prefix) {
 
         #ifdef ENABLE_STORAGE
              this->set_path_segment("EuclidianSequencer");
         #endif
 
-        for (int_fast8_t i = 0; i < NUM_GLOBAL_DENSITY_GROUPS; i++) {
+        this->set_default_pattern_label_prefix(default_pattern_label_prefix);
+
+        this->number_density_groups = number_density_groups;
+        this->instance_density = new float[number_density_groups];
+        this->effective_instance_density = new float[number_density_groups];
+
+        for (int_fast8_t i = 0; i < number_density_groups; i++) {
             instance_density[i] = DEFAULT_DENSITY;
             effective_instance_density[i] = DEFAULT_DENSITY;
         }
-
-        EuclidianPattern *p = nullptr;
-        if (number_patterns > 0) {
-            this->number_patterns = number_patterns;
-        } else if (number_patterns == -1) {
-            number_patterns = this->number_patterns;
-        } 
-        this->patterns = (EuclidianPattern**) CALLOC_FUNC(number_patterns, sizeof(p));
 
         for (int_fast8_t i = 0 ; i < number_patterns ; i++) {
             // if (this->debug && Serial) {
             //     Serial.printf("EuclidianSequencer constructor creating EuclidianPattern %i; available_outputs is @%p (size %i)\n", i, available_outputs, available_outputs->size()); 
             //     Serial.flush();
             // }
-            EuclidianPattern *p = new EuclidianPattern(available_outputs, i / (number_patterns / NUM_GLOBAL_DENSITY_GROUPS));
+
+            uint8_t density_group = i / (number_patterns / number_density_groups);
+
+            EuclidianPattern *p = new EuclidianPattern(available_outputs, density_group);
             #ifdef ENABLE_STORAGE
                  p->set_path_segment_fmt("pattern_%i", i);
             #endif
@@ -84,33 +100,12 @@ class EuclidianSequencer : public BaseSequencer
     }
     virtual ~EuclidianSequencer() {};
 
-    // pattern management
-    virtual SimplePattern *get_pattern(unsigned int pattern) override {
-        if (pattern < 0 || pattern >= get_number_patterns())
-            return nullptr;
-        return this->patterns[pattern];
-    }
-    virtual uint16_t get_number_patterns() override {
-        return this->number_patterns;
-    }
-    virtual void add_pattern(BasePattern *pattern) override {
-        if (number_added_patterns >= number_patterns) {
-            Serial.printf("Error: cannot add more than %i patterns to EuclidianSequencer\n", number_patterns);
-            return;
-        }
-
-        this->patterns[number_added_patterns] = (EuclidianPattern*)pattern;
-        number_added_patterns++;
-
-        mutate_maximum_pattern = number_added_patterns;
-    }
-
     // parameters and settings
     float get_density(int8_t channel) {
-        return instance_density[channel];
+        return instance_density[channel % number_density_groups];
     }
     void set_density(int8_t channel, float v) {
-        instance_density[channel] = v;
+        instance_density[channel % number_density_groups] = v;
     }
 
     bool is_mutate_enabled() {
@@ -122,6 +117,10 @@ class EuclidianSequencer : public BaseSequencer
     bool toggle_mutate_enabled() {
         set_mutate_enabled(!is_mutate_enabled());
         return is_mutate_enabled();
+    }
+
+    uint8_t get_mutate_maximum_pattern() {
+        return this->patterns->size();
     }
 
     int_fast8_t get_effective_mutation_count() {
@@ -304,10 +303,24 @@ class EuclidianSequencer : public BaseSequencer
             reset_patterns();
         unsigned long seed = get_euclidian_seed();
         randomSeed(seed);
+
         uint_fast8_t effective_mutation_count = this->get_effective_mutation_count();
+
+        uint8_t first_mutation_pattern = mutate_minimum_pattern % this->get_number_patterns();
+        uint8_t last_mutation_pattern = constrain(
+            this->get_mutate_maximum_pattern() + 1,
+            (uint8_t)0, 
+            this->get_number_patterns()
+        );
+
         for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
-            uint_fast8_t ran = random(mutate_minimum_pattern % this->get_number_patterns(), constrain(1 + mutate_maximum_pattern, (unsigned int)0, this->get_number_patterns()));
+
+            // use the 'seed' (which might be based on bar number, etc) and the pattern number as the
+            // seed for the random number generator to ensure reproducible randomness for this pattern
+            // generate a random pattern index within the mutation range
+            uint_fast8_t ran = random(first_mutation_pattern, last_mutation_pattern);
             randomSeed(seed + ran);
+
             if (!((EuclidianPattern*)this->get_pattern(ran))->is_locked()) {
                 ((EuclidianPattern*)this->get_pattern(ran))->mutate();
             }
@@ -316,26 +329,38 @@ class EuclidianSequencer : public BaseSequencer
 
     void do_bar_fill(int bar) {
         uint_fast8_t effective_mutation_count = this->get_effective_mutation_count();
+
+        uint8_t first_mutation_pattern = mutate_minimum_pattern % this->get_number_patterns();
+        uint8_t last_mutation_pattern = constrain(
+            this->get_mutate_maximum_pattern() + 1,
+            (uint8_t)0, 
+            this->get_number_patterns()
+        );
+
         for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
-            uint_fast8_t ran = random(
-                mutate_minimum_pattern % (uint8_t)number_patterns,
-                constrain(1 + mutate_maximum_pattern, (uint8_t)0, (uint8_t)number_patterns)
-            );
-            if (!this->get_pattern(ran)->is_locked()) {
-                ((EuclidianPattern*)this->get_pattern(ran))->set_rotation(((EuclidianPattern*)this->get_pattern(ran))->get_rotation() + 2);
-                ((EuclidianPattern*)this->get_pattern(ran))->mark_dirty();
+
+            uint_fast8_t ran = random(first_mutation_pattern, last_mutation_pattern);
+            EuclidianPattern *random_pattern = ( EuclidianPattern *)this->get_pattern(ran);
+
+            // apply a rotation randomisation by adding 2 to the current rotation
+            if (!random_pattern->is_locked()) {
+                random_pattern->set_rotation(random_pattern->get_rotation() + 2);
+                random_pattern->mark_dirty();
             }
         }
+
         for (uint_fast8_t i = 0 ; i < effective_mutation_count ; i++) {
-            uint_fast8_t ran = random(
-                mutate_minimum_pattern % (uint8_t)number_patterns,
-                constrain(1 + mutate_maximum_pattern, (unsigned int)0, (uint8_t)number_patterns)
-            );
-            if (!this->get_pattern(ran)->is_locked()) {
-                ((EuclidianPattern*)this->get_pattern(ran))->set_rotation(((EuclidianPattern*)this->get_pattern(ran))->get_rotation() * 2);
-                if (((EuclidianPattern*)this->get_pattern(ran))->get_pulses() > ((EuclidianPattern*)this->get_pattern(ran))->get_steps())
-                    ((EuclidianPattern*)this->get_pattern(ran))->set_pulses(((EuclidianPattern*)this->get_pattern(ran))->get_pulses() / 8);
-                ((EuclidianPattern*)this->get_pattern(ran))->mark_dirty();
+
+            uint_fast8_t ran = random(first_mutation_pattern, last_mutation_pattern);
+            EuclidianPattern *random_pattern = ( EuclidianPattern *)this->get_pattern(ran);
+
+            // apply a pulses randomisation by rotating and attempting to double pulses
+            // if the number of pulses exceeds the number of steps, reduce it by a factor of 8
+            if (!random_pattern->is_locked()) {
+                random_pattern->set_rotation(random_pattern->get_rotation() * 2);
+                if (random_pattern->get_pulses() > random_pattern->get_steps())
+                    random_pattern->set_pulses(random_pattern->get_pulses() / 8);
+                random_pattern->mark_dirty();
             }
         }
     }
@@ -367,7 +392,10 @@ class EuclidianSequencer : public BaseSequencer
             const char *group_name = "Euclidian"
         );
         //FLASHMEM
-        virtual void create_menu_euclidian_mutation(Euclidian::CombinePageOption combine_setting, const char *group_name = "Euclidian");
+        virtual void create_menu_euclidian_mutation(
+            Euclidian::CombinePageOption combine_setting, 
+            const char *group_name = "Euclidian"
+        );
     #endif
 
     #ifdef ENABLE_STORAGE
@@ -375,23 +403,14 @@ class EuclidianSequencer : public BaseSequencer
             // inherit parent's settings
             BaseSequencer::setup_saveable_settings();
 
-            // todo: add the global density settings up to NUM_GLOBAL_DENSITY_GROUPS programmatically
-            register_setting(
-                new VarSetting<float>("Global Density 0", "Euclidian", &this->instance_density[0]), 
-                SL_SCOPE_SCENE | SL_SCOPE_PROJECT
-            );
-            register_setting(
-                new VarSetting<float>("Global Density 1", "Euclidian", &this->instance_density[1]), 
-                SL_SCOPE_SCENE | SL_SCOPE_PROJECT
-            );
-            register_setting(
-                new VarSetting<float>("Global Density 2", "Euclidian", &this->instance_density[2]), 
-                SL_SCOPE_SCENE | SL_SCOPE_PROJECT
-            );
-            register_setting(
-                new VarSetting<float>("Global Density 3", "Euclidian", &this->instance_density[3]), 
-                SL_SCOPE_SCENE | SL_SCOPE_PROJECT
-            );
+            for (uint8_t i = 0 ; i < number_density_groups ; i++) {
+                char label[32];
+                snprintf(label, sizeof(label), "Global Density %d", i);
+                register_setting(
+                    new VarSetting<float>(label, "Euclidian", &this->instance_density[i]), 
+                    SL_SCOPE_SCENE | SL_SCOPE_PROJECT
+                );
+            }
             register_setting(
                 new VarSetting<bool>("Mutate Enabled", "Euclidian", &this->mutate_enabled),
                 SL_SCOPE_SCENE | SL_SCOPE_PROJECT  // allow mutate enabled state to be saved at scene or project level, since it's more of a preference setting than a performance setting

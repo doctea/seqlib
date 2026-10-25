@@ -7,7 +7,7 @@
 
     // override -1 to show "None" for the density group selector in the EuclidianPatternControl
     override_label_t<int8_t> flexiarp_change_every_override_label = {
-        .label = "-",
+        .label = "----",
         .value = 0
     };
 

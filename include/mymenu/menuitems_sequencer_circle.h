@@ -83,7 +83,7 @@ class CircleDisplay : public MenuItem {
             // draw circle
             for (uint_fast8_t seq = 0 ; seq < target_sequencer->get_number_patterns() ; seq++) {
                 uint_fast8_t first_x, first_y;
-                uint_fast8_t last_x, last_y;
+                uint_fast8_t last_x = -1, last_y = -1;
                 uint_fast8_t count = 0;
                 BasePattern *pattern = target_sequencer->get_pattern(seq);
                 //int16_t colour = color565(255 * seq, 255 - (255 * seq), seq) + (seq*8);

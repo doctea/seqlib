@@ -1,5 +1,7 @@
 #pragma once
 
+#define QUICKJUMP_NODES_THRESHOLD 4 // don't bother creating a QuickJump page if there are fewer than this many nodes
+
 //#include "Config.h"
 
 #include "output.h"

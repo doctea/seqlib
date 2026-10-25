@@ -96,7 +96,7 @@ void TuringMachinePattern::trigger_off_for_step(int step) {
                     menu->add(new SeparatorMenuItem("Modulation"));
                 }
             } else {
-                snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
+                snprintf(label, MENU_C_MAX, "%s%i mod", this->get_parameter_label_prefix(), pattern_index);
                 menu->add_page(label, this->get_colour(), false, group_name);
             }
             ParameterList *parameters = this->getParameters(pattern_index);

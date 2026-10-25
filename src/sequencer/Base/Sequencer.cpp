@@ -49,7 +49,7 @@ void BaseSequencer::configure_pattern_output(int index, BaseOutput *output) {
         menu->add_page(group_name, C_WHITE, true, group_name);
         for (size_t i = 0 ; i < this->get_number_patterns() ; i++) {
             char label[MENU_C_MAX];
-            snprintf(label, MENU_C_MAX, "Pattern %i", i);
+            snprintf(label, MENU_C_MAX, "%s%i", this->get_default_pattern_label_prefix(), i);
             menu->add(new PatternDisplay(label, this->get_pattern(i)));
             this->get_pattern(i)->set_colour(menu->get_next_colour());
         }

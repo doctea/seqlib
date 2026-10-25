@@ -226,7 +226,7 @@
 
         void EuclidianPattern::create_menu_items(Menu *menu, int pattern_index, BaseSequencer *target_sequencer, int combine_setting, const char *group_name) {
             char label[MENU_C_MAX];
-            snprintf(label, MENU_C_MAX, "Pattern %i", pattern_index);
+            snprintf(label, MENU_C_MAX, "%s%i", target_sequencer->get_default_pattern_label_prefix(), pattern_index);
             menu->add_page(label, this->get_colour(), false, group_name);
 
             EuclidianPatternControl *epc = new EuclidianPatternControl(label, this, target_sequencer);
@@ -237,7 +237,7 @@
                     menu->add(new SeparatorMenuItem("Modulation"));
                 }
             } else {
-                snprintf(label, MENU_C_MAX, "Pattern %i mod", pattern_index);
+                snprintf(label, MENU_C_MAX, "%s%i mod", target_sequencer->get_default_pattern_label_prefix(), pattern_index);
                 menu->add_page(label, this->get_colour(), false, group_name);
             }
 
@@ -278,7 +278,7 @@
             menu->add_page(group_name, TFT_CYAN, true, group_name);
             for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
                 char label[MENU_C_MAX];
-                snprintf(label, MENU_C_MAX, "Pattern %i", i);
+                snprintf(label, MENU_C_MAX, "%s%i", default_pattern_label_prefix, i);
                 menu->add(new PatternDisplay(label, this->get_pattern(i)));
                 this->get_pattern(i)->set_colour(menu->get_next_colour());
             }
@@ -321,11 +321,17 @@
 
             // ask each pattern to add their menu pages
             for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
-                //Serial.printf("adding controls for pattern %i..\n", i);
                 BasePattern *p = (BasePattern *)this->get_pattern(i);
-
+                
+                Serial.printf("EuclidianSequencer::make_menu_items(): adding controls for pattern %i (@%p)..\n", i, p);
+                Serial.flush();
                 p->create_menu_items(menu, i, this, combine_setting, group_name);
+                Serial.printf("EuclidianSequencer::make_menu_items(): added controls for pattern %i\n", i);
+                Serial.flush();
             }
+
+            Serial.printf("EuclidianSequencer::make_menu_items(): finished adding pattern controls\n");
+            Serial.flush();
         }
 
         #include "LinkedList.h"

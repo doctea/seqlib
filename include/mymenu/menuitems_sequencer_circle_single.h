@@ -110,7 +110,7 @@ class SingleCircleDisplay : public MenuItem {
 
             // draw circle
             int_fast16_t first_x, first_y;
-            int_fast16_t last_x, last_y;
+            int_fast16_t last_x = -1, last_y = -1;
             int_fast8_t count = 0;
             //BasePattern *pattern = target_sequencer->get_pattern(seq);
             //int16_t colour = color565(255 * seq, 255 - (255 * seq), seq) + (seq*8);

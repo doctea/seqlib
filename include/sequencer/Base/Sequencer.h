@@ -32,7 +32,17 @@ class BaseSequencer
     {
     public:
 
-    BaseSequencer() {
+    bool running = true;
+    bool debug = false;
+    bool shuffle_enabled = true;
+
+    const char *default_pattern_label_prefix = "Pattern ";
+
+    virtual SimplePattern *get_pattern(unsigned int pattern) = 0;
+    virtual void add_pattern(BasePattern *pattern) = 0;
+    virtual uint8_t get_number_patterns() = 0;
+
+    BaseSequencer(const char *default_pattern_label_prefix = "Pattern ") {
         #ifdef ENABLE_STORAGE
             this->set_path_segment("BaseSequencer");
         #endif
@@ -53,20 +63,17 @@ class BaseSequencer
     }
     virtual ~BaseSequencer() = default;
 
-    bool running = true;
-    //uint_fast8_t number_patterns = 0; // = 20;
-    bool debug = false;
-    bool shuffle_enabled = true;
-
-    virtual SimplePattern *get_pattern(unsigned int pattern) = 0;
-    virtual void add_pattern(BasePattern *pattern) = 0;
-    virtual uint16_t get_number_patterns() = 0;
-
     virtual bool is_running() {
         return this->running;
     }
     virtual void set_playing(bool state = true) {
         this->running = state;
+    }
+    virtual void set_default_pattern_label_prefix(const char *prefix) {
+        this->default_pattern_label_prefix = prefix;
+    }
+    virtual const char *get_default_pattern_label_prefix() {
+        return this->default_pattern_label_prefix;
     }
 
     virtual void release_outputs();
@@ -143,21 +150,25 @@ class BaseSequencer
 
 class SimpleSequencer : public BaseSequencer {
 
+    protected:
     GenericList<BaseOutput*> *available_outputs = nullptr;
     GenericList<BasePattern*> *patterns = new GenericList<BasePattern*>();
 
     public:
-    SimpleSequencer(GenericList<BaseOutput*> *available_outputs) : BaseSequencer() {
+    SimpleSequencer(
+        GenericList<BaseOutput*> *available_outputs, 
+        const char *default_pattern_label_prefix = "Pattern "
+    ) : BaseSequencer(default_pattern_label_prefix) {
         this->available_outputs = available_outputs;
     }
 
-    virtual uint16_t get_number_patterns() override {
+    virtual uint8_t get_number_patterns() override {
         return this->patterns->size();
     }
 
     virtual SimplePattern *get_pattern(unsigned int pattern) override {
-        if (pattern >= this->patterns->size()) {
-            Serial.printf("SimpleSequencer#get_pattern(%i) out of bounds (size=%i)\n", pattern, this->patterns->size());
+        if (pattern >= this->get_number_patterns()) {
+            Serial.printf("SimpleSequencer#get_pattern(%i) out of bounds (size=%i)\n", pattern, this->get_number_patterns());
             return nullptr;
         }
         return (SimplePattern*)this->patterns->get(pattern);

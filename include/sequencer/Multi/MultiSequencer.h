@@ -11,7 +11,7 @@ class MultiSequencer : public SimpleSequencer
 {
     public:
     GenericList<BaseSequencer*> *sequencers = nullptr;
-    int number_patterns = 0;
+    int number_patterns = 0;    // we need to track the total number of patterns across all sequencers
 
     MultiSequencer() : SimpleSequencer(nullptr) {
         this->sequencers = new GenericList<BaseSequencer*>();
@@ -40,7 +40,7 @@ class MultiSequencer : public SimpleSequencer
 
         return nullptr;
     }
-    virtual uint16_t get_number_patterns() override {
+    virtual uint8_t get_number_patterns() override {
         // this is set whenever we add a sequencer or pattern
         //Serial.printf("MultiSequencer::get_number_patterns() returns %i\n", this->number_patterns);
         return this->number_patterns;

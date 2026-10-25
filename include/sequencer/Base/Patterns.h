@@ -64,9 +64,10 @@ class BasePattern
     BasePattern(GenericList<BaseOutput*> *available_outputs) {
         this->set_available_outputs(available_outputs);
     }
-        
+    
+    const char *default_parameter_label_prefix = "Pattern ";
     virtual const char *get_parameter_label_prefix() {
-        return "Pattern ";
+        return default_parameter_label_prefix;
     }
     virtual const char *make_parameter_label(const char *parameter_name, int parameter_index) {
         static char buffer[64];
@@ -426,10 +427,19 @@ class SimplePattern : public BasePattern {
     
     class PatternMultiToggleItem : public MultiToggleColourItemClass<BasePattern> {
         public:
-        PatternMultiToggleItem(unsigned int pattern_index, BasePattern *target, void(BasePattern::*setter)(bool), bool(BasePattern::*getter)(), bool invert_colours = false) 
-            : MultiToggleColourItemClass<BasePattern>("Pattern", target, setter, getter, invert_colours), pattern_index((uint8_t)pattern_index)
-            {
-            }
+        PatternMultiToggleItem(
+            unsigned int pattern_index, 
+            BasePattern *target, 
+            void(BasePattern::*setter)(bool), 
+            bool(BasePattern::*getter)(), 
+            bool invert_colours = false
+        ) : MultiToggleColourItemClass<BasePattern>(
+            "Pattern", 
+            target, 
+            setter, 
+            getter, 
+            invert_colours
+        ), pattern_index((uint8_t)pattern_index) {}
 
         BasePattern *last_known_output = nullptr;
         uint8_t pattern_index = 0;
