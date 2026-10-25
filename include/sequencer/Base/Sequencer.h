@@ -19,6 +19,8 @@
 #endif
 
 
+#define MAX_PATTERN_LABEL_PREFIX 16
+
 class BasePattern;
 class SimplePattern;
 class BaseOutput;
@@ -36,7 +38,7 @@ class BaseSequencer
     bool debug = false;
     bool shuffle_enabled = true;
 
-    const char *default_pattern_label_prefix = "Pattern ";
+    char default_pattern_label_prefix[MAX_PATTERN_LABEL_PREFIX] = "Pattern ";
 
     virtual SimplePattern *get_pattern(unsigned int pattern) = 0;
     virtual void add_pattern(BasePattern *pattern) = 0;
@@ -70,7 +72,8 @@ class BaseSequencer
         this->running = state;
     }
     virtual void set_default_pattern_label_prefix(const char *prefix) {
-        this->default_pattern_label_prefix = prefix;
+        strncpy(this->default_pattern_label_prefix, prefix, MAX_PATTERN_LABEL_PREFIX);
+        this->default_pattern_label_prefix[MAX_PATTERN_LABEL_PREFIX - 1] = '\0';
     }
     virtual const char *get_default_pattern_label_prefix() {
         return this->default_pattern_label_prefix;
@@ -160,6 +163,8 @@ class SimpleSequencer : public BaseSequencer {
         const char *default_pattern_label_prefix = "Pattern "
     ) : BaseSequencer(default_pattern_label_prefix) {
         this->available_outputs = available_outputs;
+
+        this->set_default_pattern_label_prefix(default_pattern_label_prefix);
     }
 
     virtual uint8_t get_number_patterns() override {

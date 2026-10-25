@@ -16,10 +16,13 @@
             // helpful debug function to decode the combine page option bitmask into human-readable form
             void decode_combine_page_option(CombinePageOption option) {
                 Serial.printf("combine page option bitmask: %i\n", option);
+                if (option & COMBINE_CIRCLE_WITH_GRID) Serial.println("- combining circle with grid");
                 if (option & COMBINE_LOCKS_WITH_CIRCLE) Serial.println("- combining locks with circle");
                 if (option & COMBINE_MUTATION_WITH_LOCKS) Serial.println("- combining mutation with locks");
                 if (option & COMBINE_MODULATION_WITH_MUTATION) Serial.println("- combining modulation with mutation");
                 if (option & COMBINE_PATTERN_MODULATION_WITH_PATTERN) Serial.println("- combining pattern modulation with pattern");
+                if (option & COMBINE_PATTERN_INCLUDE_SEPARATOR) Serial.println("- combining pattern include separator");
+                if (option & COMBINE_ANOTHER_OPTION) Serial.println("- combining another option");
             }
         }
     #endif
@@ -273,12 +276,15 @@
         // todo: this should really be called create_menu_items, since it directly adds to menu
         // todo: do we really need to pass in menu here for some reason?
         void EuclidianSequencer::make_menu_items(
-                Menu *menu, int combine_setting, const char *group_name) {
+            Menu *menu, 
+            int combine_setting, 
+            const char *group_name
+        ) {
             // add a page for the 'boxed' sequence display of all tracks
             menu->add_page(group_name, TFT_CYAN, true, group_name);
             for (unsigned int i = 0 ; i < this->get_number_patterns() ; i++) {
                 char label[MENU_C_MAX];
-                snprintf(label, MENU_C_MAX, "%s%i", default_pattern_label_prefix, i);
+                snprintf(label, MENU_C_MAX, "%s%i", this->get_default_pattern_label_prefix(), i);
                 menu->add(new PatternDisplay(label, this->get_pattern(i)));
                 this->get_pattern(i)->set_colour(menu->get_next_colour());
             }
@@ -289,11 +295,14 @@
             #endif*/
 
             // add a page for the circle display that shows all tracks simultaneously
-            if (combine_setting & COMBINE_LOCKS_WITH_CIRCLE) {
-                menu->add_page("Circle & locks", C_WHITE, true, group_name);
-            } else {          
-                menu->add_page("Circle", C_WHITE, true, group_name);
+            const char *circle_page_label = "Circle";
+           
+            if (!(combine_setting & COMBINE_CIRCLE_WITH_GRID)) {
+                if (combine_setting & COMBINE_LOCKS_WITH_CIRCLE) 
+                    circle_page_label = "Circle & locks";
+                menu->add_page(circle_page_label, C_WHITE, true, group_name);
             }
+
             menu->add(new CircleDisplay("Circle", this));
 
             // multitoggle to lock patterns

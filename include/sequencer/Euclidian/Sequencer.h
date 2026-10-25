@@ -48,7 +48,7 @@ class EuclidianSequencer : public SimpleSequencer
     // pass desired number_patterns so that we can generate them at the same time
     EuclidianSequencer(
         GenericList<BaseOutput*> *available_outputs, 
-        const char *default_pattern_label_prefix = "Pattern ",
+        const char *default_pattern_label_prefix,
         uint8_t number_patterns = 20,    // number of patterns to create
         uint8_t number_density_groups = NUM_GLOBAL_DENSITY_GROUPS   // number of density groups for this set of patterns
     ) : SimpleSequencer(available_outputs, default_pattern_label_prefix) {
@@ -56,8 +56,6 @@ class EuclidianSequencer : public SimpleSequencer
         #ifdef ENABLE_STORAGE
              this->set_path_segment("EuclidianSequencer");
         #endif
-
-        this->set_default_pattern_label_prefix(default_pattern_label_prefix);
 
         this->number_density_groups = number_density_groups;
         this->instance_density = new float[number_density_groups];

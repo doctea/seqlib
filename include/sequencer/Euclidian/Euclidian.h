@@ -53,11 +53,13 @@ extern arguments_t initial_arguments[];
     namespace Euclidian {
         enum CombinePageOption {
             COMBINE_NONE = 0,
-            COMBINE_LOCKS_WITH_CIRCLE = 1,
-            COMBINE_MUTATION_WITH_LOCKS = 2,
-            COMBINE_MODULATION_WITH_MUTATION = 4,
-            COMBINE_PATTERN_MODULATION_WITH_PATTERN = 8,
-            COMBINE_PATTERN_INCLUDE_SEPARATOR = 16,
+            COMBINE_CIRCLE_WITH_GRID = 1,
+            COMBINE_LOCKS_WITH_CIRCLE = 2,
+            COMBINE_MUTATION_WITH_LOCKS = 4,
+            COMBINE_MODULATION_WITH_MUTATION = 8,
+            COMBINE_PATTERN_MODULATION_WITH_PATTERN = 16,
+            COMBINE_PATTERN_INCLUDE_SEPARATOR = 32,
+            COMBINE_ANOTHER_OPTION = 64,
             COMBINE_ALL = 0xFF
         };
 
